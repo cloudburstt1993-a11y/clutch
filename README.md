@@ -167,8 +167,8 @@ Targets: Xbox button names, `lt`/`rt`, `ls_up`…`rs_right`, `key:ctrl+c`, `mous
 ## Publishing an update (GitHub)
 
 1. Change `VERSION` at the top of `clutch.py` (for example to `10.1`) and add a line to `WHATS_NEW` in `panel.html`.
-2. Commit and push, then tag it: `git tag v10.1` and `git push origin v10.1`.
-3. GitHub Actions (`.github/workflows/release.yml`) builds `Clutch-Setup-10.1.exe` on a Windows machine and publishes it as a Release. It takes about 5–10 minutes. Check the **Actions** tab.
+2. Commit and push to `main`.
+3. GitHub Actions (`.github/workflows/release.yml`) sees a version that has no release yet, builds `Clutch-Setup-10.1.exe` on a Windows machine, and publishes Release `v10.1`. It takes about 10 minutes; watch the **Actions** tab. Pushes that don't change `VERSION` don't publish anything.
 4. Every installed Clutch sees it within 6 hours (or right away with Settings → Updates → *Check now*) and offers **Install update**.
 
 `UPDATE_REPO` in `clutch.py` must point at this repository, and its Releases have to be public for updates to download without a login. The **Run workflow** button on the Actions tab builds a test installer without releasing it.
