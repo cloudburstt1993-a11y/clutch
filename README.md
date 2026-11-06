@@ -8,8 +8,8 @@ Controller mods for Windows. Clutch reads your real controller (Xbox, PlayStatio
 
 ### Option A: build the installer once, then install anywhere (recommended)
 1. On any Windows PC, install **Python 3.12 or 3.13** from python.org. Tick **"Add python.exe to PATH"** during setup.
-2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-10.0.exe`**. If Inno Setup is missing, it installs that through winget automatically.
-3. Run `Clutch-Setup-10.0.exe` on each PC that will use Clutch. The installer:
+2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-11.0.exe`**. If Inno Setup is missing, it installs that through winget automatically.
+3. Run `Clutch-Setup-11.0.exe` on each PC that will use Clutch. The installer:
    - installs Clutch with a Start-menu entry and, if you choose, a desktop shortcut
    - installs the **ViGEmBus** virtual-controller driver if that PC doesn't have it yet
    - can set Clutch to start in the background with Windows
@@ -50,6 +50,8 @@ Open Clutch and go to **🔧 Setup check**. It shows what's missing, and each it
 Tapping Guide by itself still does its normal job. Closing the window keeps Clutch running in the tray. Right-click the tray icon to switch profiles, toggle mods or the crosshair, or quit.
 
 **🕹️ Drive Clutch with your controller:** with the Clutch window in front, the D-pad or left stick moves around, **A** picks, **B** goes back or closes a pop-up, **LB / RB** flip between pages, left/right changes sliders and lists, and the right stick scrolls. A hint bar shows the buttons (with PlayStation symbols on a PlayStation controller). While Clutch is in front, mods don't press keys or move the mouse, so nothing happens twice. On the Controller test page buttons are being tested, so hold **B** to leave. Turn it off in Settings → Controls and comfort.
+
+**🛡️ Online-safe mode (Settings, on by default):** while an online game is the window in front (Fortnite, Call of Duty, Apex, Roblox, Rocket League, Valorant, Overwatch and more, plus any shooter My games finds and any program you add), Clutch pauses the ban-risk automation: turbo/rapid fire, macros (slide cancel, quick scope, jump shot), one button doing several things (drop shot) and recoil pull. Everything else (remaps, curves, deadzones, steady aim, gyro, crosshair, trigger feel) keeps working, and a pop-up says what's paused. Switching to an offline game brings them back. Turning it off, or changing the game list, needs the parent PIN if one is set. Loading a setup file never changes it.
 
 **👪 Family mode (Settings → Family):** add each player with a name, icon, color, starting profile, look, and their own "hide ban-risk power-ups" switch. Pick who's playing from the chip in the top bar (Clutch asks at start-up). A profile can *belong to* one player, so each kid only sees their own plus the shared ones, and *Give a copy to* hands a sibling a copy. Stats track playtime per player per day. Aim Lab bests, the daily leaderboard and themes are per player.
 
@@ -151,7 +153,7 @@ Use the filter chips or the search box on the Power-ups page to find one fast. T
 Settings are saved in `%APPDATA%\Clutch\config.jsonc`, with automatic backups in `%APPDATA%\Clutch\backups\` and your stats in `stats.json` for the installed app, or next to the scripts when running from source. The panel edits them for you. The first time the panel saves, the original file is copied to `config.backup.jsonc`.
 
 ## For tinkerers: settings reference
-Top-level extras: `kids` (list of `{id, name, emoji, color, profile, theme, hide_risky}`), `active_kid`, `controllers` (`{"sn:…": {kid, profile}}`), `overlay` (`enabled`, `key`, `style`, `show_name`), `parent.quiet` (`enabled`, `from`, `to`, `kids`), `parent.daily_minutes`, `quick_menu` (`enabled`, `hold_ms`), `lightbar` (`mode`: auto/profile/breathe/rainbow/battery/off, `speed`), `controller_nav` (true/false), `ui` (`sounds`: true/false, `text`: normal/big/huge, `motion`: auto/full/less), `parent` (`hide_risky`, `pin`, `break_minutes`).
+Top-level extras: `online_safe` (`enabled`, `games`: extra exe names, `offline`: exe names to leave alone), `kids` (list of `{id, name, emoji, color, profile, theme, hide_risky}`), `active_kid`, `controllers` (`{"sn:…": {kid, profile}}`), `overlay` (`enabled`, `key`, `style`, `show_name`), `parent.quiet` (`enabled`, `from`, `to`, `kids`), `parent.daily_minutes`, `quick_menu` (`enabled`, `hold_ms`), `lightbar` (`mode`: auto/profile/breathe/rainbow/battery/off, `speed`), `controller_nav` (true/false), `ui` (`sounds`: true/false, `text`: normal/big/huge, `motion`: auto/full/less), `parent` (`hide_risky`, `pin`, `break_minutes`).
 
 Profiles can use: `owner` (player id), `trigger_feel` (`left`/`right`: off, soft, firm, click, bow, brake, pulse), `touchpad` (`mode`: button, zones2, zones4, mouse; `speed`), `gyro.auto_cal`, `extends`, `emoji`, `color`, `led`, `rumble`, `remap`, `output` (`xbox` / `playstation`), `gyro` (`enabled`, `activate`: always/aiming/hold, `button`, `output`: stick/mouse, `horizontal`: yaw/roll/both, `sensitivity`, `deadband`, `invert_x`, `invert_y`), `turbo`, `toggle`, `shift` (`button`, `tap`, `remap`), `sticks.left/right` (`deadzone`, `outer_deadzone`, `curve`, `sensitivity`, `anti_deadzone`, `x_scale`, `y_scale`, `invert_x`, `invert_y`, `output`: left/right/mouse/none, `mouse_speed`, `button_threshold`), `triggers.left/right` (`deadzone`, `max`, `curve`, `hair_trigger`), `trigger_threshold`, `macros`, `shift.sticks` (e.g. mouse mode while holding the shift button), and `stick_mods`:
 
@@ -165,6 +167,9 @@ Profiles can use: `owner` (player id), `trigger_feel` (`left`/`right`: off, soft
 Targets: Xbox button names, `lt`/`rt`, `ls_up`…`rs_right`, `key:ctrl+c`, `mouse:left`…`mouse:wheel_down`, `macro:name`, `none`, or a list of several. Macro steps: `{"tap": "a", "ms": 50, "gap": 30}`, `{"down": "rt"}`, `{"up": "rt"}`, `{"wait": 100}`, `{"stick": "left", "x": 0, "y": 1, "ms": 200}`. Macro modes: `once`, `hold`, `repeat`, `toggle`.
 
 ## Publishing an update (GitHub)
+
+The install link that always gets the newest version: https://github.com/cloudburstt1993-a11y/clutch/releases/latest/download/Clutch-Setup.exe
+
 
 1. Change `VERSION` at the top of `clutch.py` (for example to `10.1`) and add a line to `WHATS_NEW` in `panel.html`.
 2. Commit and push to `main`.

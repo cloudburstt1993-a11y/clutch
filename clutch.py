@@ -42,7 +42,7 @@ os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "10.0"
+VERSION = "11.0"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -187,6 +187,54 @@ def process_trigger(v, c):
 # --------------------------------------------------------------------------------------
 # State containers
 # --------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
+# Online-safe mode: while one of these is in front, ban-risk automation (turbo, macros, button combos
+# on one press, recoil pull) is switched off so it can't get an account banned.
+# --------------------------------------------------------------------------------------
+ONLINE_GAMES = {
+    "fortniteclient-win64-shipping.exe": "Fortnite", "r5apex.exe": "Apex Legends", "r5apex_dx12.exe": "Apex Legends",
+    "cod.exe": "Call of Duty", "modernwarfare.exe": "Call of Duty: Modern Warfare", "cs2.exe": "Counter-Strike 2",
+    "overwatch.exe": "Overwatch 2", "valorant-win64-shipping.exe": "Valorant", "destiny2.exe": "Destiny 2",
+    "haloinfinite.exe": "Halo Infinite", "marvel-win64-shipping.exe": "Marvel Rivals", "discovery.exe": "The Finals",
+    "rocketleague.exe": "Rocket League", "robloxplayerbeta.exe": "Roblox", "tslgame.exe": "PUBG",
+    "rainbowsix.exe": "Rainbow Six Siege", "rainbowsix_be.exe": "Rainbow Six Siege", "tf_win64.exe": "Team Fortress 2",
+    "bf2042.exe": "Battlefield 2042", "gta5.exe": "GTA V", "gta5_enhanced.exe": "GTA V", "fc25.exe": "EA Sports FC 25",
+}
+ONLINE_PACKS = ("fortnite", "apex", "cod", "halo", "shooter", "rocket", "roblox")  # games My games matched to these
+
+
+def online_safe_profile(p):
+    """A copy of a resolved profile with the ban-risk automation taken out: turbo (rapid fire), macros
+    (slide cancel, quick scope, jump shot...), several actions on one press (drop shot) and recoil pull."""
+    p = copy.deepcopy(p)
+
+    def clean(rm):
+        out = {}
+        for k, v in (rm or {}).items():
+            if isinstance(v, list):
+                v = [x for x in v if not (isinstance(x, str) and x.startswith("macro:"))][:1]
+                if not v:
+                    continue
+                v = v[0]
+            if isinstance(v, str) and v.startswith("macro:"):
+                continue
+            out[k] = v
+        return out
+    if isinstance(p.get("remap"), dict):
+        p["remap"] = clean(p["remap"])
+    sh = p.get("shift")
+    if isinstance(sh, dict):
+        if isinstance(sh.get("remap"), dict):
+            sh["remap"] = clean(sh["remap"])
+        sh.pop("turbo", None)
+    p.pop("turbo", None)
+    p.pop("macros", None)
+    if isinstance(p.get("stick_mods"), list):
+        p["stick_mods"] = [m for m in p["stick_mods"] if isinstance(m, dict)
+                           and not (num(m.get("add_x"), 0) or num(m.get("add_y"), 0))]
+    return p
+
+
 class RawState:
     __slots__ = ("buttons", "lx", "ly", "rx", "ry", "lt", "rt", "gx", "gy", "gz", "has_gyro", "touch", "tx", "ty")
 
@@ -366,6 +414,7 @@ class Engine:
         self.hold_mod = Modifier()
         self.menu = None  # in-game quick menu: {'items': [(kind, value)], 'sel': i, 'since': t}
         self.menu_allowed = True  # off for co-op players 2-4 and when the overlay can't draw it
+        self.online_safe = False  # True while an online game is in front (online-safe mode)
         self._tp_last, self._tp_acc, self._tp_zone = None, [0.0, 0.0], None
         self.gyro_bias, self._still, self._gyro_ema = (0.0, 0.0, 0.0), 0.0, (0.0, 0.0, 0.0)
         self.shift_mod = Modifier()
@@ -423,6 +472,8 @@ class Engine:
         self.active = name
         self.p = self._resolve(name)
         macro_cfgs = deep_merge(self.cfg.get("macros") or {}, self.p.get("macros") or {})
+        if self.online_safe:
+            self.p, macro_cfgs = online_safe_profile(self.p), {}
         self.macros = {n: Macro(n, c, self._warn) for n, c in macro_cfgs.items()}
         self.toggle_state = {}
         self.turbo_start = {}
@@ -908,6 +959,17 @@ class Engine:
         self.mouse_acc[0] -= out.mouse_dx
         self.mouse_acc[1] -= out.mouse_dy
         return out
+
+    def set_online_safe(self, on):
+        """Switch ban-risk automation off (on=True) or back on, keeping the same profile."""
+        on = bool(on)
+        if on != self.online_safe:
+            self.online_safe = on
+            keep = self.crosshair_on
+            self.set_profile(self.active, announce=False)
+            self.crosshair_on = keep
+            return True
+        return False
 
     def set_enabled(self, on):
         on = bool(on)
@@ -2754,7 +2816,7 @@ class PanelServer:
         return {
             "app_name": APP_NAME, "version": VERSION, "config_path": self.cfg_path, "data_dir": DATA_DIR,
             "windows": IS_WINDOWS, "installed": FROZEN, "app_mode": bool(self.runner and self.runner.app_mode),
-            "inputs": list(ALL_INPUTS), "xbox_buttons": list(XBOX_BUTTONS),
+            "inputs": list(ALL_INPUTS), "xbox_buttons": list(XBOX_BUTTONS), "online_games": ONLINE_GAMES,
             "triggers": list(TRIGGERS), "stick_dirs": list(STICK_DIRS),
             "mouse": list(MOUSE_TARGETS), "keys": sorted(VK, key=lambda k: (len(k) > 1, k)),
             "crosshair_defaults": CROSSHAIR_DEFAULTS, "crosshair_styles": list(CROSSHAIR_STYLES),
@@ -2838,7 +2900,7 @@ class PanelServer:
         return os.path.getmtime(self.cfg_path)
 
     LOCAL_KEYS = ("panel", "controller_index", "controller_name", "gyro_cal",  # belong to this PC
-                  "parent", "updates", "overlay", "controllers")  # and parent/stream settings never come from a file  # belong to this PC, never copied over
+                  "parent", "updates", "overlay", "controllers", "online_safe")  # and parent/stream settings never come from a file  # belong to this PC, never copied over
 
     def export_setup(self):
         """Save everything (profiles, crosshair, settings, stats badges aside) to a .clutch file in Documents."""
@@ -3177,6 +3239,7 @@ class ModRunner:
         self.on_quit = None                 # set by the desktop app: closes Clutch cleanly
         self._last_input = 0.0              # last time the controller was actually used
         self._remembered = set()            # controllers whose saved profile was applied this run
+        self.online_game = None             # name of the online game in front (online-safe mode)
         self.problem = None
         self.notify = None      # callable(title, message), set by the desktop app
         self.on_show = None     # callable(): bring the app window forward
@@ -3558,6 +3621,49 @@ class ModRunner:
                 "buttons": sorted(raw.buttons) if raw else [], "lx": raw.lx if raw else 0, "ly": raw.ly if raw else 0,
                 "rx": raw.rx if raw else 0, "ry": raw.ry if raw else 0, "lt": raw.lt if raw else 0, "rt": raw.rt if raw else 0}
 
+    # ---- 11.0: online-safe mode ----
+    def online_games(self):
+        """exe -> name for every program that counts as an online game right now."""
+        cfg = self.engine.cfg.get("online_safe") if isinstance(self.engine.cfg.get("online_safe"), dict) else {}
+        games = dict(ONLINE_GAMES)
+        cache = self.panel.games_cache if self.panel else None
+        for g in (cache or {}).get("games", []):
+            if g.get("pack") in ONLINE_PACKS:
+                for e in [g.get("exe")] + list(g.get("alt_exes") or []):
+                    if e:
+                        games.setdefault(e, g["name"])
+        for e in cfg.get("games") or []:
+            if isinstance(e, str) and e.strip():
+                games.setdefault(e.strip().lower(), e.strip())
+        for e in cfg.get("offline") or []:
+            if isinstance(e, str):
+                games.pop(e.strip().lower(), None)
+        return games
+
+    def _online_tick(self):
+        cfg = self.engine.cfg.get("online_safe") if isinstance(self.engine.cfg.get("online_safe"), dict) else {}
+        if self.auto.watch.own:
+            return  # looking at Clutch itself: keep whatever the game in the background had
+        exe = self.auto.last_exe or ""
+        game = self.online_games().get(exe) if cfg.get("enabled", True) else None
+        engines = [self.engine] + [sl.engine for sl in self.slots]
+        changed = [e.set_online_safe(bool(game)) for e in engines]
+        if changed[0]:
+            self.online_game = game
+            risky = self._has_risky()
+            if game and risky:
+                self.osd("Online-safe mode", f"Rapid fire, macros and recoil control are paused in {game}", accent="#3ee6a0", secs=4)
+            elif not game and risky:
+                self.osd("Online-safe mode off", "Your ban-risk power-ups are back on", accent="#ffd23f", secs=3)
+            self._changed()
+
+    def _has_risky(self):
+        """Does the current profile use anything online-safe mode switches off?"""
+        eng = self.engine
+        raw = eng._resolve(eng.active)
+        strip = lambda d: {k: v for k, v in d.items() if k != "macros"}  # macros only matter if a button runs them
+        return strip(online_safe_profile(raw)) != strip(raw)
+
     # ---- 6.0: updates, help file, full-screen warning ----
     def check_updates(self, force=False):
         """Ask GitHub (in the background) whether a newer Clutch is out."""
@@ -3832,7 +3938,8 @@ class ModRunner:
             "overlay_error": self.overlay.error if self.overlay else None,
             "recent_apps": list(self.auto.recent), "warnings": list(self.panel.warnings),
             "config_mtime": self.cfg_mtime, "nav_mute": self.nav_mute(), "front": bool(self.auto.watch.own),
-            "kid": self.kid, "quiet": self._quiet_off, "fullscreen_games": sorted(self.fullscreen_seen),
+            "kid": self.kid, "quiet": self._quiet_off,
+            "online_safe": {"active": self.engine.online_safe, "game": self.online_game}, "fullscreen_games": sorted(self.fullscreen_seen),
             "update": {k: v for k, v in self.update.items() if k in ("state", "busy", "latest", "newer", "page", "notes", "error", "downloading", "progress", "ready")},
             "pad_key": getattr(self.pad, "key", None) if self.pad else None,
             "pad_caps": {"touch": bool(getattr(self.pad, "has_touch", False)), "trigger_fx": bool(getattr(self.pad, "has_trigger_fx", False)),
@@ -3945,6 +4052,7 @@ class ModRunner:
                 if t0 >= next_auto:
                     next_auto = t0 + 0.5
                     self.auto.check(eng)
+                    self._online_tick()
                 eng.menu_allowed = bool(self.overlay and self.overlay.thread and not self.overlay.error)
                 if t0 >= next_fam:
                     next_fam = t0 + 0.25
@@ -4162,6 +4270,9 @@ DEFAULT_CONFIG_TEXT = r'''// Clutch settings. Easiest way to change them: the Cl
 
   // Hold Guide (Xbox / PS / Home button) and press:
   //   D-pad right/left = next/previous profile, Back = mods on/off, R3 = crosshair on/off
+  // Online-safe mode: while an online game (Fortnite, Call of Duty, Apex...) is in front, turbo, macros,
+  // multi-action buttons and recoil pull are paused so they can't get an account banned
+  "online_safe": { "enabled": true, "games": [], "offline": [] },
   // Hold Guide for a moment (without pressing anything else) to open the quick menu over your game
   "quick_menu": { "enabled": true, "hold_ms": 450 },
   // Controller light (PlayStation and some others): auto, profile, breathe, rainbow, battery, off

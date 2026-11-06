@@ -1,7 +1,7 @@
 ; Inno Setup script for the Clutch installer (built by build_installer.bat)
 #define AppName "Clutch"
 #ifndef AppVersion
-#define AppVersion "10.0"
+#define AppVersion "11.0"
 #endif
 
 [Setup]

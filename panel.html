@@ -823,7 +823,7 @@ async function loadConfig(){
   CFG = j.config; CFG_MTIME = j.mtime;
   CFG.profiles = CFG.profiles || {};
   if (!Object.keys(CFG.profiles).length) CFG.profiles.Everyday = {};
-  for (const k of ["profile_switch","auto_profiles","panel","macros","crosshair","hotkeys","lightbar","quick_menu","controllers","overlay","updates"]) if (!isObj(CFG[k])) CFG[k] = {};
+  for (const k of ["profile_switch","auto_profiles","panel","macros","crosshair","hotkeys","lightbar","quick_menu","controllers","overlay","updates","online_safe"]) if (!isObj(CFG[k])) CFG[k] = {};
   SAVED = JSON.stringify(CFG);
   applyTheme((curKid() && curKid().theme) || CFG.theme); applyUI();
   $("#fatal").hidden = true;
@@ -1115,7 +1115,7 @@ function renderPowerups(v){
         else { c.mods.forEach(id => applyPU(puById(id), (c.params || {})[id])); toast(`${c.emoji} ${c.title} is on for ${tname}`, before); }
         changed(); renderAll(); }},
         h("span", {class:"emo"}, c.emoji), h("b", {}, c.title), h("span", {}, c.text),
-        c.risk ? h("span", {class:"risk"}, "⚠️ Can get you banned online") : null);
+        c.risk ? h("span", {class:"risk"}, (!CFG.online_safe || CFG.online_safe.enabled !== false) ? "⚠️ Paused in online games" : "⚠️ Can get you banned online") : null);
     })));
   const search = h("input", {type:"search", placeholder:"🔎 Search power-ups", value:puSearch, "aria-label":"Search power-ups"});
   const results = h("div", {});
@@ -1159,7 +1159,7 @@ function puCard(pu, r){
   }, pu.title);
   card.append(h("div", {class:"top3"}, h("div", {class:"badge emo"}, pu.emoji),
     h("div", {class:"txt"}, h("b", {}, pu.title), h("p", {}, pu.text),
-      pu.risk ? h("span", {class:"risk", title:"Against the rules in most online games"}, "⚠️ Ban risk online") : null,
+      pu.risk ? h("span", {class:"risk", title:"Against the rules in most online games"}, (!CFG.online_safe || CFG.online_safe.enabled !== false) ? "⚠️ Paused in online games" : "⚠️ Ban risk online") : null,
       inherited ? h("div", {class:"from"}, "Comes from your " + CFG.profiles[puTarget()].extends + " profile.") : null),
     toggle));
   if (on && (pu.params || pu.extra)){
@@ -2512,14 +2512,11 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["🛡️", "Online-safe mode", "In Fortnite, Call of Duty, Apex and other online games, Clutch pauses rapid fire, macros and recoil control so your account stays safe. They come back in offline games."],
   ["👪", "Family mode", "Each player gets their own profiles, look, stats and Aim Lab scores. Tap “Who's playing?” at the top."],
-  ["🏹", "Trigger feel", "DualSense triggers can push back: gun click, bow tension, car brake. Profile → Triggers."],
-  ["🖐️", "Touchpad tricks", "Split the PlayStation touchpad into 2 or 4 buttons, or use it like a laptop touchpad."],
+  ["🏹", "Trigger feel", "DualSense triggers can push back: gun click, bow, car brake. Profile → Triggers."],
   ["🗓️", "Daily challenge", "Same targets for everyone each day in Aim Lab, with a family leaderboard."],
-  ["🎛️", "Tune my aim", "Aim Lab tries 3 aim curves and keeps the one you score best with."],
-  ["🔥", "Streaks", "Play 5 minutes a day to build a streak. See it on the Stats page."],
   ["📺", "Stream overlay", "Show your button presses and profile in OBS. Settings → Streaming overlay."],
-  ["🔄", "One-click updates", "Clutch can update itself from GitHub."],
 ];
 function showWhatsNew(){
   CFG.seen_version = META.version; changed();
@@ -2712,6 +2709,7 @@ function renderSettings(v){
             CFG.coop.profiles = Object.assign({}, CFG.coop.profiles || {}, {[pl.n]: v}); changed(); }, {"aria-label":"Player " + pl.n + " profile"}))),
         ((STATE && STATE.players) || []).length ? null : h("span", {class:"help"}, "Plug in another controller and it shows up here as Player 2.")) : null),
     ...familySection(),
+    ...onlineSafeSection(),
     h("div", {class:"section-title"}, "🛡️ Parent controls"),
     h("p", {class:"section-sub"}, "Hide the power-ups that can get game accounts banned online (rapid fire, recoil control, jump shot and other macros). Turning this on also switches them off in every profile."),
     h("div", {class:"form"},
@@ -3421,6 +3419,8 @@ function homeBanners(){
   if (fs.length) out.push(h("div", {class:"banner", style:"display:block;margin-top:16px"},
     h("b", {}, "🖥️ " + fs.map(gameNameFor).join(", ") + (fs.length > 1 ? " were" : " was") + " running in full screen. "),
     "The crosshair and quick menu can't show over full-screen games. In the game's video settings, pick ", h("b", {}, "Borderless"), " or ", h("b", {}, "Windowed fullscreen"), "."));
+  const os = STATE && STATE.online_safe;
+  if (os && os.active) out.push(h("div", {class:"banner info", style:"display:block;margin-top:16px"}, `🛡️ Online-safe mode: rapid fire, macros and recoil control are paused while you play ${os.game || "an online game"}. Everything else works as normal.`));
   if (STATE && STATE.quiet) out.push(h("div", {class:"banner info", style:"display:block;margin-top:16px"}, "🌙 Quiet hours: mods are off for now. The controller still works normally."));
   return out;
 }
@@ -3589,6 +3589,30 @@ async function parentOk(){
   if (got && await sha(got) === pin) return true;
   if (got) toast("That PIN isn't right");
   renderAll(); return false;
+}
+function onlineSafeSection(){
+  const o = CFG.online_safe = isObj(CFG.online_safe) ? CFG.online_safe : {};
+  const on = o.enabled !== false;
+  const builtins = [...new Set(Object.values((META && META.online_games) || {}))].sort();
+  const found = ((GAMES && GAMES.games) || []).filter(g => g.exe && ["fortnite","apex","cod","halo","shooter","rocket","roblox"].includes(g.pack)).map(g => g.name);
+  const custom = (o.games || []), offline = (o.offline || []);
+  const known = new Set([...Object.keys((META && META.online_games) || {}), ...custom]);
+  const recent = ((STATE && STATE.recent_apps) || []).filter(e => !known.has(e) && !/^(clutch|pythonw?|explorer|steam|epicgameslauncher)\.exe$/i.test(e)).slice(0, 8);
+  const edit = async fn => { if (await parentOk()){ fn(); changed(); } renderAll(); };
+  return [h("div", {class:"section-title"}, "🛡️ Online-safe mode"),
+    h("p", {class:"section-sub"}, "While an online game is in front, Clutch pauses the power-ups that break online rules: rapid fire and other turbo, macros (slide cancel, quick scope, jump shot), drop shot and recoil control. Everything else keeps working. In offline games they come back by themselves."),
+    h("div", {class:"form"},
+      h("div", {class:"lab"}, "Online-safe mode", h("div", {class:"help"}, "Recommended. A parent PIN is needed to turn it off.")),
+      swtch(on, async v => { if (v || await parentOk()){ o.enabled = v; changed(); toast(v ? "🛡️ Online-safe mode is on" : "Online-safe mode is off"); } renderAll(); }, "Online-safe mode"),
+      h("div", {class:"lab"}, "Online games", h("div", {class:"help"}, "Built in, plus shooters and other online games found in My games.")),
+      h("div", {class:"help", style:"line-height:1.6"}, [...new Map([...builtins, ...found].map(n => [n.toLowerCase(), n])).values()].sort((a, b) => a.localeCompare(b)).join(" · ")),
+      h("div", {class:"lab"}, "Also count these", h("div", {class:"help"}, "Programs you've opened recently. Tap one to treat it as an online game.")),
+      h("div", {class:"cellrow", style:"flex-wrap:wrap"},
+        custom.map(e => h("button", {class:"chip", onclick: () => edit(() => { o.games = custom.filter(x => x !== e); })}, `${e} ✕`)),
+        recent.map(e => h("button", {class:"chip ghost", onclick: () => edit(() => { o.games = [...custom, e]; })}, `+ ${e}`)),
+        !custom.length && !recent.length ? h("span", {class:"muted"}, "Start a game, then come back here to add it.") : null),
+      offline.length ? h("div", {class:"lab"}, "Treated as offline") : null,
+      offline.length ? h("div", {class:"cellrow", style:"flex-wrap:wrap"}, offline.map(e => h("button", {class:"chip", onclick: () => edit(() => { o.offline = offline.filter(x => x !== e); })}, `${e} ✕`))) : null)];
 }
 function parentExtras(){
   const par = CFG.parent = CFG.parent || {};
