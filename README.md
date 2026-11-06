@@ -8,8 +8,8 @@ Controller mods for Windows. Clutch reads your real controller (Xbox, PlayStatio
 
 ### Option A: build the installer once, then install anywhere (recommended)
 1. On any Windows PC, install **Python 3.12 or 3.13** from python.org. Tick **"Add python.exe to PATH"** during setup.
-2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-11.0.exe`**. If Inno Setup is missing, it installs that through winget automatically.
-3. Run `Clutch-Setup-11.0.exe` on each PC that will use Clutch. The installer:
+2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-11.1.exe`**. If Inno Setup is missing, it installs that through winget automatically.
+3. Run `Clutch-Setup-11.1.exe` on each PC that will use Clutch. The installer:
    - installs Clutch with a Start-menu entry and, if you choose, a desktop shortcut
    - installs the **ViGEmBus** virtual-controller driver if that PC doesn't have it yet
    - can set Clutch to start in the background with Windows
@@ -38,7 +38,7 @@ Open Clutch and go to **🔧 Setup check**. It shows what's missing, and each it
 | **Profiles** | Each profile is one set of mods, with its own emoji and color. Click a profile to see the live controller diagram and change any button, stick, trigger or macro. |
 | **🎬 Macros** (in a profile) | Build button combos step by step, or press **Start recording** and play the combo on the controller. |
 | **🕹️ My games** | Clutch looks through Steam, Epic Games, GOG, the Xbox app, Minecraft Java and Roblox and lists the games on this PC, with Steam cover art. Tap **Set up** (or **Set up all**) and each game gets a matching profile that switches on by itself when the game opens. Any other game can be given any profile from its card. |
-| **🧩 Game packs** (bottom of My games) | Ready-made profiles: Minecraft Java (full controller support for a keyboard-only game), Fortnite, Roblox, Rocket League, any shooter, racing games, keyboard-only games, Couch PC. Packs with a game name switch on by themselves when that game opens. |
+| **🧩 Game packs** (bottom of My games) | 48 ready-made profiles in 7 categories (Shooters, Action and adventure, Building and survival, Racing and sports, Party and fighting, Platformers, Keyboard games) with search. Includes Fortnite, Minecraft Java and Bedrock, Roblox, Rocket League, Apex, Call of Duty, Halo, Overwatch 2, Marvel Rivals, Destiny 2, The Finals, Rainbow Six Siege, Battlefield, PUBG, Helldivers 2, Warframe, GTA V, Red Dead 2, Elden Ring, Hogwarts Legacy, Cyberpunk 2077, Sea of Thieves, Terraria, Stardew Valley, Palworld, No Man's Sky, EA Sports FC, NBA 2K, Madden, F1, Forza, Need for Speed, Fall Guys, Street Fighter 6, Mortal Kombat, Tekken, Brawlhalla, Among Us (keyboard game), Hollow Knight, Celeste and more. Packs only change feel (deadzones, curves, hair triggers, steady aim, trigger feel); none use rapid fire, macros or recoil control. My games matches installed games to the right pack. |
 | **❓ Help** | Controller shortcut cheat sheet and answers to common problems. |
 | **⚙️ Settings** | Controller shortcuts, switch profiles by game, pop-ups over games, start with Windows, **👪 parent controls** (hide ban-risk power-ups behind a PIN), **⏪ go back in time** (restore an automatic backup), Xbox or PlayStation controller type. |
 

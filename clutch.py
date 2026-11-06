@@ -42,7 +42,7 @@ os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "11.0"
+VERSION = "11.1"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -200,7 +200,9 @@ ONLINE_GAMES = {
     "rainbowsix.exe": "Rainbow Six Siege", "rainbowsix_be.exe": "Rainbow Six Siege", "tf_win64.exe": "Team Fortress 2",
     "bf2042.exe": "Battlefield 2042", "gta5.exe": "GTA V", "gta5_enhanced.exe": "GTA V", "fc25.exe": "EA Sports FC 25",
 }
-ONLINE_PACKS = ("fortnite", "apex", "cod", "halo", "shooter", "rocket", "roblox")  # games My games matched to these
+ONLINE_PACKS = ("fortnite", "apex", "cod", "halo", "shooter", "rocket", "roblox",  # games My games matched to these
+                "overwatch", "rivals", "destiny", "finals", "siege", "battlefield", "pubg", "helldivers", "warframe",
+                "fc", "nba2k", "madden", "fallguys", "amongus", "brawlhalla", "gta", "seaofthieves")
 
 
 def online_safe_profile(p):
@@ -2022,6 +2024,16 @@ GAME_PACK_RULES = [  # (pack id, regex on the lower-case game name); specific pa
     ("cod", r"call of duty"),
     ("halo", r"\bhalo\b"),
     ("forza", r"forza"),
+    ("overwatch", r"overwatch"), ("rivals", r"marvel rivals"), ("destiny", r"destiny 2"), ("finals", r"^the finals"),
+    ("siege", r"rainbow six"), ("battlefield", r"battlefield"), ("pubg", r"pubg|playerunknown"), ("helldivers", r"helldivers"),
+    ("warframe", r"^warframe"), ("borderlands", r"borderlands"), ("drg", r"deep rock galactic"),
+    ("gta", r"grand theft auto|\bgta\b"), ("rdr2", r"red dead redemption"), ("eldenring", r"elden ring"),
+    ("hogwarts", r"hogwarts legacy"), ("cyberpunk", r"cyberpunk"), ("spiderman", r"spider-man|spiderman"),
+    ("seaofthieves", r"sea of thieves"), ("terraria", r"^terraria"), ("stardew", r"stardew"), ("palworld", r"palworld"),
+    ("nms", r"no man.s sky"), ("fc", r"ea sports fc|\bfifa\b"), ("nba2k", r"nba 2k"), ("madden", r"madden"),
+    ("f1", r"\bf1\b"), ("nfs", r"need for speed"), ("fallguys", r"fall guys"), ("sf6", r"street fighter"),
+    ("mk", r"mortal kombat"), ("tekken", r"tekken"), ("brawlhalla", r"brawlhalla"), ("amongus", r"among us"),
+    ("hollowknight", r"hollow knight"), ("celeste", r"^celeste"),
     ("shooter", r"call of duty|apex legends|\bhalo\b|destiny 2|overwatch|counter-strike|battlefield|the finals|"
                 r"marvel rivals|borderlands|team fortress|splitgate|titanfall|\bdoom\b|far cry|rainbow six|warframe|"
                 r"paladins|deep rock galactic|helldivers|left 4 dead|payday|xdefiant|delta force|gears|"
@@ -2056,7 +2068,7 @@ def known_exes(name):
 def game_pack(name):
     n = (name or "").lower()
     if "minecraft" in n:
-        return "minecraft"
+        return "minecraft" if "java" in n else "bedrock"
     if "roblox" in n:
         return "roblox"
     for pack, rx in GAME_PACK_RULES:
@@ -2816,7 +2828,7 @@ class PanelServer:
         return {
             "app_name": APP_NAME, "version": VERSION, "config_path": self.cfg_path, "data_dir": DATA_DIR,
             "windows": IS_WINDOWS, "installed": FROZEN, "app_mode": bool(self.runner and self.runner.app_mode),
-            "inputs": list(ALL_INPUTS), "xbox_buttons": list(XBOX_BUTTONS), "online_games": ONLINE_GAMES,
+            "inputs": list(ALL_INPUTS), "xbox_buttons": list(XBOX_BUTTONS), "online_games": ONLINE_GAMES, "online_packs": list(ONLINE_PACKS),
             "triggers": list(TRIGGERS), "stick_dirs": list(STICK_DIRS),
             "mouse": list(MOUSE_TARGETS), "keys": sorted(VK, key=lambda k: (len(k) > 1, k)),
             "crosshair_defaults": CROSSHAIR_DEFAULTS, "crosshair_styles": list(CROSSHAIR_STYLES),

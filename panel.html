@@ -863,8 +863,8 @@ function renderSidebar(){
       onclick: () => go("profile", {profile:n})},
       h("span", {class:"emo"}, pEmoji(n)), h("span", {class:"pname"}, n),
       n === live ? h("span", {class:"live-dot", title:"Your controller is using this one"}) : null))),
-    hidden || showAllProfiles ? h("li", {}, h("button", {class:"link", style:"padding:4px 14px;font-size:13px", onclick: () => { showAllProfiles = !showAllProfiles; renderAll(); }},
-      showAllProfiles ? "Show just mine" : `Show ${hidden} more`)) : null);
+    ...(hidden || showAllProfiles ? [h("li", {}, h("button", {class:"link", style:"padding:4px 14px;font-size:13px", onclick: () => { showAllProfiles = !showAllProfiles; renderAll(); }},
+      showAllProfiles ? "Show just mine" : `Show ${hidden} more`))] : []));
   document.querySelectorAll(".side .nav[data-view]").forEach(b => b.classList.toggle("sel", b.dataset.view === view));
   const w = (STATE && STATE.warnings || []).length;
   $("#warnBadge").hidden = !w; $("#warnBadge").textContent = w;
@@ -2157,62 +2157,62 @@ const KBM = () => ({
   remap:{ls_up:"key:w", ls_down:"key:s", ls_left:"key:a", ls_right:"key:d", rt:"mouse:left", lt:"mouse:right", start:"key:esc"},
 });
 const PACKS = [
-  {id:"minecraft", emoji:"⛏️", color:"#3ee6a0", name:"Minecraft Java", exe:"javaw.exe",
+  {id:"minecraft", cat:"Building and survival", popular:true, emoji:"⛏️", color:"#3ee6a0", name:"Minecraft Java", exe:"javaw.exe",
     text:"Minecraft Java Edition doesn't support controllers at all. This makes it play like the console version.",
     bullets:["Left stick walks, right stick looks around","RT mines, LT places and uses","A jumps, B sneaks, L3 sprints, Y opens your inventory","LB and RB scroll your hotbar"],
-    note:"Playing Bedrock Edition from the Microsoft Store? It already supports controllers, so use your Everyday profile.",
+    note:"Playing Bedrock Edition from the Microsoft Store? Use the Minecraft Bedrock pack instead.",
     make: () => merge(KBM(), {turbo:{lb:{rate_hz:8, duty:.5}, rb:{rate_hz:8, duty:.5}}, remap:{a:"key:space", b:"key:shift", l3:"key:ctrl", y:"key:e", x:"key:q",
       lb:"mouse:wheel_up", rb:"mouse:wheel_down", back:"key:tab", dpad_up:"key:f5", dpad_down:"key:f1", dpad_left:"key:f2", r3:"mouse:middle"}})},
-  {id:"fortnite", emoji:"🏗️", color:"#7c5cff", name:"Fortnite", exe:"fortniteclient-win64-shipping.exe",
+  {id:"fortnite", cat:"Shooters", popular:true, emoji:"🏗️", color:"#7c5cff", name:"Fortnite", exe:"fortniteclient-win64-shipping.exe",
     text:"Sharper aim on top of Fortnite's own controller support.",
     bullets:["Hair triggers for instant shots","Smooth aim, plus steadier aim while you aim down sights","Light drift protection"],
     note:"Leave Fortnite's in-game deadzones on their defaults for the best feel.",
     make: () => ({triggers:{left:{hair_trigger:true}, right:{hair_trigger:true}}, sticks:{right:{curve:1.5, anti_deadzone:.08, y_scale:.85, deadzone:.07}},
       stick_mods:[{id:"ads_slow", while:["lt"], stick:"right", scale:.75}]})},
-  {id:"roblox", emoji:"🟥", color:"#ff6b6b", name:"Roblox", exe:"robloxplayerbeta.exe",
+  {id:"roblox", cat:"Building and survival", popular:true, emoji:"🟥", color:"#ff6b6b", name:"Roblox", exe:"robloxplayerbeta.exe",
     text:"Roblox works with controllers, but loads of games need the mouse. Hold Back to get a mouse pointer whenever you need one.",
     bullets:["Plays like normal with your controller","Hold Back: right stick moves the mouse, RT clicks","A quick tap of Back still works like normal"],
     make: () => ({shift:{button:"back", tap:"back", sticks:{right:{output:"mouse", mouse_speed:1300, curve:1.6}}, remap:{rt:"mouse:left", lt:"mouse:right"}}})},
-  {id:"rocket", emoji:"🚗", color:"#ff8a3d", name:"Rocket League", exe:"rocketleague.exe",
+  {id:"rocket", cat:"Racing and sports", popular:true, emoji:"🚗", color:"#ff8a3d", name:"Rocket League", exe:"rocketleague.exe",
     text:"Snappier controls for car soccer.",
     bullets:["Small deadzones for precise aerials and flicks","Full throttle and boost with less trigger pull","Gentle steering for clean dribbles"],
     make: () => ({sticks:{left:{deadzone:.05, curve:1.2}, right:{deadzone:.06}}, triggers:{left:{deadzone:.02, max:.8}, right:{deadzone:.02, max:.8}}})},
-  {id:"shooter", emoji:"🎯", color:"#ff5fa2", name:"Any shooter", exe:null,
+  {id:"shooter", cat:"Shooters", emoji:"🎯", color:"#ff5fa2", name:"Any shooter", exe:null,
     text:"A solid setup for Call of Duty, Apex, Halo, Destiny and other shooters with controller support.",
     bullets:["Hair triggers","Smooth aim curve","Steadier aim while you aim down sights"],
     make: () => ({triggers:{left:{hair_trigger:true}, right:{hair_trigger:true}}, sticks:{right:{curve:1.6, anti_deadzone:.1, y_scale:.85, deadzone:.07}},
       stick_mods:[{id:"ads_slow", while:["lt"], stick:"right", scale:.7}]})},
-  {id:"apex", emoji:"🦊", color:"#ff4d4d", name:"Apex Legends", exe:"r5apex_dx12.exe",
+  {id:"apex", cat:"Shooters", popular:true, emoji:"🦊", color:"#ff4d4d", name:"Apex Legends", exe:"r5apex_dx12.exe",
     text:"Tuned for Apex's fast tracking fights.",
     bullets:["Hair triggers","Smooth aim with a little extra speed for big turns","Steadier aim while you aim down sights"],
     note:"In Apex, set Look Sensitivity to 4 and Response Curve to Classic, then fine-tune with Aim Lab.",
     make: () => ({triggers:{left:{hair_trigger:true}, right:{hair_trigger:true}}, sticks:{right:{curve:1.4, anti_deadzone:.1, deadzone:.06, y_scale:.85}},
       stick_mods:[{id:"ads_slow", while:["lt"], stick:"right", scale:.75}]})},
-  {id:"cod", emoji:"🪖", color:"#8fd14f", name:"Call of Duty", exe:"cod.exe",
+  {id:"cod", cat:"Shooters", popular:true, emoji:"🪖", color:"#8fd14f", name:"Call of Duty", exe:"cod.exe",
     text:"For Call of Duty and Warzone.",
     bullets:["Hair triggers","Smooth aim curve","Steadier aim while you aim down sights","Bumpers stay normal for tactical and lethal"],
     note:"Set the in-game deadzones low (around 5) so Clutch's settings can do the work.",
     make: () => ({triggers:{left:{hair_trigger:true}, right:{hair_trigger:true}}, sticks:{right:{curve:1.6, anti_deadzone:.1, deadzone:.06, y_scale:.85}},
       stick_mods:[{id:"ads_slow", while:["lt"], stick:"right", scale:.7}]})},
-  {id:"halo", emoji:"🪐", color:"#3ec6ff", name:"Halo", exe:"haloinfinite.exe",
+  {id:"halo", cat:"Shooters", emoji:"🪐", color:"#3ec6ff", name:"Halo", exe:"haloinfinite.exe",
     text:"For Halo Infinite and the Master Chief Collection.",
     bullets:["Hair triggers","Gentle aim curve for Halo's slower aim","Small deadzones"],
     make: () => ({triggers:{left:{hair_trigger:true}, right:{hair_trigger:true}}, sticks:{right:{curve:1.3, anti_deadzone:.08, deadzone:.06}, left:{deadzone:.06}}})},
-  {id:"forza", emoji:"🏎️", color:"#ffd23f", name:"Forza", exe:"forzahorizon5.exe",
+  {id:"forza", cat:"Racing and sports", popular:true, emoji:"🏎️", color:"#ffd23f", name:"Forza", exe:"forzahorizon5.exe",
     text:"For Forza Horizon and Forza Motorsport.",
     bullets:["Smooth throttle and brake","Precise, gentle steering","Brake trigger feel on a DualSense"],
     make: () => ({triggers:{left:{curve:1.6}, right:{curve:1.4}}, sticks:{left:{curve:1.6, deadzone:.05}}, trigger_feel:{left:"brake", right:"soft"}})},
-  {id:"racing", emoji:"🏁", color:"#ffd23f", name:"Racing games", exe:null,
+  {id:"racing", cat:"Racing and sports", emoji:"🏁", color:"#ffd23f", name:"Racing games", exe:null,
     text:"For Forza, F1, Need for Speed, Mario Kart-style racers and more.",
     bullets:["Smooth gas and brake","Gentle, precise steering","Small deadzone so steering reacts right away"],
     make: () => ({triggers:{left:{curve:1.6}, right:{curve:1.6}}, sticks:{left:{curve:1.5, deadzone:.06}}})},
-  {id:"keyboard", emoji:"⌨️", color:"#9b8cff", name:"Keyboard-only games", exe:null,
+  {id:"keyboard", cat:"Keyboard games", emoji:"⌨️", color:"#9b8cff", name:"Keyboard-only games", exe:null,
     text:"For PC games with no controller support. Uses the keys most action and adventure games use.",
     bullets:["Left stick = WASD, right stick = mouse","RT / LT = left / right click, A = Space, B = Ctrl","X = R (reload), Y = E (use), L3 = Shift (run), LB = Q, RB = F","D-pad = 1 to 4, Start = Esc, Back = Tab"],
     note:"Keys don't match your game? Change any button on the profile's Buttons tab.",
     make: () => merge(KBM(), {remap:{a:"key:space", b:"key:ctrl", x:"key:r", y:"key:e", l3:"key:shift", r3:"key:v", lb:"key:q", rb:"key:f",
       dpad_up:"key:1", dpad_right:"key:2", dpad_down:"key:3", dpad_left:"key:4", back:"key:tab"}})},
-  {id:"couch", emoji:"🛋️", color:"#3ec6ff", name:"Couch PC", exe:null,
+  {id:"couch", cat:"Keyboard games", emoji:"🛋️", color:"#3ec6ff", name:"Couch PC", exe:null,
     text:"Use Windows, YouTube and Discord from the couch.",
     bullets:["Right stick moves the mouse, left stick scrolls","A / RT click, X / LT right-click, B goes back","LB / RB switch browser tabs, Start opens the Start menu"],
     make: () => ({rumble:false, sticks:{left:{output:"none"}, right:{output:"mouse", mouse_speed:1400, curve:1.8}},
@@ -2222,6 +2222,130 @@ const PACKS = [
         lb:"key:ctrl+shift+tab", rb:"key:ctrl+tab", dpad_up:"key:up", dpad_down:"key:down", dpad_left:"key:left", dpad_right:"key:right",
         start:"key:win", back:"key:alt+tab", r3:"key:f11"}})},
 ];
+// ---- pack building blocks (feel and comfort only; nothing here is ban-risk automation) ----
+const P_SHOOT = (curve = 1.5, ads = .75, extra = {}) => merge({triggers:{left:{hair_trigger:true}, right:{hair_trigger:true}},
+  sticks:{right:{curve, anti_deadzone:.08, deadzone:.06, y_scale:.88}, left:{deadzone:.07}},
+  stick_mods:[{id:"ads_slow", while:["lt"], stick:"right", scale:ads}]}, extra);
+const P_ACTION = (curve = 1.3, extra = {}) => merge({sticks:{right:{curve, deadzone:.07}, left:{deadzone:.08}}}, extra);
+const P_RACE = (feel = true) => ({triggers:{left:{curve:1.6, deadzone:.03}, right:{curve:1.4, deadzone:.03}}, sticks:{left:{curve:1.6, deadzone:.05}},
+  ...(feel ? {trigger_feel:{left:"brake", right:"soft"}} : {})});
+const P_SPORT = () => ({sticks:{left:{deadzone:.07, curve:1.2}, right:{deadzone:.08}}, triggers:{left:{deadzone:.03}, right:{deadzone:.03}}});
+const P_PLAT = () => ({sticks:{left:{deadzone:.16, curve:1.0}, right:{deadzone:.1}}, triggers:{left:{deadzone:.05}, right:{deadzone:.05}}});
+const P_FIGHT = () => ({sticks:{left:{deadzone:.2, button_threshold:.45}}, rumble:.6});
+const MORE_PACKS = [
+  // ---------- shooters ----------
+  {id:"overwatch", cat:"Shooters", popular:true, emoji:"🛡️", color:"#ff9c3d", name:"Overwatch 2", exe:"overwatch.exe",
+    text:"Quick, smooth aim for hero shooters.", bullets:["Hair triggers","Smooth aim curve, a bit faster for tracking","Steadier aim while you hold LT"],
+    note:"Turn Overwatch's own aim smoothing down a little so the two don't stack.", make: () => P_SHOOT(1.35, .8)},
+  {id:"rivals", cat:"Shooters", popular:true, emoji:"🦸", color:"#e23a3a", name:"Marvel Rivals", exe:"marvel-win64-shipping.exe",
+    text:"For fast hero fights with lots of tracking.", bullets:["Hair triggers","Light aim curve for tracking moving heroes","Small deadzones"],
+    make: () => P_SHOOT(1.3, .85)},
+  {id:"destiny", cat:"Shooters", emoji:"🌌", color:"#8fb3ff", name:"Destiny 2", exe:"destiny2.exe",
+    text:"Steady precision-weapon aim for raids and Crucible.", bullets:["Hair triggers","Smooth aim curve","Steadier aim while aiming down sights"],
+    make: () => P_SHOOT(1.5, .75)},
+  {id:"finals", cat:"Shooters", emoji:"💥", color:"#ffd23f", name:"The Finals", exe:"discovery.exe",
+    text:"Snappy aim for a fast, destructive arena shooter.", bullets:["Hair triggers","Medium aim curve","Steadier aim while you hold LT"],
+    make: () => P_SHOOT(1.45, .78)},
+  {id:"siege", cat:"Shooters", emoji:"🏚️", color:"#6c8bb3", name:"Rainbow Six Siege", exe:"rainbowsix.exe",
+    text:"Precise, slow aim for holding angles.", bullets:["Hair triggers","Extra-smooth aim curve","Much steadier aim while aiming down sights"],
+    note:"Siege rewards slow, precise aim. Try Aim Lab's Tiny targets with this profile.", make: () => P_SHOOT(1.8, .65)},
+  {id:"battlefield", cat:"Shooters", emoji:"🪖", color:"#4fa3c7", name:"Battlefield", exe:"bf2042.exe",
+    text:"For big-map shooters and vehicles.", bullets:["Hair triggers","Smooth aim curve","Gentle left stick for driving and flying"],
+    make: () => P_SHOOT(1.55, .75, {sticks:{left:{curve:1.3}}})},
+  {id:"pubg", cat:"Shooters", emoji:"🍳", color:"#f2a93b", name:"PUBG", exe:"tslgame.exe",
+    text:"Long-range battle royale aim.", bullets:["Hair triggers","Smooth aim curve","Steadier aim while scoped in"],
+    make: () => P_SHOOT(1.6, .7)},
+  {id:"helldivers", cat:"Shooters", emoji:"🪂", color:"#ffd23f", name:"Helldivers 2", exe:"helldivers2.exe",
+    text:"Co-op shooting with lots of stratagem inputs.", bullets:["Hair triggers","Smooth aim curve","D-pad stays free for stratagem codes"],
+    make: () => P_SHOOT(1.4, .8)},
+  {id:"warframe", cat:"Shooters", emoji:"🥷", color:"#c9a86a", name:"Warframe", exe:"warframe.x64.exe",
+    text:"Fast movement plus shooting and melee.", bullets:["Hair triggers","Light aim curve for fast movement","Small deadzones"],
+    make: () => P_SHOOT(1.25, .85)},
+  {id:"borderlands", cat:"Shooters", emoji:"🔫", color:"#ffcf3f", name:"Borderlands", exe:"borderlands3.exe",
+    text:"Looter-shooter setup for lots of different guns.", bullets:["Hair triggers","Smooth aim curve","Steadier aim while aiming"],
+    make: () => P_SHOOT(1.45, .78)},
+  {id:"drg", cat:"Shooters", emoji:"⛏️", color:"#e0a040", name:"Deep Rock Galactic", exe:"fsd-win64-shipping.exe",
+    text:"Co-op mining and bug shooting.", bullets:["Hair triggers","Gentle aim curve","Small deadzones for precise mining"],
+    make: () => P_SHOOT(1.3, .85)},
+  // ---------- action and adventure ----------
+  {id:"gta", cat:"Action and adventure", popular:true, emoji:"🚓", color:"#5ec26a", name:"GTA V", exe:"gta5.exe",
+    text:"On foot, driving and flying, all in one.", bullets:["Smooth camera","Gentle steering on the left stick","Smooth gas and brake on the triggers"],
+    make: () => P_ACTION(1.35, {sticks:{left:{curve:1.3}}, triggers:{left:{curve:1.3}, right:{curve:1.3}}})},
+  {id:"rdr2", cat:"Action and adventure", emoji:"🤠", color:"#c0392b", name:"Red Dead Redemption 2", exe:"rdr2.exe",
+    text:"A calm camera for exploring, with steady aim for duels.", bullets:["Smooth camera","Steadier aim while you hold LT","Small deadzones"],
+    make: () => P_ACTION(1.45, {stick_mods:[{id:"ads_slow", while:["lt"], stick:"right", scale:.75}]})},
+  {id:"eldenring", cat:"Action and adventure", popular:true, emoji:"🗡️", color:"#d4af37", name:"Elden Ring", exe:"eldenring.exe",
+    text:"For souls-like games: precise dodges and a steady camera.", bullets:["Small left-stick deadzone for exact rolls","Smooth camera","Lighter rumble"],
+    make: () => P_ACTION(1.3, {sticks:{left:{deadzone:.06}}, rumble:.7})},
+  {id:"hogwarts", cat:"Action and adventure", emoji:"🪄", color:"#8e6bd8", name:"Hogwarts Legacy", exe:"hogwartslegacy.exe",
+    text:"Smooth camera for exploring and spell combat.", bullets:["Smooth camera","Small deadzones","Easy flying on the left stick"],
+    make: () => P_ACTION(1.35, {sticks:{left:{curve:1.2}}})},
+  {id:"cyberpunk", cat:"Action and adventure", emoji:"🌃", color:"#f5e626", name:"Cyberpunk 2077", exe:"cyberpunk2077.exe",
+    text:"First-person action plus driving.", bullets:["Hair triggers","Smooth aim curve","Gentle steering"],
+    make: () => P_SHOOT(1.5, .78, {sticks:{left:{curve:1.3}}})},
+  {id:"spiderman", cat:"Action and adventure", emoji:"🕷️", color:"#e23a3a", name:"Spider-Man", exe:null,
+    text:"Fast swinging and combat.", bullets:["Quick, light camera","Small deadzones","Full-strength rumble for impacts"],
+    make: () => P_ACTION(1.15, {rumble:1})},
+  {id:"seaofthieves", cat:"Action and adventure", emoji:"🏴‍☠️", color:"#2bb3a4", name:"Sea of Thieves", exe:"sotgame.exe",
+    text:"Sailing, sword fights and cannon shots with friends.", bullets:["Smooth camera","Steadier aim while you hold LT","Small deadzones"],
+    make: () => P_ACTION(1.4, {stick_mods:[{id:"ads_slow", while:["lt"], stick:"right", scale:.75}]})},
+  // ---------- building and survival ----------
+  {id:"bedrock", cat:"Building and survival", popular:true, emoji:"🧱", color:"#3ee6a0", name:"Minecraft Bedrock", exe:"minecraft.windows.exe",
+    text:"For the Microsoft Store version, which already supports controllers.", bullets:["Precise camera for building","Small deadzones","Gentle aim curve"],
+    note:"Playing Java Edition? Use the Minecraft Java pack instead.", make: () => P_ACTION(1.25, {sticks:{right:{deadzone:.06}}})},
+  {id:"terraria", cat:"Building and survival", emoji:"🌳", color:"#5fbf4a", name:"Terraria", exe:"terraria.exe",
+    text:"Smooth cursor and movement for digging and building.", bullets:["Small deadzones","Gentle right stick for precise placing"],
+    make: () => P_ACTION(1.5)},
+  {id:"stardew", cat:"Building and survival", emoji:"🌱", color:"#7cc46a", name:"Stardew Valley", exe:"stardew valley.exe",
+    text:"Relaxed farming with less accidental tool swings.", bullets:["Bigger deadzone so you stop exactly where you want","Gentle movement","Lighter rumble"],
+    make: () => ({sticks:{left:{deadzone:.14, curve:1.2}}, rumble:.5})},
+  {id:"palworld", cat:"Building and survival", emoji:"🐾", color:"#4fb6e8", name:"Palworld", exe:"palworld-win64-shipping.exe",
+    text:"Catching, building and shooting.", bullets:["Hair triggers","Smooth aim curve","Steadier aim while you hold LT"],
+    make: () => P_SHOOT(1.4, .8)},
+  {id:"nms", cat:"Building and survival", emoji:"🪐", color:"#d96bff", name:"No Man's Sky", exe:"nms.exe",
+    text:"Smooth flying and exploring.", bullets:["Gentle flight controls on the left stick","Smooth camera","Small deadzones"],
+    make: () => P_ACTION(1.4, {sticks:{left:{curve:1.4}}})},
+  // ---------- racing and sports ----------
+  {id:"fc", cat:"Racing and sports", popular:true, emoji:"⚽", color:"#3ec66e", name:"EA Sports FC", exe:null,
+    text:"Precise dribbling and passing.", bullets:["Small deadzones for exact passes","Gentle dribbling curve","Quick trigger response"],
+    make: P_SPORT},
+  {id:"nba2k", cat:"Racing and sports", emoji:"🏀", color:"#ff7a2e", name:"NBA 2K", exe:null,
+    text:"Steady shooting and dribble moves on the stick.", bullets:["Small deadzones","Precise right stick for pro stick moves","Quick triggers"],
+    make: () => merge(P_SPORT(), {sticks:{right:{deadzone:.06}}})},
+  {id:"madden", cat:"Racing and sports", emoji:"🏈", color:"#3b6fd6", name:"Madden NFL", exe:null,
+    text:"Clean cuts and juke moves.", bullets:["Small deadzones","Gentle running curve","Quick triggers"],
+    make: P_SPORT},
+  {id:"f1", cat:"Racing and sports", emoji:"🏁", color:"#ff2e2e", name:"F1", exe:null,
+    text:"Smooth inputs for racing lines without spinning out.", bullets:["Smooth throttle and brake","Precise steering","Brake trigger feel on a DualSense"],
+    note:"Lower F1's own steering sensitivity a little and let Clutch handle the smoothness.", make: () => P_RACE(true)},
+  {id:"nfs", cat:"Racing and sports", emoji:"🚦", color:"#00d1ff", name:"Need for Speed", exe:null,
+    text:"Arcade racing with clean drifts.", bullets:["Smooth throttle","Gentle steering for long drifts","Brake trigger feel on a DualSense"],
+    make: () => P_RACE(true)},
+  {id:"fallguys", cat:"Party and fighting", popular:true, emoji:"🫘", color:"#ff7ac6", name:"Fall Guys", exe:"fallguys_client_game.exe",
+    text:"Exact steering on narrow paths.", bullets:["Small left-stick deadzone","Straight, no-curve movement","Lighter rumble"],
+    make: () => ({sticks:{left:{deadzone:.06, curve:1}}, rumble:.6})},
+  // ---------- party and fighting ----------
+  {id:"sf6", cat:"Party and fighting", emoji:"🥊", color:"#ff6a3d", name:"Street Fighter 6", exe:"streetfighter6.exe",
+    text:"Clean motion inputs for fighting games.", bullets:["Stick directions only register on a clear push","Use the D-pad or stick for special moves","Lighter rumble"],
+    note:"Clutch doesn't add combos to fighting games. These settings just make your inputs cleaner.", make: P_FIGHT},
+  {id:"mk", cat:"Party and fighting", emoji:"🐉", color:"#d4a017", name:"Mortal Kombat", exe:null,
+    text:"Clean motion inputs for fighting games.", bullets:["Stick directions only register on a clear push","Lighter rumble"], make: P_FIGHT},
+  {id:"tekken", cat:"Party and fighting", emoji:"👊", color:"#c0392b", name:"Tekken", exe:null,
+    text:"Clean inputs for 3D fighters.", bullets:["Stick directions only register on a clear push","Lighter rumble"], make: P_FIGHT},
+  {id:"brawlhalla", cat:"Party and fighting", emoji:"⚔️", color:"#3ec6ff", name:"Brawlhalla", exe:"brawlhalla.exe",
+    text:"Platform fighter setup.", bullets:["Clear stick directions for aimed attacks","Small trigger deadzones"], make: P_FIGHT},
+  {id:"amongus", cat:"Keyboard games", popular:true, emoji:"🧑‍🚀", color:"#c51111", name:"Among Us", exe:"among us.exe",
+    text:"Among Us on PC is made for keyboard and mouse. This lets you play it with a controller.", bullets:["Left stick walks (WASD)","Right stick moves the mouse, RT clicks","A = Use, X = Report, B = Kill, Y = Map, Start = Menu"],
+    make: () => merge(KBM(), {sticks:{right:{mouse_speed:1300}}, remap:{a:"key:e", x:"key:r", b:"key:q", y:"key:tab", start:"key:esc"}})},
+  // ---------- platformers ----------
+  {id:"hollowknight", cat:"Platformers", emoji:"🦋", color:"#a9c6e8", name:"Hollow Knight", exe:"hollow_knight.exe",
+    text:"Tight controls for precise jumps.", bullets:["Bigger deadzone so you don't drift off ledges","Straight, no-curve movement"], make: P_PLAT},
+  {id:"celeste", cat:"Platformers", emoji:"🍓", color:"#e86a8a", name:"Celeste", exe:"celeste.exe",
+    text:"Exact eight-way dashes.", bullets:["Bigger deadzone for clean dash directions","Straight, no-curve movement"], make: P_PLAT},
+];
+PACKS.push(...MORE_PACKS);
+const PACK_CATS = ["Shooters", "Action and adventure", "Building and survival", "Racing and sports", "Party and fighting", "Platformers", "Keyboard games"];
+
 const packProfile = id => Object.keys(CFG.profiles).find(n => CFG.profiles[n].pack === id);
 function addPack(pk, quiet){
   const existing = packProfile(pk.id);
@@ -2233,15 +2357,25 @@ function addPack(pk, quiet){
   if (!quiet){ changed(); toast(`${pk.emoji} Added ${name}` + (pk.exe ? `. It turns on by itself when you open the game.` : "")); }
   return name;
 }
+let packCat = "", packQ = "";
+const packVisible = pk => (!packCat || pk.cat === packCat) && (!packQ || (pk.name + " " + pk.text).toLowerCase().includes(packQ));
+function packFilterBar(){
+  const q = h("input", {type:"search", placeholder:"🔎 Search packs", value:packQ, "aria-label":"Search packs"});
+  q.addEventListener("input", () => { packQ = q.value.trim().toLowerCase(); const pos = q.selectionStart; renderAll(); const n = document.querySelector("input[aria-label='Search packs']"); if (n){ n.focus(); n.setSelectionRange(pos, pos); } });
+  return h("div", {class:"filters", style:"margin:6px 0 14px"},
+    ["", ...PACK_CATS].map(c => h("button", {class:"chip", "aria-pressed":String(packCat === c), onclick: () => { packCat = c; renderAll(); }},
+      c || `All ${PACKS.length}`)), q);
+}
 function renderPacks(v){
   if (!GAMES && !gamesBusy) loadGames();
   add(v, gamesSection(),
     h("div", {class:"section-title", style:"margin-top:34px"}, "🧩 Game packs"),
     h("p", {class:"section-sub"}, "Ready-made profiles for popular games. Add one and it's set up for you. Packs with a game name switch on by themselves when that game opens."),
-    h("div", {class:"packs"}, PACKS.map(pk => {
+    packFilterBar(),
+    h("div", {class:"packs"}, PACKS.filter(packVisible).map(pk => {
       const have = packProfile(pk.id);
       return h("div", {class:"pack" + (have ? " have" : ""), style:`--pc:${pk.color}`},
-        h("span", {class:"emo big"}, pk.emoji), h("b", {}, pk.name), h("p", {}, pk.text),
+        h("span", {class:"emo big"}, pk.emoji), h("b", {}, pk.name), h("small", {class:"muted"}, pk.cat || ""), h("p", {}, pk.text),
         h("ul", {}, pk.bullets.map(b => h("li", {}, b))),
         pk.note ? h("p", {class:"help"}, pk.note) : null,
         h("div", {class:"foot"}, have
@@ -2285,7 +2419,7 @@ function renderWelcome(v){
       h("h2", {style:"margin-top:0"}, "Step 2: What do you play?"),
       h("p", {class:"muted"}, "Pick as many as you like. Clutch makes a profile for each one."),
       foundNames.length ? h("div", {class:"found"}, `✨ Found on this PC: ${foundNames.slice(0, 4).join(", ")}${foundNames.length > 4 ? ` and ${foundNames.length - 4} more` : ""}. We picked them for you.`) : null,
-      h("div", {class:"gamechips"}, PACKS.map(pk => h("button", {"aria-pressed":String(wz.games.has(pk.id)), onclick: e => {
+      h("div", {class:"gamechips"}, PACKS.filter(pk => pk.popular || wz.games.has(pk.id) || found.some(g => g.pack === pk.id)).map(pk => h("button", {"aria-pressed":String(wz.games.has(pk.id)), onclick: e => {
         wz.games.has(pk.id) ? wz.games.delete(pk.id) : wz.games.add(pk.id); e.currentTarget.setAttribute("aria-pressed", String(wz.games.has(pk.id))); }},
         h("span", {class:"emo"}, pk.emoji), pk.name))),
       h("div", {class:"cellrow", style:"margin-top:22px"}, h("button", {class:"primary", onclick: finish}, "Finish"),
@@ -2512,11 +2646,9 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
-  ["🛡️", "Online-safe mode", "In Fortnite, Call of Duty, Apex and other online games, Clutch pauses rapid fire, macros and recoil control so your account stays safe. They come back in offline games."],
-  ["👪", "Family mode", "Each player gets their own profiles, look, stats and Aim Lab scores. Tap “Who's playing?” at the top."],
-  ["🏹", "Trigger feel", "DualSense triggers can push back: gun click, bow, car brake. Profile → Triggers."],
-  ["🗓️", "Daily challenge", "Same targets for everyone each day in Aim Lab, with a family leaderboard."],
-  ["📺", "Stream overlay", "Show your button presses and profile in OBS. Settings → Streaming overlay."],
+  ["🧩", "48 game packs", "New packs for Overwatch 2, Marvel Rivals, GTA V, Elden Ring, Minecraft Bedrock, EA Sports FC, Fall Guys, Among Us and many more. Filter them by type on My games."],
+  ["🔍", "Smarter game finder", "My games now matches far more games to the right pack automatically."],
+  ["🛡️", "Online-safe mode", "In online games, Clutch pauses rapid fire, macros and recoil control so your account stays safe."],
 ];
 function showWhatsNew(){
   CFG.seen_version = META.version; changed();
@@ -3594,7 +3726,7 @@ function onlineSafeSection(){
   const o = CFG.online_safe = isObj(CFG.online_safe) ? CFG.online_safe : {};
   const on = o.enabled !== false;
   const builtins = [...new Set(Object.values((META && META.online_games) || {}))].sort();
-  const found = ((GAMES && GAMES.games) || []).filter(g => g.exe && ["fortnite","apex","cod","halo","shooter","rocket","roblox"].includes(g.pack)).map(g => g.name);
+  const found = ((GAMES && GAMES.games) || []).filter(g => g.exe && ((META && META.online_packs) || []).includes(g.pack)).map(g => g.name);
   const custom = (o.games || []), offline = (o.offline || []);
   const known = new Set([...Object.keys((META && META.online_games) || {}), ...custom]);
   const recent = ((STATE && STATE.recent_apps) || []).filter(e => !known.has(e) && !/^(clutch|pythonw?|explorer|steam|epicgameslauncher)\.exe$/i.test(e)).slice(0, 8);
