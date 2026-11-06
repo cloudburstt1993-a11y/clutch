@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+build/
+dist/
+installer_output/
+# your code-signing script can hold certificate details; never commit it
+sign.cmd
+*.pfx
+*.log
+config.jsonc
+config.backup.jsonc
+stats.json
+backups/
+webview/

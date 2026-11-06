@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Clutch overlay</title>
+<style>
+  html,body{margin:0;background:transparent;overflow:hidden;font-family:Bahnschrift,"Segoe UI",system-ui,sans-serif;color:#f2f5ff}
+  .wrap{display:flex;gap:16px;align-items:flex-end;padding:10px}
+  svg{width:360px;height:236px;filter:drop-shadow(0 6px 14px #0009)}
+  .body{fill:#141c3a;stroke:#2c3a72;stroke-width:3}
+  .b{fill:#222c55;stroke:#3a4a8a;stroke-width:2;transition:fill .05s}
+  .b.on{fill:var(--acc,#ff5fa2);stroke:#fff}
+  .lbl{font-size:13px;font-weight:700;fill:#c9d2f5;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+  .well{fill:#0b1024;stroke:#2c3a72;stroke-width:2}
+  .dot{fill:var(--acc,#ff5fa2);stroke:#fff;stroke-width:2}
+  .trig{fill:#0b1024;stroke:#2c3a72;stroke-width:2}
+  .tfill{fill:var(--acc,#ff5fa2)}
+  .card{background:#0d1328ee;border:2px solid var(--acc,#ff5fa2);border-radius:18px;padding:10px 16px;display:flex;gap:10px;align-items:center;
+    box-shadow:0 8px 20px #0008;min-width:150px}
+  .card .emo{font-size:30px;font-family:"Segoe UI Emoji","Apple Color Emoji",sans-serif}
+  .card b{display:block;font-size:20px}
+  .card small{color:#a9b4dc;font-size:13px}
+  .off{opacity:.55}
+  [hidden]{display:none !important}
+</style></head>
+<body>
+<div class="wrap">
+<svg id="pad" viewBox="0 0 360 236" aria-hidden="true">
+  <rect class="trig" x="52" y="6" width="70" height="16" rx="6"/><rect id="ltf" class="tfill" x="52" y="6" width="0" height="16" rx="6"/>
+  <rect class="trig" x="238" y="6" width="70" height="16" rx="6"/><rect id="rtf" class="tfill" x="238" y="6" width="0" height="16" rx="6"/>
+  <rect id="b_lb" class="b" x="48" y="28" width="78" height="18" rx="8"/><text class="lbl" x="87" y="37" data-x="LB" data-p="L1">LB</text>
+  <rect id="b_rb" class="b" x="234" y="28" width="78" height="18" rx="8"/><text class="lbl" x="273" y="37" data-x="RB" data-p="R1">RB</text>
+  <path class="body" d="M70 52 H290 Q340 52 350 120 L356 186 Q358 226 322 226 Q296 226 282 196 L264 168 H96 L78 196 Q64 226 38 226 Q2 226 4 186 L10 120 Q20 52 70 52 Z"/>
+  <circle class="well" cx="92" cy="104" r="30"/><circle id="ls" class="dot" cx="92" cy="104" r="12"/>
+  <circle class="well" cx="226" cy="156" r="30"/><circle id="rs" class="dot" cx="226" cy="156" r="12"/>
+  <rect id="b_dpad_up" class="b" x="123" y="126" width="20" height="22" rx="4"/>
+  <rect id="b_dpad_down" class="b" x="123" y="170" width="20" height="22" rx="4"/>
+  <rect id="b_dpad_left" class="b" x="100" y="148" width="22" height="20" rx="4"/>
+  <rect id="b_dpad_right" class="b" x="144" y="148" width="22" height="20" rx="4"/>
+  <circle id="b_y" class="b" cx="268" cy="82" r="14"/><text class="lbl" x="268" y="82" data-x="Y" data-p="△">Y</text>
+  <circle id="b_x" class="b" cx="242" cy="106" r="14"/><text class="lbl" x="242" y="106" data-x="X" data-p="□">X</text>
+  <circle id="b_b" class="b" cx="294" cy="106" r="14"/><text class="lbl" x="294" y="106" data-x="B" data-p="○">B</text>
+  <circle id="b_a" class="b" cx="268" cy="130" r="14"/><text class="lbl" x="268" y="130" data-x="A" data-p="✕">A</text>
+  <rect id="b_back" class="b" x="146" y="88" width="24" height="12" rx="6"/>
+  <rect id="b_start" class="b" x="192" y="88" width="24" height="12" rx="6"/>
+  <circle id="b_guide" class="b" cx="181" cy="120" r="11"/>
+</svg>
+<div class="card" id="card"><span class="emo" id="emo">🎮</span><div><b id="pname">Clutch</b><small id="sub">waiting…</small></div></div>
+</div>
+<script>
+const q = new URLSearchParams(location.search), key = q.get("key") || "", show = q.get("show") || "both";
+if (show === "profile") document.getElementById("pad").hidden = true;
+if (show === "pad") document.getElementById("card").hidden = true;
+const $ = id => document.getElementById(id);
+const BTN = ["a","b","x","y","lb","rb","back","start","guide","dpad_up","dpad_down","dpad_left","dpad_right"];
+let ps = null;
+async function tick(){
+  try {
+    const r = await fetch("/api/overlay_state?key=" + encodeURIComponent(key), {cache:"no-store"});
+    if (r.status === 403){ $("pname").textContent = "Overlay is off"; $("sub").textContent = "Turn it on in Clutch → Settings"; setTimeout(tick, 2000); return; }
+    const s = await r.json();
+    document.documentElement.style.setProperty("--acc", s.color || "#ff5fa2");
+    $("emo").textContent = s.emoji || "🎮"; $("pname").textContent = s.profile || "Clutch";
+    $("sub").textContent = !s.connected ? "No controller" : s.enabled ? (s.kid ? `${s.kid} · mods on` : "Mods on") : "Mods off";
+    document.body.classList.toggle("off", !s.connected);
+    const isPs = /dualsense|dualshock|playstation/i.test(s.controller || "");
+    if (isPs !== ps){ ps = isPs; document.querySelectorAll(".lbl").forEach(t => t.textContent = ps ? t.dataset.p : t.dataset.x); }
+    const down = new Set(s.buttons || []);
+    for (const b of BTN){ const el = $("b_" + b); if (el) el.classList.toggle("on", down.has(b)); }
+    $("ls").setAttribute("cx", 92 + (s.lx || 0) * 18); $("ls").setAttribute("cy", 104 - (s.ly || 0) * 18);
+    $("rs").setAttribute("cx", 226 + (s.rx || 0) * 18); $("rs").setAttribute("cy", 156 - (s.ry || 0) * 18);
+    $("ltf").setAttribute("width", 70 * (s.lt || 0)); $("rtf").setAttribute("width", 70 * (s.rt || 0));
+    setTimeout(tick, 33);
+  } catch(e){ $("sub").textContent = "Clutch isn't running"; setTimeout(tick, 1500); }
+}
+tick();
+</script>
+</body></html>

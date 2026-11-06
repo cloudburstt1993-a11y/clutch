@@ -1,0 +1,61 @@
+# Builds the Windows installer on GitHub's own Windows machines.
+# Push a tag like v10.1 (matching VERSION in clutch.py) and a Release with Clutch-Setup-10.1.exe appears,
+# which every installed Clutch then offers as a one-click update.
+name: Build installer
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:   # "Run workflow" button: builds a test installer without releasing it
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+
+      - name: Make sure the tag matches VERSION in clutch.py
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $v = (python clutch.py --version).Trim()
+          if ("v$v" -ne "${{ github.ref_name }}") { Write-Error "Tag ${{ github.ref_name }} doesn't match VERSION $v in clutch.py"; exit 1 }
+
+      - name: Build Clutch.exe
+        run: python -m PyInstaller --noconfirm --clean Clutch.spec
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $v = (python clutch.py --version).Trim()
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" installer.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer_output/Clutch-Setup-*.exe
+          generate_release_notes: true
+
+      - name: Keep the test build
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: Clutch-installer
+          path: installer_output/Clutch-Setup-*.exe
