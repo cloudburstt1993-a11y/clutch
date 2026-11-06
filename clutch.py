@@ -42,7 +42,7 @@ os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "12.0"
+VERSION = "12.1"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -1857,6 +1857,34 @@ def guid_vid_pid(guid):
     return (vid, pid) if vid else None
 
 
+def hidhide_hiding(cli, vid=None, pid=None, run=None):
+    """Is HidHide actually hiding this controller from games? Returns (state, reason):
+    True = hidden, False = games can see it (reason says why), None = couldn't tell (never warn on a guess)."""
+    import subprocess
+    run = run or (lambda args: subprocess.run([cli] + args, capture_output=True, text=True, timeout=5,
+                                              creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)))
+    try:
+        r = run(["--cloak-state"])
+        txt = ((r.stdout or "") + " " + (r.stderr or "")).lower()
+        if r.returncode == 0 and txt.strip():
+            if any(w in txt for w in ("off", "false", "inactive", "disabled")):
+                return False, "cloak_off"
+    except Exception:
+        return None, None
+    if not vid:
+        return None, None
+    try:
+        r = run(["--dev-list"])
+        if r.returncode != 0:
+            return None, None
+        txt = (r.stdout or "").lower().replace("\\\\", "\\")
+    except Exception:
+        return None, None
+    # USB: "VID_054C&PID_0CE6". Bluetooth: "_VID&0002054c_PID&0ce6" (a 4-digit source prefix before the id).
+    pat = re.compile(rf"vid[_&](?:[0-9a-f]{{4}})?{vid:04x}[&_]pid[_&]{pid:04x}")
+    return (True, None) if pat.search(txt) else (False, "not_hidden")
+
+
 def hidhide_targets(cli_json, vid, pid):
     """From `HidHideCLI --dev-gaming` output, the device paths of the real controller with this vendor/product id.
     Virtual controllers (ViGEm, software devices) are never returned, so games keep seeing Clutch's."""
@@ -3385,6 +3413,8 @@ class ModRunner:
         self._remembered = set()            # controllers whose saved profile was applied this run
         self.online_game = None             # name of the online game in front (online-safe mode)
         self.setup_job = {}                 # one-click HidHide progress
+        self.double = {"risk": False, "reason": None}   # 12.1: can games see the real AND the virtual controller?
+        self._double_busy, self._double_next, self._double_warned = False, 0.0, set()
         self.problem = None
         self.notify = None      # callable(title, message), set by the desktop app
         self.on_show = None     # callable(): bring the app window forward
@@ -3824,6 +3854,7 @@ class ModRunner:
                 if res.get("restart"):
                     msg += " Restart the PC to finish."
                 j.update(state="done", message=msg, hidden=res.get("hidden") or [], restart=bool(res.get("restart")))
+                self._double_next = 0.0  # check again right away
                 self.log(f"HidHide setup: {msg}")
             except Exception as e:
                 j.update(state="error", message=str(e)[:300])
@@ -3866,6 +3897,49 @@ class ModRunner:
             elif not game and risky:
                 self.osd("Online-safe mode off", "Your ban-risk power-ups are back on", accent="#ffd23f", secs=3)
             self._changed()
+
+    # ---- 12.1: double-input check ----
+    def _double_check(self):
+        """Background: work out whether games see both controllers (each press then counts twice:
+        weapons skip a slot, menus jump two items). Only says "risk" when it's sure."""
+        try:
+            risk, reason = False, None
+            if IS_WINDOWS and self.vpad and self.pad:
+                vp = guid_vid_pid(getattr(self.pad, "guid", None))
+                if vp in ((0x045E, 0x028E), (0x054C, 0x05C4)):
+                    vp = None  # looks like Clutch's own virtual pad: can't tell them apart
+                if not svc_exists("HidHide"):
+                    risk, reason = True, "no_hidhide"
+                else:
+                    cli = find_hidhide("HidHideCLI.exe")
+                    if cli:
+                        state, why = hidhide_hiding(cli, *(vp or (None, None)))
+                        if state is False:
+                            risk, reason = True, why
+            if risk != self.double.get("risk") or reason != self.double.get("reason"):
+                self.double = {"risk": risk, "reason": reason}
+                self._changed()
+        except Exception:
+            pass
+        finally:
+            self._double_busy = False
+
+    def _double_tick(self, now):
+        if not IS_WINDOWS:
+            return
+        if not self.pad or not self.vpad:
+            if self.double.get("risk"):
+                self.double = {"risk": False, "reason": None}; self._changed()
+            return
+        if now >= self._double_next and not self._double_busy and not (self.setup_job or {}).get("state") in ("starting", "downloading", "waiting"):
+            self._double_next = now + 20.0
+            self._double_busy = True
+            threading.Thread(target=self._double_check, daemon=True).start()
+        exe = self.auto.last_exe or ""
+        if self.double.get("risk") and exe and not self.auto.watch.own and exe not in self._double_warned \
+                and (exe in self.online_games() or exe in self.fullscreen_seen):
+            self._double_warned.add(exe)
+            self.osd("Buttons counting twice?", "Your game can see two controllers. Open Clutch and tap “Fix it for me”.", accent="#ffd23f", secs=6)
 
     def _has_risky(self):
         """Does the current profile use anything online-safe mode switches off?"""
@@ -4150,7 +4224,7 @@ class ModRunner:
             "config_mtime": self.cfg_mtime, "nav_mute": self.nav_mute(), "front": bool(self.auto.watch.own),
             "kid": self.kid, "quiet": self._quiet_off,
             "online_safe": {"active": self.engine.online_safe, "game": self.online_game},
-            "setup_job": self.setup_job or None, "fullscreen_games": sorted(self.fullscreen_seen),
+            "setup_job": self.setup_job or None, "double_input": self.double, "fullscreen_games": sorted(self.fullscreen_seen),
             "update": {k: v for k, v in self.update.items() if k in ("state", "busy", "latest", "newer", "page", "notes", "error", "downloading", "progress", "ready")},
             "pad_key": getattr(self.pad, "key", None) if self.pad else None,
             "pad_caps": {"touch": bool(getattr(self.pad, "has_touch", False)), "trigger_fx": bool(getattr(self.pad, "has_trigger_fx", False)),
@@ -4264,6 +4338,7 @@ class ModRunner:
                     next_auto = t0 + 0.5
                     self.auto.check(eng)
                     self._online_tick()
+                    self._double_tick(t0)
                 eng.menu_allowed = bool(self.overlay and self.overlay.thread and not self.overlay.error)
                 if t0 >= next_fam:
                     next_fam = t0 + 0.25

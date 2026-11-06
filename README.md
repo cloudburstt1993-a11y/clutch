@@ -8,8 +8,8 @@ Controller mods for Windows. Clutch reads your real controller (Xbox, PlayStatio
 
 ### Option A: build the installer once, then install anywhere (recommended)
 1. On any Windows PC, install **Python 3.12 or 3.13** from python.org. Tick **"Add python.exe to PATH"** during setup.
-2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-12.0.exe`**. If Inno Setup is missing, it installs that through winget automatically.
-3. Run `Clutch-Setup-12.0.exe` on each PC that will use Clutch. The installer:
+2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-12.1.exe`**. If Inno Setup is missing, it installs that through winget automatically.
+3. Run `Clutch-Setup-12.1.exe` on each PC that will use Clutch. The installer:
    - installs Clutch with a Start-menu entry and, if you choose, a desktop shortcut
    - installs the **ViGEmBus** virtual-controller driver if that PC doesn't have it yet
    - can set Clutch to start in the background with Windows
@@ -50,6 +50,8 @@ Open Clutch and go to **🔧 Setup check**. It shows what's missing, and each it
 Tapping Guide by itself still does its normal job. Closing the window keeps Clutch running in the tray. Right-click the tray icon to switch profiles, toggle mods or the crosshair, or quit.
 
 **🕹️ Drive Clutch with your controller:** with the Clutch window in front, the D-pad or left stick moves around, **A** picks, **B** goes back or closes a pop-up, **LB / RB** flip between pages, left/right changes sliders and lists, and the right stick scrolls. A hint bar shows the buttons (with PlayStation symbols on a PlayStation controller). While Clutch is in front, mods don't press keys or move the mouse, so nothing happens twice. On the Controller test page buttons are being tested, so hold **B** to leave. Turn it off in Settings → Controls and comfort.
+
+**🔂 Double-press check (12.1):** if a game can see both the real controller and Clutch's virtual one, each press counts twice (Fortnite skips a weapon slot, menus jump two items). Clutch checks HidHide every 20 seconds (installed, switched on, and this controller in its hidden list). When it's sure games can see both, Home shows a warning with **Fix it for me**, and a one-time pop-up appears over online games. If it can't tell, it stays quiet.
 
 **🎯 "How does it feel?" (12.0):** profiles made from a game pack show a small card at the top: *Feels great*, *Aim's too slow / too fast* (right-stick sensitivity ×1.15 / ×0.87, or mouse speed for keyboard-and-mouse packs), *Too jumpy* (curve +0.2 up to 2.4, and a slightly steadier aim-down-sights slowdown) and *It drifts* (deadzones +0.03 up to 0.3). Each tap nudges the profile a little and the toast has Undo.
 

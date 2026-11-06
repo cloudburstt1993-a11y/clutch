@@ -2212,7 +2212,8 @@ function renderSetup(v){
     H.hidhide ? (H.hidhide_allowed ? row("good", "✅", "Clutch is allowed through HidHide", "Clutch can still see your controller after it's hidden from games.")
       : row("bad", "🔑", "Let Clutch through HidHide", "Clutch needs permission to see your hidden controller. You might get a Windows “allow changes” pop-up.",
           btn("Allow Clutch", () => action("hidhide_allow"), true))) : null,
-    H.hidhide ? row("info", "🙈", "Hide your real controller from games", "Clutch can find your controller and hide it from games for you (one Windows prompt). Or do it yourself: Open HidHide, go to the Devices tab, tick your controller, and tick “Enable device hiding”.",
+    H.hidhide ? row((STATE && STATE.double_input && STATE.double_input.risk) ? "bad" : "info", (STATE && STATE.double_input && STATE.double_input.risk) ? "⚠️" : "🙈",
+      (STATE && STATE.double_input && STATE.double_input.risk) ? "Your real controller isn't hidden yet" : "Hide your real controller from games", "Clutch can find your controller and hide it from games for you (one Windows prompt). Or do it yourself: Open HidHide, go to the Devices tab, tick your controller, and tick “Enable device hiding”.",
       btn("Hide it for me", autoHide, true), H.hidhide_client ? btn("Open HidHide", () => action("open_hidhide")) : null, btn("Stop hiding", () => autoHide(true))) : null,
     H.steam_running ? row("info", "🚂", "Steam is running", "Steam has its own controller system called Steam Input, and it can fight with Clutch (double presses, or mods that seem to do nothing). For each Steam game you play with Clutch: open your Steam Library, right-click the game, pick Properties, then Controller, and choose “Disable Steam Input”.") :
     row("info", "🚂", "Playing through Steam?", "Steam has its own controller system called Steam Input. It can fight with Clutch. For each Steam game you play with Clutch: open your Steam Library, right-click the game, pick Properties, then Controller, and choose “Disable Steam Input”. Epic, Xbox app and other launchers don't need this."),
@@ -2734,6 +2735,7 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["🔂", "No more double presses", "If a game can see your real controller and Clutch's at the same time, every press counts twice (like skipping weapons). Clutch now spots this and shows a “Fix it for me” button."],
   ["🙈", "One-click controller hiding", "Setup check can now install HidHide and hide your real controller for you. No more double inputs, and no fiddly settings."],
   ["🎯", "“How does it feel?”", "On a game-pack profile, tap “Aim's too slow”, “Too jumpy” or “It drifts” and Clutch tunes it for you. Undo any time."],
   ["🧪", "Try it out", "The welcome tour now has a quick test so you know everything works before you jump into a game."],
@@ -3049,8 +3051,10 @@ function onState(st){
       if (view === "powerups" && !puProfileLocked) { puProfile = st.profile; renderAll(); }
       else if (view === "profile"){ const sub = $("#profSub"); if (sub) sub.textContent = (own().extends ? "Based on " + own().extends : "Standalone profile") + (st.profile === curProfile ? ", in use right now" : ""); }
     }
-    if (prev && view === "setup" && (prev.connected !== st.connected || prev.problem !== st.problem || JSON.stringify(prev.setup_job || {}) !== JSON.stringify(st.setup_job || {}))) loadHealth().then(() => { if (view === "setup") renderAll(); });
   }
+  const jsonDiff = k => prev && JSON.stringify(prev[k] || {}) !== JSON.stringify(st[k] || {});
+  if (prev && view === "setup" && (prev.connected !== st.connected || prev.problem !== st.problem || jsonDiff("setup_job") || jsonDiff("double_input"))) loadHealth().then(() => { if (view === "setup") renderAll(); });
+  if (view === "home" && jsonDiff("double_input")) renderAll();
   if (st.config_mtime && CFG && st.config_mtime > CFG_MTIME + 0.001 && !dirty() && !saving){
     CFG_MTIME = st.config_mtime;
     loadConfig().then(ok => { if (ok){ renderAll(); toast("Loaded changes from the settings file"); } });
@@ -3647,6 +3651,18 @@ function homeBanners(){
   if (fs.length) out.push(h("div", {class:"banner", style:"display:block;margin-top:16px"},
     h("b", {}, "🖥️ " + fs.map(gameNameFor).join(", ") + (fs.length > 1 ? " were" : " was") + " running in full screen. "),
     "The crosshair and quick menu can't show over full-screen games. In the game's video settings, pick ", h("b", {}, "Borderless"), " or ", h("b", {}, "Windowed fullscreen"), "."));
+  const di = STATE && STATE.double_input;
+  if (di && di.risk && !homeBanners.dismissed){
+    const why = {no_hidhide:"HidHide isn't installed yet, so games see your real controller and Clutch's modded one.",
+      cloak_off:"HidHide is installed but switched off, so games see your real controller and Clutch's modded one.",
+      not_hidden:"HidHide isn't hiding this controller yet, so games see it and Clutch's modded one."}[di.reason] || "Games can see two controllers.";
+    out.push(h("div", {class:"banner", id:"doubleBanner", style:"display:block;margin-top:16px"},
+      h("b", {}, "⚠️ Buttons counting twice? "), why, " One press then counts as two, like skipping a weapon or jumping two spots in a menu. ",
+      h("div", {class:"cellrow", style:"margin-top:12px"},
+        h("button", {class:"primary small", onclick: autoHide}, "Fix it for me"),
+        h("button", {class:"small", onclick: () => go("setup")}, "Show me"),
+        h("button", {class:"ghost small", onclick: () => { homeBanners.dismissed = true; renderAll(); }}, "Not now"))));
+  }
   const os = STATE && STATE.online_safe;
   if (os && os.active) out.push(h("div", {class:"banner info", style:"display:block;margin-top:16px"}, `🛡️ Online-safe mode: rapid fire, macros and recoil control are paused while you play ${os.game || "an online game"}. Everything else works as normal.`));
   if (STATE && STATE.quiet) out.push(h("div", {class:"banner info", style:"display:block;margin-top:16px"}, "🌙 Quiet hours: mods are off for now. The controller still works normally."));
