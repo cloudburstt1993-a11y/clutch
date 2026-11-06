@@ -2201,7 +2201,8 @@ function renderSetup(v){
     H.vigembus ? row("good", "✅", "Virtual controller driver", "ViGEmBus is installed. This lets Clutch create the modded controller that games see.")
       : row("bad", "❌", "Virtual controller driver", "ViGEmBus is missing, so games can't see your modded controller. It's a quick install.",
           btn("Install driver", () => action("install_vigem"), true)),
-    live.connected ? row("good", "🎮", "Controller connected", live.controller)
+    live.connected ? row("good", "🎮", "Controller connected", live.controller + (H.controller_id ? ` (ID ${H.controller_id})` : "")
+      + (H.controller_lookalike ? ". This controller uses the same ID as Clutch's virtual Xbox controller (common with GameSir and other third-party pads in PC mode), so Clutch can't hide it by itself. Open HidHide and tick it by hand, and leave anything called “Virtual” unticked." : ""))
       : row("bad", "🔌", "No controller found", "Plug in your controller with a cable or connect it with Bluetooth. Clutch picks it up by itself."),
     live.test_mode ? row("info", "🧪", "Test mode", "Clutch was started in test mode, so it isn't sending anything to games.")
       : (H.virtual ? row("good", "✅", "Modded controller running", `Games see a virtual ${OUT_LABEL[(STATE && STATE.output) || "xbox"]} with your mods on it.`)
@@ -2735,6 +2736,8 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["🛠️", "One-click hiding fixed", "“Set it up for me” could stop with a “Permission denied” error after the Windows pop-up. That's fixed, and it now reminds you to replug the controller and restart your game."],
+  ["🆔", "Controller ID in Setup check", "Shows your controller's ID, and warns when it's a look-alike (like some GameSir pads) that needs ticking in HidHide by hand."],
   ["🔂", "No more double presses", "If a game can see your real controller and Clutch's at the same time, every press counts twice (like skipping weapons). Clutch now spots this and shows a “Fix it for me” button."],
   ["🙈", "One-click controller hiding", "Setup check can now install HidHide and hide your real controller for you. No more double inputs, and no fiddly settings."],
   ["🎯", "“How does it feel?”", "On a game-pack profile, tap “Aim's too slow”, “Too jumpy” or “It drifts” and Clutch tunes it for you. Undo any time."],

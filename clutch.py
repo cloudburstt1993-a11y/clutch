@@ -42,7 +42,7 @@ os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "12.1"
+VERSION = "12.2"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -1964,8 +1964,11 @@ def hidhide_setup_job(job_path):
         res["ok"] = True
     except Exception as e:
         res["error"] = str(e)[:300]
-    with open(job_path + ".result", "w", encoding="utf-8") as f:
-        json.dump(res, f)
+    # Write INTO the file Clutch made beforehand, so it keeps Clutch as its owner. A file this admin process
+    # creates itself would be owned by Administrators, and the normal Clutch couldn't read it (Errno 13).
+    out = job_path + ".result"
+    with open(out, "r+" if os.path.exists(out) else "w", encoding="utf-8") as f:
+        f.seek(0); f.write(json.dumps(res)); f.truncate()
     return res
 
 
@@ -3538,6 +3541,8 @@ class ModRunner:
              "hidhide": svc_exists("HidHide"), "hidhide_client": bool(find_hidhide("HidHideClient.exe")),
              "hidhide_cli": bool(find_hidhide("HidHideCLI.exe")), "hidhide_allowed": None,
              "controller": self.pad.name if self.pad else None, "virtual": bool(self.vpad),
+             "controller_id": ("%04X:%04X" % guid_vid_pid(getattr(self.pad, "guid", None))) if self.pad and guid_vid_pid(getattr(self.pad, "guid", None)) else None,
+             "controller_lookalike": bool(self.pad) and guid_vid_pid(getattr(self.pad, "guid", None)) in ((0x045E, 0x028E), (0x054C, 0x05C4)),
              "output": self.wanted_output(),
              "problem": self.problem, "autostart": get_autostart(),
              "overlay_error": self.overlay.error if self.overlay else None,
@@ -3827,25 +3832,40 @@ class ModRunner:
                 with open(job, "w", encoding="utf-8") as f:
                     json.dump({"installer": inst, "apps": app_exe_paths(), "undo": undo,
                                "vid": vp[0] if vp else None, "pid": vp[1] if vp else None}, f)
+                open(job + ".result", "w").close()  # made by us (so we can read it back); the helper fills it in
                 j.update(state="waiting", message="Say Yes to the Windows pop-up…")
                 script = [] if FROZEN else [os.path.abspath(sys.argv[0])]
                 args = " ".join(f'"{a}"' for a in script + ["--hidhide-setup", job])
                 if not shell_open(sys.executable, args, elevate=True, hidden=True):
                     raise ValueError("Windows didn't allow it. A parent needs to click Yes.")
+                res, denied = None, 0
                 for _ in range(900):  # up to 15 minutes (the installer can take a while)
-                    if os.path.exists(job + ".result"):
-                        break
                     time.sleep(1)
-                else:
+                    try:
+                        with open(job + ".result", "r", encoding="utf-8") as f:
+                            txt = f.read()
+                        if txt.strip():
+                            res = json.loads(txt)
+                            break
+                    except PermissionError:
+                        denied += 1
+                        if denied >= 8:  # can't read the answer: check HidHide itself instead
+                            cli = find_hidhide("HidHideCLI.exe")
+                            state = hidhide_hiding(cli, *(vp or (None, None)))[0] if cli else None
+                            if undo or state is not None:
+                                res = {"ok": True, "hidden": ["Your controller"] if state else [], "checked": True}
+                                break
+                    except (OSError, ValueError):
+                        pass  # still being written
+                if res is None:
                     raise ValueError("It took too long. Try again, or use the manual steps.")
-                with open(job + ".result", "r", encoding="utf-8") as f:
-                    res = json.load(f)
                 if not res.get("ok"):
                     raise ValueError(res.get("error") or "Something went wrong.")
                 if undo:
                     msg = "Your controller isn't hidden any more."
                 elif res.get("hidden"):
-                    msg = f"Done! {', '.join(res['hidden'])} is now hidden from games, and Clutch can still see it."
+                    msg = (f"Done! {', '.join(res['hidden'])} is now hidden from games, and Clutch can still see it. "
+                           "Unplug the controller and plug it back in (or turn it off and on), then restart your game.")
                 elif lookalike:
                     msg = ("Clutch is allowed through HidHide. Your controller looks just like Clutch's virtual one, "
                            "so tick it yourself: Open HidHide, Devices tab, tick your controller.")
