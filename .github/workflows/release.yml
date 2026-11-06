@@ -11,9 +11,18 @@ on:
 permissions:
   contents: write
 
+concurrency:              # a newer push cancels an older build that's still running
+  group: build-installer
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      # vgamepad normally pops up the ViGEmBus driver installer while it installs; nobody can click it here
+      # (the Clutch installer installs the driver on the user's PC instead)
+      VGAMEPAD_SKIP_VIGEMBUS_INSTALL: "true"
     steps:
       - uses: actions/checkout@v4
 
