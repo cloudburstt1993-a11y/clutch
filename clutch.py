@@ -42,7 +42,7 @@ os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "11.1"
+VERSION = "12.0"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -1186,6 +1186,7 @@ class SDLControllerPad:
             guid = self.j.get_guid()
         except Exception:
             guid = ""
+        self.guid = guid
         # what Clutch remembers this controller by (serial if it has one, else its model)
         self.key = ("sn:" + self.serial) if self.serial else ("model:" + (guid or self.name))
         self.has_touch = bool(self.gc and x.has("SDL_GameControllerGetTouchpadFinger")
@@ -1841,6 +1842,135 @@ def find_hidhide(exe):
     return None
 
 
+# --------------------------------------------------------------------------------------
+# One-click HidHide: install it, let Clutch through, hide only the real controller
+# --------------------------------------------------------------------------------------
+def guid_vid_pid(guid):
+    """SDL joystick GUID (32 hex chars) -> (vendor id, product id), or None."""
+    try:
+        b = bytes.fromhex(str(guid or ""))
+    except ValueError:
+        return None
+    if len(b) != 16:
+        return None
+    vid, pid = b[4] | (b[5] << 8), b[8] | (b[9] << 8)
+    return (vid, pid) if vid else None
+
+
+def hidhide_targets(cli_json, vid, pid):
+    """From `HidHideCLI --dev-gaming` output, the device paths of the real controller with this vendor/product id.
+    Virtual controllers (ViGEm, software devices) are never returned, so games keep seeing Clutch's."""
+    try:
+        data = json.loads(cli_json) if isinstance(cli_json, str) else cli_json
+    except ValueError:
+        return []
+    found = []
+
+    def walk(o, name=None):
+        if isinstance(o, dict):
+            name = o.get("friendlyName") or name
+            if o.get("deviceInstancePath"):
+                found.append((o, name))
+            for v in o.values():
+                walk(v, name)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v, name)
+    walk(data)
+    rx = re.compile(r"VID[_&](?:0002|0001)?%04X[_&]PID[_&]%04X" % (vid, pid), re.I)
+    out, seen = [], set()
+    for dev, name in found:
+        paths = " ".join(str(dev.get(k) or "") for k in ("deviceInstancePath", "baseContainerDeviceInstancePath", "symbolicLink"))
+        if re.search(r"ROOT\\|VIGEM|^SWD\\|\\SWD\\", paths, re.I):
+            continue  # a virtual device, possibly Clutch's own
+        if not rx.search(paths):
+            continue
+        p = dev["deviceInstancePath"]
+        if p not in seen:
+            seen.add(p)
+            out.append((p, dev.get("product") or dev.get("description") or name or "Controller"))
+    return out
+
+
+def hidhide_setup_job(job_path):
+    """Runs elevated (one Windows prompt): install HidHide if needed, allow Clutch, hide the real controller."""
+    import subprocess
+    res = {"ok": False, "hidden": [], "restart": False}
+    nowin = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    try:
+        with open(job_path, "r", encoding="utf-8") as f:
+            job = json.load(f)
+        inst = job.get("installer")
+        if inst and not find_hidhide("HidHideCLI.exe"):
+            # The job file lives in the user's temp folder, so check again here with admin rights: copy the installer
+            # somewhere a normal user can't change it, and only run it if it's still signed by HidHide's maker.
+            import shutil, tempfile
+            safe_root = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "Temp")
+            safe = os.path.join(tempfile.mkdtemp(prefix="clutch-hh-", dir=safe_root if os.path.isdir(safe_root) else None),
+                                "HidHide-Setup.exe")
+            shutil.copyfile(inst, safe)
+            status, _, subject = _signer(safe, subject=True)
+            if status != "Valid" or "nefarius" not in (subject or "").lower():
+                raise RuntimeError("The HidHide installer isn't signed by its maker, so Clutch didn't run it.")
+            inst = safe
+            r = subprocess.run([inst, "/quiet", "/norestart"], timeout=900)
+            res["restart"] = r.returncode in (1641, 3010)
+            if r.returncode not in (0, 1641, 3010):
+                raise RuntimeError(f"The HidHide installer stopped (code {r.returncode}).")
+        cli = find_hidhide("HidHideCLI.exe")
+        if not cli:
+            raise RuntimeError("HidHide didn't install. Try the manual download.")
+
+        def run(args):
+            return subprocess.run([cli] + args, capture_output=True, text=True, timeout=60, creationflags=nowin)
+        for app in job.get("apps") or []:
+            run(["--app-reg", app])
+        if job.get("vid"):
+            for path, name in hidhide_targets(run(["--dev-gaming"]).stdout, int(job["vid"]), int(job["pid"])):
+                if run(["--dev-hide", path]).returncode == 0:
+                    res["hidden"].append(name)
+        if job.get("undo"):
+            run(["--cloak-off"])
+        else:
+            run(["--cloak-on"])
+        res["ok"] = True
+    except Exception as e:
+        res["error"] = str(e)[:300]
+    with open(job_path + ".result", "w", encoding="utf-8") as f:
+        json.dump(res, f)
+    return res
+
+
+def latest_hidhide_installer(folder):
+    """Downloads the newest official HidHide installer and checks it's signed by Nefarius."""
+    import urllib.request
+    req = urllib.request.Request("https://api.github.com/repos/nefarius/HidHide/releases/latest",
+                                 headers={"Accept": "application/vnd.github+json", "User-Agent": f"{APP_NAME}-setup"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        rel = json.loads(r.read(400_000).decode("utf-8", "replace"))
+    asset = next((a for a in rel.get("assets") or [] if str(a.get("name", "")).lower().endswith(".exe")
+                  and "x64" in str(a.get("name", "")).lower()), None) or \
+        next((a for a in rel.get("assets") or [] if str(a.get("name", "")).lower().endswith(".exe")), None)
+    url = (asset or {}).get("browser_download_url") or ""
+    if not url.startswith("https://github.com/nefarius/HidHide/"):
+        raise ValueError("Couldn't find the HidHide installer on GitHub.")
+    path = os.path.join(folder, "HidHide-Setup.exe")
+    req = urllib.request.Request(url, headers={"User-Agent": f"{APP_NAME}-setup"})
+    with urllib.request.urlopen(req, timeout=60) as r, open(path, "wb") as f:
+        while True:
+            chunk = r.read(256 * 1024)
+            if not chunk:
+                break
+            f.write(chunk)
+            if f.tell() > 100 * 1024 * 1024:
+                raise ValueError("The HidHide download is much bigger than expected.")
+    status, _, subject = _signer(path, subject=True)
+    if status != "Valid" or "nefarius" not in (subject or "").lower():
+        os.remove(path)
+        raise ValueError("The HidHide download isn't signed by its maker, so Clutch didn't run it.")
+    return path
+
+
 def find_vigem_msi():
     rel = ("vgamepad", "win", "vigem", "install", "x64", "ViGEmBusSetup_x64.msi")
     cands = [resource(*rel)]
@@ -1932,19 +2062,21 @@ def check_github_release(repo, timeout=8.0):
             "sha256": digest[7:] if digest.startswith("sha256:") else None}
 
 
-def _signer(path):
-    """(status, thumbprint) of a file's Authenticode signature, via PowerShell."""
+def _signer(path, subject=False):
+    """(status, thumbprint[, subject]) of a file's Authenticode signature, via PowerShell."""
     import subprocess
     ps = ("$s = Get-AuthenticodeSignature -LiteralPath $env:CLUTCH_SIGCHECK; "
-          "Write-Output $s.Status; if ($s.SignerCertificate) { Write-Output $s.SignerCertificate.Thumbprint }")
+          "Write-Output $s.Status; if ($s.SignerCertificate) { Write-Output $s.SignerCertificate.Thumbprint; "
+          "Write-Output $s.SignerCertificate.Subject }")
     try:
         r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True, text=True,
                            timeout=30, env=dict(os.environ, CLUTCH_SIGCHECK=path),
                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         lines = [x.strip() for x in r.stdout.splitlines() if x.strip()]
-        return (lines[0] if lines else "Unknown"), (lines[1] if len(lines) > 1 else None)
+        out = ((lines[0] if lines else "Unknown"), (lines[1] if len(lines) > 1 else None))
+        return out + ((lines[2] if len(lines) > 2 else ""),) if subject else out
     except Exception:
-        return "Unknown", None
+        return ("Unknown", None, "") if subject else ("Unknown", None)
 
 
 def same_signer(installer):
@@ -3252,6 +3384,7 @@ class ModRunner:
         self._last_input = 0.0              # last time the controller was actually used
         self._remembered = set()            # controllers whose saved profile was applied this run
         self.online_game = None             # name of the online game in front (online-safe mode)
+        self.setup_job = {}                 # one-click HidHide progress
         self.problem = None
         self.notify = None      # callable(title, message), set by the desktop app
         self.on_show = None     # callable(): bring the app window forward
@@ -3400,6 +3533,9 @@ class ModRunner:
                 return {"ok": True, "message": "Opened the ViGEmBus download page."}
             shell_open("msiexec.exe", f'/i "{msi}"', elevate=True)
             return {"ok": True, "message": "Follow the installer window. Clutch connects by itself when it's done."}
+        if name in ("auto_hide", "hidhide_off"):
+            self.start_hidhide_job(undo=name == "hidhide_off")
+            return {"ok": True}
         if name == "hidhide_allow":
             cli = find_hidhide("HidHideCLI.exe")
             if not cli:
@@ -3632,6 +3768,68 @@ class ModRunner:
                 "kid": kid.get("name") if kid and (eng.cfg.get("overlay") or {}).get("show_name") else None,
                 "buttons": sorted(raw.buttons) if raw else [], "lx": raw.lx if raw else 0, "ly": raw.ly if raw else 0,
                 "rx": raw.rx if raw else 0, "ry": raw.ry if raw else 0, "lt": raw.lt if raw else 0, "rt": raw.rt if raw else 0}
+
+    # ---- 12.0: one-click HidHide ----
+    def start_hidhide_job(self, undo=False):
+        if not IS_WINDOWS:
+            raise ValueError("This only works on Windows.")
+        if self.setup_job.get("state") in ("downloading", "waiting"):
+            return
+        vp = guid_vid_pid(getattr(self.pad, "guid", None)) if self.pad else None
+        if not undo and not vp:
+            raise ValueError("Plug in your controller first, so Clutch knows which one to hide.")
+        # an original Xbox 360 pad or first DualShock 4 looks exactly like Clutch's own virtual controller,
+        # so hiding by id could hide the virtual one too: for those, only let Clutch through and ask to tick it by hand
+        lookalike = vp in ((0x045E, 0x028E), (0x054C, 0x05C4))
+        if lookalike:
+            vp = None
+
+        def work():
+            import tempfile
+            j = self.setup_job
+            try:
+                folder = tempfile.mkdtemp(prefix="clutch-hidhide-")
+                inst = None
+                if not undo and not find_hidhide("HidHideCLI.exe"):
+                    j.update(state="downloading", message="Downloading HidHide from its official GitHub…")
+                    inst = latest_hidhide_installer(folder)
+                job = os.path.join(folder, "job.json")
+                with open(job, "w", encoding="utf-8") as f:
+                    json.dump({"installer": inst, "apps": app_exe_paths(), "undo": undo,
+                               "vid": vp[0] if vp else None, "pid": vp[1] if vp else None}, f)
+                j.update(state="waiting", message="Say Yes to the Windows pop-up…")
+                script = [] if FROZEN else [os.path.abspath(sys.argv[0])]
+                args = " ".join(f'"{a}"' for a in script + ["--hidhide-setup", job])
+                if not shell_open(sys.executable, args, elevate=True, hidden=True):
+                    raise ValueError("Windows didn't allow it. A parent needs to click Yes.")
+                for _ in range(900):  # up to 15 minutes (the installer can take a while)
+                    if os.path.exists(job + ".result"):
+                        break
+                    time.sleep(1)
+                else:
+                    raise ValueError("It took too long. Try again, or use the manual steps.")
+                with open(job + ".result", "r", encoding="utf-8") as f:
+                    res = json.load(f)
+                if not res.get("ok"):
+                    raise ValueError(res.get("error") or "Something went wrong.")
+                if undo:
+                    msg = "Your controller isn't hidden any more."
+                elif res.get("hidden"):
+                    msg = f"Done! {', '.join(res['hidden'])} is now hidden from games, and Clutch can still see it."
+                elif lookalike:
+                    msg = ("Clutch is allowed through HidHide. Your controller looks just like Clutch's virtual one, "
+                           "so tick it yourself: Open HidHide, Devices tab, tick your controller.")
+                else:
+                    msg = "Clutch is allowed through HidHide, but it couldn't find your controller to hide. Use Open HidHide to tick it."
+                if res.get("restart"):
+                    msg += " Restart the PC to finish."
+                j.update(state="done", message=msg, hidden=res.get("hidden") or [], restart=bool(res.get("restart")))
+                self.log(f"HidHide setup: {msg}")
+            except Exception as e:
+                j.update(state="error", message=str(e)[:300])
+                self.log(f"HidHide setup failed: {e}")
+        self.setup_job = {"state": "starting", "message": "Getting ready…"}
+        threading.Thread(target=work, daemon=True, name="hidhide-setup").start()
 
     # ---- 11.0: online-safe mode ----
     def online_games(self):
@@ -3951,7 +4149,8 @@ class ModRunner:
             "recent_apps": list(self.auto.recent), "warnings": list(self.panel.warnings),
             "config_mtime": self.cfg_mtime, "nav_mute": self.nav_mute(), "front": bool(self.auto.watch.own),
             "kid": self.kid, "quiet": self._quiet_off,
-            "online_safe": {"active": self.engine.online_safe, "game": self.online_game}, "fullscreen_games": sorted(self.fullscreen_seen),
+            "online_safe": {"active": self.engine.online_safe, "game": self.online_game},
+            "setup_job": self.setup_job or None, "fullscreen_games": sorted(self.fullscreen_seen),
             "update": {k: v for k, v in self.update.items() if k in ("state", "busy", "latest", "newer", "page", "notes", "error", "downloading", "progress", "ready")},
             "pad_key": getattr(self.pad, "key", None) if self.pad else None,
             "pad_caps": {"touch": bool(getattr(self.pad, "has_touch", False)), "trigger_fx": bool(getattr(self.pad, "has_trigger_fx", False)),
@@ -4413,11 +4612,15 @@ def main():
     ap.add_argument("--profile", help="profile to start in")
     ap.add_argument("--list", action="store_true", help="list detected controllers and exit")
     ap.add_argument("--version", action="version", version=VERSION)
+    ap.add_argument("--hidhide-setup", metavar="JOB", help=argparse.SUPPRESS)
     ap.add_argument("--test", action="store_true",
                     help="show live input and mapped output without creating a virtual controller")
     ap.add_argument("--no-panel", action="store_true", help="don't start the browser control panel")
     ap.add_argument("--no-crosshair", action="store_true", help="don't start the crosshair overlay")
     args = ap.parse_args()
+    if args.hidhide_setup:  # started elevated by the app's one-click HidHide setup
+        hidhide_setup_job(args.hidhide_setup)
+        return
 
     set_dpi_aware()
     cfg_path = os.path.abspath(args.config) if args.config else default_config_path()

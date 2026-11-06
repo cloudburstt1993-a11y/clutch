@@ -108,6 +108,7 @@ main{padding:26px 32px 80px;max-width:1280px;width:100%}
 .ph .acts{margin-left:auto;display:flex;gap:8px;padding-bottom:2px;flex-wrap:wrap}
 .lede{color:var(--muted);max-width:720px;margin:4px 0 22px;font-size:16px}
 .banner{border:1px solid #7a3446;background:var(--warn-bg);color:#ffd6dd;border-radius:var(--r);padding:12px 16px;margin:12px 0;font-size:14.5px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btnstack{display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .banner.info{border-color:var(--line);background:var(--panel);color:var(--text)}
 .section-title{font-size:21px;font-weight:700;margin:34px 0 6px}
 .section-sub{color:var(--muted);margin:0 0 14px;font-size:14.5px}
@@ -328,6 +329,14 @@ dialog textarea{width:100%;min-height:120px;font-family:Consolas,monospace;font-
 .welcome h1{font-family:var(--font-cond);font-size:56px;line-height:1;margin:0 0 8px}
 .steps3{display:flex;gap:8px;margin:18px 0 26px}
 .steps3 span{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.trylist{display:grid;gap:10px;margin-top:14px}
+.tryitem{display:flex;gap:14px;align-items:center;padding:12px 16px;border-radius:var(--r);background:var(--well);transition:background .2s}
+.tryitem .emo{font-size:24px}.tryitem p{margin:2px 0 0}
+.tryitem.done{background:linear-gradient(135deg,#1c6f93,#2a9fcf)}
+.tryitem.done .help{color:#e8f6ff}
+.feel{display:flex;gap:14px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;margin:0 0 14px}
+.feel.small{justify-content:flex-start;gap:10px;font-size:14px;color:var(--muted)}
+.feelbtns{display:flex;gap:6px;flex-wrap:wrap}
 .steps3 span.on{background:linear-gradient(90deg,var(--brand),var(--violet))}
 .bigcard{background:var(--panel);border-radius:var(--r-xl);padding:28px}
 .gamechips{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:16px}
@@ -1184,6 +1193,54 @@ function puCard(pu, r){
 }
 
 /* ================================================================ PROFILE VIEW */
+/* ---- "How does it feel?" quick tweaks for game-pack profiles */
+const FEEL = [
+  {id:"slow", emoji:"🐢", label:"Aim's too slow", done:"Aim sped up a little"},
+  {id:"fast", emoji:"⚡", label:"Aim's too fast", done:"Aim slowed down a little"},
+  {id:"jumpy", emoji:"🎯", label:"Too jumpy", done:"Small aim moves are steadier now"},
+  {id:"drift", emoji:"🫨", label:"It drifts", done:"Drift protection turned up"},
+];
+const r2 = x => Math.round(x * 100) / 100;
+function feelTweak(name, id){
+  const p = CFG.profiles[name], r = resolve(name), rs = (r.sticks || {}).right || {}, ls = (r.sticks || {}).left || {};
+  const set = (path, val) => setIn(p, path, val);
+  const mouse = rs.output === "mouse";
+  if (id === "slow" || id === "fast"){
+    const f = id === "slow" ? 1.15 : 0.87;
+    if (mouse){ const cur = num(rs.mouse_speed, 1200), nv = Math.round(Math.min(6000, Math.max(200, cur * f))); if (nv === cur) return false; set(["sticks","right","mouse_speed"], nv); }
+    else { const cur = num(rs.sensitivity, 1), nv = r2(Math.min(2, Math.max(.4, cur * f))); if (nv === cur) return false; set(["sticks","right","sensitivity"], nv); }
+  } else if (id === "jumpy"){
+    const cur = num(rs.curve, 1), nv = r2(Math.min(2.4, cur + .2));
+    const mods = clone(r.stick_mods || []), ads = mods.find(m => m && m.id === "ads_slow");
+    if (nv === cur && !(ads && ads.scale > .4)) return false;
+    set(["sticks","right","curve"], nv);
+    if (ads && ads.scale > .4){ ads.scale = r2(ads.scale - .05); p.stick_mods = mods; }
+  } else if (id === "drift"){
+    const rc = num(rs.deadzone, .08), lc = num(ls.deadzone, .08);
+    if (rc >= .3 && lc >= .3) return false;
+    set(["sticks","right","deadzone"], r2(Math.min(.3, rc + .03)));
+    if (ls.output !== "none") set(["sticks","left","deadzone"], r2(Math.min(.3, lc + .03)));
+  }
+  p.feel = Object.assign({}, p.feel, {[id]: ((p.feel || {})[id] || 0) + 1});
+  return true;
+}
+function feelCard(name){
+  const p = CFG.profiles[name]; if (!p || !p.pack) return null;
+  const pk = PACKS.find(x => x.id === p.pack);
+  const good = (p.feel || {}).good;
+  if (good && !feelCard.open) return h("div", {class:"feel small"}, h("span", {class:"emo"}, "👍"), h("span", {}, "You said this pack feels good."),
+    h("button", {class:"linkbtn", onclick: () => { feelCard.open = true; renderAll(); }}, "Tweak it anyway"));
+  return h("div", {class:"feel"},
+    h("div", {}, h("b", {}, `How does ${pk ? pk.name : "this game pack"} feel?`), h("p", {class:"help", style:"margin:2px 0 0"}, "Play a round, then tap what's off. Clutch nudges the settings a little each time. Tap again for more.")),
+    h("div", {class:"feelbtns"},
+      h("button", {class:"small" + (good ? " primary" : ""), onclick: () => { p.feel = Object.assign({}, p.feel, {good:true}); feelCard.open = false; changed(); renderAll(); toast("👍 Nice! Clutch will leave it as it is."); }}, "👍 Feels great"),
+      ...FEEL.map(f => h("button", {class:"small", onclick: () => {
+        const before = snap();
+        if (!feelTweak(name, f.id)){ toast("That's already as far as it goes. Try a different fix, or tune it yourself in the Sticks tab."); return; }
+        if (p.feel) delete p.feel.good;
+        changed(); renderAll(); toast(`${f.emoji} ${f.done}. Try it in game!`, before);
+      }}, `${f.emoji} ${f.label}`))));
+}
 function renderProfileView(v){
   const p = own();
   const live = STATE && STATE.profile === curProfile;
@@ -1197,6 +1254,7 @@ function renderProfileView(v){
         h("button", {class:"small", onclick: () => { puProfile = curProfile; go("powerups"); }}, "⚡ Power-ups"))),
     warn ? h("div", {class:"banner"}, `Clutch found ${warn} problem${warn > 1 ? "s" : ""} in your settings.`,
       h("button", {class:"linkbtn", onclick: () => go("settings")}, "See details")) : null,
+    feelCard(curProfile),
     h("div", {class:"stage"}, buildPad(), h("div", {class:"legend"},
       h("div", {class:"k"}, h("span",{class:"swatch live"}), h("div",{}, "Lights up while you press it. Press a button to find it.")),
       h("div", {class:"k"}, h("span",{class:"swatch mod"}), h("div",{}, "Does something different in this profile.")),
@@ -2115,10 +2173,20 @@ function setupProblems(){
   return HEALTH.vigembus === false || !!(STATE && STATE.problem);
 }
 async function loadHealth(){ try { HEALTH = await api("/api/health"); } catch(e){} }
+function setupJobBanner(){
+  const j = STATE && STATE.setup_job; if (!j || !j.state) return null;
+  const icon = {starting:"⏳", downloading:"⬇️", waiting:"🛡️", done:"✅", error:"⚠️"}[j.state] || "⏳";
+  return h("div", {class: "banner" + (j.state === "error" ? "" : " info"), id:"setupJob", style:"display:block;margin:0 0 16px;max-width:860px"}, h("b", {}, icon + " "), j.message || "");
+}
+async function autoHide(undo){
+  if (undo === true){ if (!(await confirmBox("Stop hiding your controller?", "Games will see your real controller again, which can cause double inputs.", "Stop hiding"))) return; }
+  try { await action(undo === true ? "hidhide_off" : "auto_hide"); toast("🛡️ Working on it. Say Yes to the Windows pop-up."); } catch(e){ toast(e.message); }
+}
 function renderSetup(v){
   const H = HEALTH || {};
-  const row = (state, emoji, title, text, button) => h("div", {class:"check " + state}, h("div", {class:"st emo"}, emoji),
-    h("div", {}, h("b", {}, title), h("p", {}, text)), button || h("span"));
+  const row = (state, emoji, title, text, ...buttons) => { buttons = buttons.filter(Boolean);
+    return h("div", {class:"check " + state}, h("div", {class:"st emo"}, emoji),
+      h("div", {}, h("b", {}, title), h("p", {}, text)), buttons.length > 1 ? h("div", {class:"btnstack"}, ...buttons) : (buttons[0] || h("span"))); };
   const btn = (label, fn, primary) => h("button", {class: primary ? "primary small" : "small", onclick: async e => {
     e.target.disabled = true;
     try { const r = await fn(); if (r && r.message) toast(r.message); } catch(err){ toast(err.message); }
@@ -2128,6 +2196,7 @@ function renderSetup(v){
   add(v, h("div", {class:"ph"}, h("h1", {}, "Setup check")),
     h("p", {class:"lede"}, "Everything Clutch needs to work, with a button to fix anything that's missing."));
   if (!H.windows){ add(v, h("div", {class:"banner info"}, "Clutch is running somewhere other than Windows, so these checks don't apply.")); return; }
+  const job = setupJobBanner(); if (job) add(v, job);
   add(v, h("div", {class:"checks"},
     H.vigembus ? row("good", "✅", "Virtual controller driver", "ViGEmBus is installed. This lets Clutch create the modded controller that games see.")
       : row("bad", "❌", "Virtual controller driver", "ViGEmBus is missing, so games can't see your modded controller. It's a quick install.",
@@ -2138,15 +2207,15 @@ function renderSetup(v){
       : (H.virtual ? row("good", "✅", "Modded controller running", `Games see a virtual ${OUT_LABEL[(STATE && STATE.output) || "xbox"]} with your mods on it.`)
         : row(H.vigembus ? "info" : "bad", "⏳", "Modded controller", live.problem || "Starts as soon as a controller is connected.")),
     H.hidhide ? row("good", "✅", "HidHide installed", "HidHide stops games from seeing your real controller, so you don't get double inputs.")
-      : row("bad", "⚠️", "HidHide not installed", "Without it, games see your real controller AND the modded one. That causes double inputs, or your mods seem to do nothing.",
-          btn("Download HidHide", () => action("open_url", {url:"https://github.com/nefarius/HidHide/releases"}), true)),
+      : row("bad", "⚠️", "HidHide not installed", "Without it, games see your real controller AND the modded one. That causes double inputs, or your mods seem to do nothing. Clutch can set it all up: install HidHide, let itself through, and hide your real controller. One Windows prompt, then restart the PC.",
+          btn("Set it up for me", autoHide, true), btn("Download it myself", () => action("open_url", {url:"https://github.com/nefarius/HidHide/releases"}))),
     H.hidhide ? (H.hidhide_allowed ? row("good", "✅", "Clutch is allowed through HidHide", "Clutch can still see your controller after it's hidden from games.")
       : row("bad", "🔑", "Let Clutch through HidHide", "Clutch needs permission to see your hidden controller. You might get a Windows “allow changes” pop-up.",
           btn("Allow Clutch", () => action("hidhide_allow"), true))) : null,
-    H.hidhide ? row("info", "🙈", "Hide your real controller from games", "Open HidHide, go to the Devices tab, tick your controller, and tick “Enable device hiding”. You only do this once.",
-      H.hidhide_client ? btn("Open HidHide", () => action("open_hidhide")) : null) : null,
-    H.steam_running ? row("info", "🚂", "Steam is running", "If a Steam game ignores your mods or buttons press twice, turn off Steam Input for that game (right-click it, then Properties, Controller, Disable Steam Input).") :
-    row("info", "🚂", "Playing through Steam?", "Turn off Steam Input for that game (right-click it, then Properties, Controller, Disable Steam Input). Otherwise Steam changes your buttons too."),
+    H.hidhide ? row("info", "🙈", "Hide your real controller from games", "Clutch can find your controller and hide it from games for you (one Windows prompt). Or do it yourself: Open HidHide, go to the Devices tab, tick your controller, and tick “Enable device hiding”.",
+      btn("Hide it for me", autoHide, true), H.hidhide_client ? btn("Open HidHide", () => action("open_hidhide")) : null, btn("Stop hiding", () => autoHide(true))) : null,
+    H.steam_running ? row("info", "🚂", "Steam is running", "Steam has its own controller system called Steam Input, and it can fight with Clutch (double presses, or mods that seem to do nothing). For each Steam game you play with Clutch: open your Steam Library, right-click the game, pick Properties, then Controller, and choose “Disable Steam Input”.") :
+    row("info", "🚂", "Playing through Steam?", "Steam has its own controller system called Steam Input. It can fight with Clutch. For each Steam game you play with Clutch: open your Steam Library, right-click the game, pick Properties, then Controller, and choose “Disable Steam Input”. Epic, Xbox app and other launchers don't need this."),
     row(H.autostart ? "good" : "info", H.autostart ? "✅" : "🚀", "Start with Windows", H.autostart ? "Clutch starts quietly in the background when you log in." : "Have Clutch start by itself in the background when your PC turns on.",
       swtch(!!H.autostart, async on => { try { await action("autostart", {on}); toast(on ? "🚀 Clutch will start with Windows" : "Clutch won't start with Windows"); } catch(e){ toast(e.message); } await loadHealth(); renderAll(); }, "Start with Windows")),
     H.overlay_error ? row("bad", "⚠️", "Crosshair overlay", H.overlay_error) : null));
@@ -2385,9 +2454,17 @@ function renderPacks(v){
 }
 
 /* ================================================================ WELCOME TOUR */
-let wz = {step:0, games:new Set(), pressed:false};
+function tryTasks(hold, menuOn){
+  const t = [
+    {id:"rt", emoji:"🔫", title:"Pull the right trigger", text:"All the way down, then let go.", test: st => st.raw && st.raw.rt > .5},
+    {id:"aim", emoji:"🎯", title:"Spin the right stick", text:"Push it all the way to the edge. That's how you aim.", test: st => st.raw && Math.hypot(st.raw.rx, st.raw.ry) > .7},
+  ];
+  if (menuOn) t.push({id:"menu", emoji:"📋", title:`Hold ${outName(hold)} by itself`, text:"Keep holding for a second. The quick menu pops up over your games, so you can switch profiles without leaving the game. Let go to close it.", test: st => !!st.menu});
+  return t;
+}
+let wz = {step:0, games:new Set(), pressed:false, tried:{}};
 function renderWelcome(v){
-  const bar = h("div", {class:"steps3"}, [0,1,2].map(i => h("span", {class: i <= wz.step ? "on" : ""})));
+  const bar = h("div", {class:"steps3"}, [0,1,2,3].map(i => h("span", {class: i <= wz.step ? "on" : ""})));
   const finish = () => {
     for (const id of wz.games){ const pk = PACKS.find(p => p.id === id); if (pk) addPack(pk, true); }
     for (const g of (GAMES && GAMES.games) || []) if (g.pack && g.exe && wz.games.has(g.pack) && !gameRule(g)) linkGame(g, packProfile(g.pack));
@@ -2411,7 +2488,7 @@ function renderWelcome(v){
       h("div", {class:"pressme" + (wz.pressed ? " got" : ""), id:"pressme"}, wz.pressed ? `✅ Got it! ${STATE.controller}` : ok ? "👆 Press any button…" : "🔌 Waiting for a controller…"),
       h("div", {class:"cellrow", style:"margin-top:18px"}, h("button", {class:"primary", id:"wzNext", disabled: !wz.pressed, onclick: () => { wz.step = 2; renderAll(); }}, "Next"),
         h("button", {class:"ghost", onclick: () => { wz.step = 2; renderAll(); }}, "Skip this step")));
-  } else {
+  } else if (wz.step === 2){
     const found = ((GAMES && GAMES.games) || []).filter(g => g.pack);
     if (GAMES && !wz.autoPicked){ wz.autoPicked = true; found.forEach(g => wz.games.add(g.pack)); }
     const foundNames = [...new Set(found.map(g => g.name))];
@@ -2422,8 +2499,19 @@ function renderWelcome(v){
       h("div", {class:"gamechips"}, PACKS.filter(pk => pk.popular || wz.games.has(pk.id) || found.some(g => g.pack === pk.id)).map(pk => h("button", {"aria-pressed":String(wz.games.has(pk.id)), onclick: e => {
         wz.games.has(pk.id) ? wz.games.delete(pk.id) : wz.games.add(pk.id); e.currentTarget.setAttribute("aria-pressed", String(wz.games.has(pk.id))); }},
         h("span", {class:"emo"}, pk.emoji), pk.name))),
-      h("div", {class:"cellrow", style:"margin-top:22px"}, h("button", {class:"primary", onclick: finish}, "Finish"),
+      h("div", {class:"cellrow", style:"margin-top:22px"}, h("button", {class:"primary", onclick: () => { wz.step = 3; renderAll(); }}, "Next"),
         h("button", {class:"ghost", onclick: () => { wz.step = 1; renderAll(); }}, "Back")));
+  } else {
+    const hold = (CFG.profile_switch || {}).hold, menuOn = hold && (CFG.quick_menu || {}).enabled !== false;
+    const tasks = tryTasks(hold, menuOn);
+    body = h("div", {class:"bigcard"},
+      h("h2", {style:"margin-top:0"}, "Step 3: Try it out"),
+      h("p", {class:"muted"}, STATE && STATE.connected ? "Do these on your controller. They tick off by themselves." : "Plug in your controller to try these. Or skip it, you can practice any time in Aim Lab."),
+      h("div", {class:"trylist"}, tasks.map(t => h("div", {class:"tryitem" + (wz.tried[t.id] ? " done" : ""), id:"try-" + t.id},
+        h("span", {class:"emo"}, wz.tried[t.id] ? "✅" : t.emoji), h("div", {}, h("b", {}, t.title), h("p", {class:"help"}, t.text))))),
+      h("div", {class:"found", id:"tryDone", style: tasks.every(t => wz.tried[t.id]) ? "" : "display:none"}, "🎉 Nice! Your controller and Clutch are working together."),
+      h("div", {class:"cellrow", style:"margin-top:22px"}, h("button", {class:"primary", onclick: finish}, "Finish"),
+        h("button", {class:"ghost", onclick: () => { wz.step = 2; renderAll(); }}, "Back")));
   }
   add(v, h("div", {class:"welcome"}, h("h1", {}, "Welcome to Clutch ⚡"), bar, body));
 }
@@ -2646,9 +2734,10 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
-  ["🧩", "48 game packs", "New packs for Overwatch 2, Marvel Rivals, GTA V, Elden Ring, Minecraft Bedrock, EA Sports FC, Fall Guys, Among Us and many more. Filter them by type on My games."],
-  ["🔍", "Smarter game finder", "My games now matches far more games to the right pack automatically."],
-  ["🛡️", "Online-safe mode", "In online games, Clutch pauses rapid fire, macros and recoil control so your account stays safe."],
+  ["🙈", "One-click controller hiding", "Setup check can now install HidHide and hide your real controller for you. No more double inputs, and no fiddly settings."],
+  ["🎯", "“How does it feel?”", "On a game-pack profile, tap “Aim's too slow”, “Too jumpy” or “It drifts” and Clutch tunes it for you. Undo any time."],
+  ["🧪", "Try it out", "The welcome tour now has a quick test so you know everything works before you jump into a game."],
+  ["🚂", "Steam help", "Clearer steps for turning off Steam Input, which can fight with Clutch."],
 ];
 function showWhatsNew(){
   CFG.seen_version = META.version; changed();
@@ -2934,6 +3023,13 @@ function updateLive(){
       wz.pressed = true; pm.classList.add("got"); pm.textContent = `✅ Got it! ${st.controller}`; const n = $("#wzNext"); if (n) n.disabled = false;
     } else if (pm && !wz.pressed){ pm.textContent = st && st.connected ? "👆 Press any button…" : "🔌 Waiting for a controller…"; }
   }
+  if (view === "welcome" && wz.step === 3 && st && st.connected){
+    const hold = (CFG.profile_switch || {}).hold, tasks = tryTasks(hold, hold && (CFG.quick_menu || {}).enabled !== false);
+    for (const t of tasks) if (!wz.tried[t.id] && t.test(st)){
+      wz.tried[t.id] = true; const el = $("#try-" + t.id); if (el){ el.classList.add("done"); el.querySelector(".emo").textContent = "✅"; }
+    }
+    const d = $("#tryDone"); if (d && tasks.every(t => wz.tried[t.id])) d.style.display = "";
+  }
   const rc = $("#recCount"); if (rc && st) rc.textContent = st.recorded ? `${st.recorded} presses so far` : "press buttons on your controller";
 }
 function onState(st){
@@ -2953,7 +3049,7 @@ function onState(st){
       if (view === "powerups" && !puProfileLocked) { puProfile = st.profile; renderAll(); }
       else if (view === "profile"){ const sub = $("#profSub"); if (sub) sub.textContent = (own().extends ? "Based on " + own().extends : "Standalone profile") + (st.profile === curProfile ? ", in use right now" : ""); }
     }
-    if (prev && view === "setup" && (prev.connected !== st.connected || prev.problem !== st.problem)) loadHealth().then(() => { if (view === "setup") renderAll(); });
+    if (prev && view === "setup" && (prev.connected !== st.connected || prev.problem !== st.problem || JSON.stringify(prev.setup_job || {}) !== JSON.stringify(st.setup_job || {}))) loadHealth().then(() => { if (view === "setup") renderAll(); });
   }
   if (st.config_mtime && CFG && st.config_mtime > CFG_MTIME + 0.001 && !dirty() && !saving){
     CFG_MTIME = st.config_mtime;

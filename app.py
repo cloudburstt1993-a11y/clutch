@@ -59,6 +59,11 @@ def message_box(text, title=cm.APP_NAME):
 
 
 def main():
+    if "--hidhide-setup" in sys.argv:  # elevated helper started by one-click HidHide setup
+        i = sys.argv.index("--hidhide-setup")
+        if i + 1 < len(sys.argv):
+            cm.hidhide_setup_job(sys.argv[i + 1])
+        return
     if "--set-autostart" in sys.argv:  # used by the installer, running as the signed-in user
         try:
             cm.set_autostart(True)
