@@ -962,6 +962,14 @@ const POWERUPS = [
     get: r => { const m = findSM(r,"recoil"); return m ? {strength:-num(m.add_y,-.2), when: listify(m.while).includes("lt") ? "ads" : "fire"} : null; },
     apply: p => upsertSM({id:"recoil", while: p.when === "ads" ? ["lt","rt"] : ["rt"], stick:"right", add_y: -p.strength}),
     remove: () => removeSM("recoil")},
+  {cat:"Shooters", id:"aa_boost", emoji:"🌀", title:"Aim assist booster", text:"While you aim, Clutch adds a tiny circle to your aim stick so the game's own aim assist keeps grabbing on. Turn the game's aim assist on and up.", risk:true,
+    params:[{key:"size", label:"Strength", type:"select", opts:[["0.1","Light"],["0.15","Medium"],["0.22","Strong"]], def:"0.15"},
+            {key:"hz", label:"Speed", type:"range", min:6, max:20, step:1, def:12, fmt:v => Math.round(v) + "/s"},
+            {key:"pattern", label:"Pattern", type:"select", opts:[["circle","Circle"],["shake","Side to side"]], def:"circle"},
+            {key:"when", label:"Only when", type:"select", opts:[["ads","I'm aiming (LT)"],["ads_fire","I'm aiming and firing"]], def:"ads"}],
+    get: r => { const m = findSM(r,"aa_boost"); return m ? {size: String(num(m.wiggle,.15)), hz: num(m.hz,12), pattern: m.pattern || "circle", when: listify(m.while).includes("rt") ? "ads_fire" : "ads"} : null; },
+    apply: p => upsertSM({id:"aa_boost", while: p.when === "ads_fire" ? ["lt","rt"] : ["lt"], stick:"right", wiggle: +p.size, hz: +p.hz, pattern: p.pattern}),
+    remove: () => removeSM("aa_boost")},
   {cat:"Shooters", id:"jump_shot", emoji:"🦘", title:"Jump shot", text:"You jump the moment you start shooting. Hard to hit, fun to pull off.", risk:true, conflicts:["drop_shot"],
     params:[{key:"btn", label:"Your game's jump button", type:"select", opts:BTN_OPTS(["a","b","x","y","lb","rb"]), def:"a"}],
     get: r => remapHas(r,"rt","macro:cm_jump_shot") ? {btn: getPath(r,["macros","cm_jump_shot","steps",0,"tap"]) || "a"} : null,
@@ -2563,7 +2571,7 @@ function renderHelp(v){
         h("p", {}, "Go to My games. If Clutch found Minecraft, tap Set up. If not, scroll down to Game packs and add Minecraft Java. It switches on by itself when Minecraft opens."),
         h("button", {class:"small", onclick: () => go("packs")}, "Open My games")),
       q("⚠️ Can I get banned?",
-        h("p", {}, "Clutch shows up to games as a normal controller. But power-ups marked ⚠️ (rapid fire, recoil control, jump shot and other macros) break the rules of most online games, and anti-cheat can ban accounts for them. Use those only in single-player, offline or practice. Everything else, like hair triggers, smooth aim, drift fix and the crosshair, just changes how your controller feels.")),
+        h("p", {}, "Clutch shows up to games as a normal controller. But power-ups marked ⚠️ (rapid fire, recoil control, the aim assist booster, jump shot and other macros) break the rules of most online games, and anti-cheat can ban accounts for them. Use those only in single-player, offline or practice. Everything else, like hair triggers, smooth aim, drift fix and the crosshair, just changes how your controller feels.")),
       q("😬 I messed up my settings",
         h("p", {}, "No problem. Clutch saves a backup automatically. Go to Settings, then “Go back in time”, and pick a time before things went wrong."),
         h("button", {class:"small", onclick: () => go("settings")}, "Open Settings")),
@@ -2736,6 +2744,7 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["🌀", "Aim assist booster ⚠️", "In Power-ups: a tiny automatic circle on your aim stick while you aim, so the game's aim assist keeps grabbing on. It can get accounts banned online, so online-safe mode pauses it in online games."],
   ["🛠️", "One-click hiding fixed", "“Set it up for me” could stop with a “Permission denied” error after the Windows pop-up. That's fixed, and it now reminds you to replug the controller and restart your game."],
   ["🆔", "Controller ID in Setup check", "Shows your controller's ID, and warns when it's a look-alike (like some GameSir pads) that needs ticking in HidHide by hand."],
   ["🔂", "No more double presses", "If a game can see your real controller and Clutch's at the same time, every press counts twice (like skipping weapons). Clutch now spots this and shows a “Fix it for me” button."],
@@ -2937,7 +2946,7 @@ function renderSettings(v){
     ...familySection(),
     ...onlineSafeSection(),
     h("div", {class:"section-title"}, "🛡️ Parent controls"),
-    h("p", {class:"section-sub"}, "Hide the power-ups that can get game accounts banned online (rapid fire, recoil control, jump shot and other macros). Turning this on also switches them off in every profile."),
+    h("p", {class:"section-sub"}, "Hide the power-ups that can get game accounts banned online (rapid fire, recoil control, the aim assist booster, jump shot and other macros). Turning this on also switches them off in every profile."),
     h("div", {class:"form"},
       h("div", {class:"lab"}, "Hide ban-risk power-ups"),
       swtch(hideRisky(), async on => {
@@ -3667,7 +3676,7 @@ function homeBanners(){
         h("button", {class:"ghost small", onclick: () => { homeBanners.dismissed = true; renderAll(); }}, "Not now"))));
   }
   const os = STATE && STATE.online_safe;
-  if (os && os.active) out.push(h("div", {class:"banner info", style:"display:block;margin-top:16px"}, `🛡️ Online-safe mode: rapid fire, macros and recoil control are paused while you play ${os.game || "an online game"}. Everything else works as normal.`));
+  if (os && os.active) out.push(h("div", {class:"banner info", style:"display:block;margin-top:16px"}, `🛡️ Online-safe mode: rapid fire, macros, recoil control and the aim assist booster are paused while you play ${os.game || "an online game"}. Everything else works as normal.`));
   if (STATE && STATE.quiet) out.push(h("div", {class:"banner info", style:"display:block;margin-top:16px"}, "🌙 Quiet hours: mods are off for now. The controller still works normally."));
   return out;
 }
@@ -3847,7 +3856,7 @@ function onlineSafeSection(){
   const recent = ((STATE && STATE.recent_apps) || []).filter(e => !known.has(e) && !/^(clutch|pythonw?|explorer|steam|epicgameslauncher)\.exe$/i.test(e)).slice(0, 8);
   const edit = async fn => { if (await parentOk()){ fn(); changed(); } renderAll(); };
   return [h("div", {class:"section-title"}, "🛡️ Online-safe mode"),
-    h("p", {class:"section-sub"}, "While an online game is in front, Clutch pauses the power-ups that break online rules: rapid fire and other turbo, macros (slide cancel, quick scope, jump shot), drop shot and recoil control. Everything else keeps working. In offline games they come back by themselves."),
+    h("p", {class:"section-sub"}, "While an online game is in front, Clutch pauses the power-ups that break online rules: rapid fire and other turbo, macros (slide cancel, quick scope, jump shot), drop shot, recoil control and the aim assist booster. Everything else keeps working. In offline games they come back by themselves."),
     h("div", {class:"form"},
       h("div", {class:"lab"}, "Online-safe mode", h("div", {class:"help"}, "Recommended. A parent PIN is needed to turn it off.")),
       swtch(on, async v => { if (v || await parentOk()){ o.enabled = v; changed(); toast(v ? "🛡️ Online-safe mode is on" : "Online-safe mode is off"); } renderAll(); }, "Online-safe mode"),

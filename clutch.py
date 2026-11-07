@@ -42,7 +42,7 @@ os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "12.2"
+VERSION = "12.3"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -233,7 +233,7 @@ def online_safe_profile(p):
     p.pop("macros", None)
     if isinstance(p.get("stick_mods"), list):
         p["stick_mods"] = [m for m in p["stick_mods"] if isinstance(m, dict)
-                           and not (num(m.get("add_x"), 0) or num(m.get("add_y"), 0))]
+                           and not (num(m.get("add_x"), 0) or num(m.get("add_y"), 0) or num(m.get("wiggle"), 0))]
     return p
 
 
@@ -942,6 +942,14 @@ class Engine:
                     continue
                 sc = num(sm.get("scale"), 1.0)
                 ax, ay = num(sm.get("add_x"), 0.0), num(sm.get("add_y"), 0.0)
+                wig = clamp(num(sm.get("wiggle"), 0.0), 0.0, 0.4)
+                if wig:  # aim assist booster: tiny automatic stick motion so the game's own aim assist keeps engaging
+                    ph = 2 * math.pi * clamp(num(sm.get("hz"), 12), 2, 30) * (now - since)
+                    if str(sm.get("pattern", "circle")) == "shake":
+                        ax += wig * math.sin(ph)
+                    else:
+                        ax += wig * math.cos(ph)
+                        ay += wig * math.sin(ph)
                 if str(sm.get("stick", "right")).lower() == "left":
                     out.lx, out.ly = out.lx * sc + ax, out.ly * sc + ay
                 else:
