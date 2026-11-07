@@ -1,0 +1,7 @@
+node_modules/
+# made by "npm run build"
+www/js/catalog.gen.js
+www/js/link.bundle.js
+www/fonts/
+www/icon.png
+www/manifest.webmanifest

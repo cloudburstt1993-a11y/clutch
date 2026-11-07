@@ -1,0 +1,80 @@
+# Builds the Clutch phone app.
+# - Android test app: Clutch-Android.apk on the "android-test" pre-release (pre-release, so the PC
+#   app's update check and the PC install link keep pointing at the PC release).
+# - Web version: GitHub Pages (works in Chrome on Android and computers; demo box works anywhere).
+name: Phone app
+
+on:
+  push:
+    branches: [main]
+    paths: ["mobile/**", "panel.html", "assets/clutch.png", "make_icon.py", ".github/workflows/mobile.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: mobile
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install
+        run: npm ci
+      - name: Build the app files
+        run: npm run build
+      - name: Android project
+        run: npx cap sync android
+      - name: Build the APK
+        working-directory: mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon -PversionCode=${{ github.run_number }} -PversionName=0.1.${{ github.run_number }}
+          cp app/build/outputs/apk/debug/app-debug.apk ../Clutch-Android.apk
+      - name: Publish the test APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-test
+          name: Clutch phone app (Android test build)
+          prerelease: true
+          make_latest: false
+          body: |
+            Test build of the Clutch phone app for Android, made from ${{ github.sha }}.
+            Download **Clutch-Android.apk** on the Android phone, open it, and allow installing from your browser when Android asks.
+            It includes a demo box, so it works before the Clutch hardware is ready.
+          files: mobile/Clutch-Android.apk
+      - name: Pack the web version
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: mobile/www
+
+  pages:
+    # Needs Settings > Pages > Source: "GitHub Actions" turned on once. Until then this step fails on
+    # its own and the Android build is unaffected.
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
