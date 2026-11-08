@@ -2744,6 +2744,7 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["🎮", "Hidden controllers stay visible to Clutch", "Xbox-style controllers (including GameSir pads in PC mode) are now read in a way HidHide lets Clutch through, so hiding your controller from games no longer hides it from Clutch."],
   ["🌀", "Aim assist booster ⚠️", "In Power-ups: a tiny automatic circle on your aim stick while you aim, so the game's aim assist keeps grabbing on. It can get accounts banned online, so online-safe mode pauses it in online games."],
   ["🛠️", "One-click hiding fixed", "“Set it up for me” could stop with a “Permission denied” error after the Windows pop-up. That's fixed, and it now reminds you to replug the controller and restart your game."],
   ["🆔", "Controller ID in Setup check", "Shows your controller's ID, and warns when it's a look-alike (like some GameSir pads) that needs ticking in HidHide by hand."],
@@ -3066,7 +3067,7 @@ function onState(st){
   }
   const jsonDiff = k => prev && JSON.stringify(prev[k] || {}) !== JSON.stringify(st[k] || {});
   if (prev && view === "setup" && (prev.connected !== st.connected || prev.problem !== st.problem || jsonDiff("setup_job") || jsonDiff("double_input"))) loadHealth().then(() => { if (view === "setup") renderAll(); });
-  if (view === "home" && jsonDiff("double_input")) renderAll();
+  if (view === "home" && (jsonDiff("double_input") || (prev && prev.hidhide_cloak !== st.hidhide_cloak))) renderAll();
   if (st.config_mtime && CFG && st.config_mtime > CFG_MTIME + 0.001 && !dirty() && !saving){
     CFG_MTIME = st.config_mtime;
     loadConfig().then(ok => { if (ok){ renderAll(); toast("Loaded changes from the settings file"); } });
@@ -3663,6 +3664,14 @@ function homeBanners(){
   if (fs.length) out.push(h("div", {class:"banner", style:"display:block;margin-top:16px"},
     h("b", {}, "🖥️ " + fs.map(gameNameFor).join(", ") + (fs.length > 1 ? " were" : " was") + " running in full screen. "),
     "The crosshair and quick menu can't show over full-screen games. In the game's video settings, pick ", h("b", {}, "Borderless"), " or ", h("b", {}, "Windowed fullscreen"), "."));
+  if (STATE && !STATE.connected && STATE.hidhide_cloak === true)
+    out.push(h("div", {class:"banner info", id:"hiddenBanner", style:"display:block;margin-top:16px"},
+      h("b", {}, "🙈 Controller plugged in but Clutch can't see it? "),
+      "HidHide may be hiding it from Clutch too. Tap “Let Clutch see it”, then unplug the controller (or its dongle) and plug it back in.",
+      h("div", {class:"cellrow", style:"margin-top:12px"},
+        h("button", {class:"primary small", onclick: async () => { try { await action("hidhide_allow"); toast("✅ Clutch is allowed through HidHide. Now unplug the controller and plug it back in."); } catch (e){ toast(e.message); } }}, "Let Clutch see it"),
+        h("button", {class:"small", onclick: () => autoHide(true)}, "Stop hiding"),
+        h("button", {class:"small", onclick: () => go("setup")}, "Setup check"))));
   const di = STATE && STATE.double_input;
   if (di && di.risk && !homeBanners.dismissed){
     const why = {no_hidhide:"HidHide isn't installed yet, so games see your real controller and Clutch's modded one.",

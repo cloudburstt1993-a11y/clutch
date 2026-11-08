@@ -38,11 +38,18 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 # Let SDL read motion sensors (gyro) from PlayStation pads over Bluetooth.
 os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS4_RUMBLE", "1")
 os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
+# Read Xbox-style pads through XInput, inside Clutch. SDL's default Raw Input / Windows.Gaming.Input paths
+# open the device from a Windows system process, so once HidHide hides the pad, Clutch couldn't see it
+# either, even though Clutch is on HidHide's allow list. XInput (and HIDAPI for PlayStation/Switch pads)
+# opens it from Clutch itself, which the allow list covers.
+os.environ.setdefault("SDL_JOYSTICK_RAWINPUT", "0")
+os.environ.setdefault("SDL_JOYSTICK_WGI", "0")
+os.environ.setdefault("SDL_XINPUT_ENABLED", "1")
 
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "12.3"
+VERSION = "12.4"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -1861,6 +1868,10 @@ def guid_vid_pid(guid):
         return None
     if len(b) != 16:
         return None
+    # Only GUIDs in SDL's vendor/product layout carry real ids: bytes 6-7 and 10-11 are zero there. Other
+    # GUIDs (virtual joysticks, some Bluetooth devices) hold a name hash instead, which is not an id.
+    if b[6] or b[7] or b[10] or b[11]:
+        return None
     vid, pid = b[4] | (b[5] << 8), b[8] | (b[9] << 8)
     return (vid, pid) if vid else None
 
@@ -1891,6 +1902,24 @@ def hidhide_hiding(cli, vid=None, pid=None, run=None):
     # USB: "VID_054C&PID_0CE6". Bluetooth: "_VID&0002054c_PID&0ce6" (a 4-digit source prefix before the id).
     pat = re.compile(rf"vid[_&](?:[0-9a-f]{{4}})?{vid:04x}[&_]pid[_&]{pid:04x}")
     return (True, None) if pat.search(txt) else (False, "not_hidden")
+
+
+def hidhide_cloak_on(cli, run=None):
+    """Is HidHide's hiding switched on? True / False, or None if we can't tell."""
+    import subprocess
+    try:
+        r = (run or (lambda a: subprocess.run([cli] + a, capture_output=True, text=True, timeout=5,
+                                              creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))))(["--cloak-state"])
+        txt = ((r.stdout or "") + " " + (r.stderr or "")).lower()
+        if r.returncode != 0 or not txt.strip():
+            return None
+        if any(w in txt for w in ("off", "false", "inactive", "disabled")):
+            return False
+        if any(w in txt for w in ("on", "true", "active", "enabled")):
+            return True
+    except Exception:
+        pass
+    return None
 
 
 def hidhide_targets(cli_json, vid, pid):
@@ -3426,6 +3455,7 @@ class ModRunner:
         self.setup_job = {}                 # one-click HidHide progress
         self.double = {"risk": False, "reason": None}   # 12.1: can games see the real AND the virtual controller?
         self._double_busy, self._double_next, self._double_warned = False, 0.0, set()
+        self.hh_cloak = None                # 12.4: HidHide hiding switched on? (None = unknown / not installed)
         self.problem = None
         self.notify = None      # callable(title, message), set by the desktop app
         self.on_show = None     # callable(): bring the app window forward
@@ -3952,9 +3982,25 @@ class ModRunner:
         finally:
             self._double_busy = False
 
+    def _cloak_check(self):
+        try:
+            cli = find_hidhide("HidHideCLI.exe") if svc_exists("HidHide") else None
+            on = hidhide_cloak_on(cli) if cli else None
+            if on != self.hh_cloak:
+                self.hh_cloak = on
+                self._changed()
+        except Exception:
+            pass
+        finally:
+            self._double_busy = False
+
     def _double_tick(self, now):
         if not IS_WINDOWS:
             return
+        if not self.pad and now >= self._double_next and not self._double_busy:
+            self._double_next = now + 15.0
+            self._double_busy = True
+            threading.Thread(target=self._cloak_check, daemon=True).start()
         if not self.pad or not self.vpad:
             if self.double.get("risk"):
                 self.double = {"risk": False, "reason": None}; self._changed()
@@ -4252,7 +4298,7 @@ class ModRunner:
             "config_mtime": self.cfg_mtime, "nav_mute": self.nav_mute(), "front": bool(self.auto.watch.own),
             "kid": self.kid, "quiet": self._quiet_off,
             "online_safe": {"active": self.engine.online_safe, "game": self.online_game},
-            "setup_job": self.setup_job or None, "double_input": self.double, "fullscreen_games": sorted(self.fullscreen_seen),
+            "setup_job": self.setup_job or None, "double_input": self.double, "hidhide_cloak": self.hh_cloak, "fullscreen_games": sorted(self.fullscreen_seen),
             "update": {k: v for k, v in self.update.items() if k in ("state", "busy", "latest", "newer", "page", "notes", "error", "downloading", "progress", "ready")},
             "pad_key": getattr(self.pad, "key", None) if self.pad else None,
             "pad_caps": {"touch": bool(getattr(self.pad, "has_touch", False)), "trigger_fx": bool(getattr(self.pad, "has_trigger_fx", False)),
@@ -4386,8 +4432,13 @@ class ModRunner:
                 for ev in pg.event.get():
                     if ev.type == getattr(pg, "JOYDEVICEADDED", -1) and self.pending_own > 0:
                         try:
-                            self.own_ids.add(pg.joystick.Joystick(ev.device_index).get_instance_id())
-                            self.pending_own -= 1
+                            js = pg.joystick.Joystick(ev.device_index)
+                            vp = guid_vid_pid(js.get_guid()) if hasattr(js, "get_guid") else None
+                            # only a device with a virtual pad's ID can be ours (a real pad plugged in at the
+                            # same moment must not be mistaken for it and ignored)
+                            if not vp or not vp[0] or vp in ((0x045E, 0x028E), (0x054C, 0x05C4)):
+                                self.own_ids.add(js.get_instance_id())
+                                self.pending_own -= 1
                         except Exception:
                             pass
                     elif ev.type == getattr(pg, "JOYDEVICEREMOVED", -1):
