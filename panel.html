@@ -2745,6 +2745,7 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["🔂", "Double presses fixed for Xbox-style controllers", "“Hide it for me” now hides the part of Xbox-style controllers (like GameSir pads) that Fortnite and other XInput games read. Before, those games could still see the real controller, so presses counted twice."],
   ["🌀", "Finer aim assist booster", "Strength is now a slider from 2% (barely there) to 25%, and Speed goes down to 2 per second, so you can turn it way down."],
   ["🎮", "Hidden controllers stay visible to Clutch", "Xbox-style controllers (including GameSir pads in PC mode) are now read in a way HidHide lets Clutch through, so hiding your controller from games no longer hides it from Clutch."],
   ["🌀", "Aim assist booster ⚠️", "In Power-ups: a tiny automatic circle on your aim stick while you aim, so the game's aim assist keeps grabbing on. It can get accounts banned online, so online-safe mode pauses it in online games."],
@@ -3678,7 +3679,8 @@ function homeBanners(){
   if (di && di.risk && !homeBanners.dismissed){
     const why = {no_hidhide:"HidHide isn't installed yet, so games see your real controller and Clutch's modded one.",
       cloak_off:"HidHide is installed but switched off, so games see your real controller and Clutch's modded one.",
-      not_hidden:"HidHide isn't hiding this controller yet, so games see it and Clutch's modded one."}[di.reason] || "Games can see two controllers.";
+      not_hidden:"HidHide isn't hiding this controller yet, so games see it and Clutch's modded one.",
+      xinput_visible:"HidHide is only hiding part of this controller. Games that use XInput, like Fortnite, can still see it next to Clutch's modded one."}[di.reason] || "Games can see two controllers.";
     out.push(h("div", {class:"banner", id:"doubleBanner", style:"display:block;margin-top:16px"},
       h("b", {}, "⚠️ Buttons counting twice? "), why, " One press then counts as two, like skipping a weapon or jumping two spots in a menu. ",
       h("div", {class:"cellrow", style:"margin-top:12px"},

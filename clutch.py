@@ -49,7 +49,7 @@ os.environ.setdefault("SDL_XINPUT_ENABLED", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "12.5"
+VERSION = "12.6"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -1901,7 +1901,14 @@ def hidhide_hiding(cli, vid=None, pid=None, run=None):
         return None, None
     # USB: "VID_054C&PID_0CE6". Bluetooth: "_VID&0002054c_PID&0ce6" (a 4-digit source prefix before the id).
     pat = re.compile(rf"vid[_&](?:[0-9a-f]{{4}})?{vid:04x}[&_]pid[_&]{pid:04x}")
-    return (True, None) if pat.search(txt) else (False, "not_hidden")
+    hits = [m for m in re.findall(r'[a-z]+\\[^"\s,\]]+', txt) if pat.search(m)]
+    if not hits:
+        return False, "not_hidden"
+    # An Xbox-style (XInput) pad shows up as an "&IG_" HID interface. Hiding only that keeps it visible to
+    # XInput games, so its parent device (anything not under HID\) must be on the list as well.
+    if any("&ig_" in m for m in hits) and all(m.startswith("hid\\") for m in hits):
+        return False, "xinput_visible"
+    return True, None
 
 
 def hidhide_cloak_on(cli, run=None):
@@ -1950,10 +1957,15 @@ def hidhide_targets(cli_json, vid, pid):
             continue  # a virtual device, possibly Clutch's own
         if not rx.search(paths):
             continue
-        p = dev["deviceInstancePath"]
-        if p not in seen:
-            seen.add(p)
-            out.append((p, dev.get("product") or dev.get("description") or name or "Controller"))
+        label = dev.get("product") or dev.get("description") or name or "Controller"
+        # Hide both halves. The HID interface (deviceInstancePath) only covers DirectInput/HID games; for
+        # Xbox-style pads, XInput games (Fortnite, most PC shooters) read the parent device
+        # (baseContainerDeviceInstancePath, e.g. USB\VID_045E&PID_02EA\...), which has to be hidden too.
+        for key in ("deviceInstancePath", "baseContainerDeviceInstancePath"):
+            p = str(dev.get(key) or "")
+            if p and rx.search(p) and p not in seen:
+                seen.add(p)
+                out.append((p, label))
     return out
 
 
@@ -1992,7 +2004,7 @@ def hidhide_setup_job(job_path):
             run(["--app-reg", app])
         if job.get("vid"):
             for path, name in hidhide_targets(run(["--dev-gaming"]).stdout, int(job["vid"]), int(job["pid"])):
-                if run(["--dev-hide", path]).returncode == 0:
+                if run(["--dev-hide", path]).returncode == 0 and name not in res["hidden"]:
                     res["hidden"].append(name)
         if job.get("undo"):
             run(["--cloak-off"])
