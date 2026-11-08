@@ -8,8 +8,8 @@ Controller mods for Windows. Clutch reads your real controller (Xbox, PlayStatio
 
 ### Option A: build the installer once, then install anywhere (recommended)
 1. On any Windows PC, install **Python 3.12 or 3.13** from python.org. Tick **"Add python.exe to PATH"** during setup.
-2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-12.6.exe`**. If Inno Setup is missing, it installs that through winget automatically.
-3. Run `Clutch-Setup-12.6.exe` on each PC that will use Clutch. The installer:
+2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-12.7.exe`**. If Inno Setup is missing, it installs that through winget automatically.
+3. Run `Clutch-Setup-12.7.exe` on each PC that will use Clutch. The installer:
    - installs Clutch with a Start-menu entry and, if you choose, a desktop shortcut
    - installs the **ViGEmBus** virtual-controller driver if that PC doesn't have it yet
    - can set Clutch to start in the background with Windows
@@ -50,6 +50,11 @@ Open Clutch and go to **🔧 Setup check**. It shows what's missing, and each it
 Tapping Guide by itself still does its normal job. Closing the window keeps Clutch running in the tray. Right-click the tray icon to switch profiles, toggle mods or the crosshair, or quit.
 
 **🕹️ Drive Clutch with your controller:** with the Clutch window in front, the D-pad or left stick moves around, **A** picks, **B** goes back or closes a pop-up, **LB / RB** flip between pages, left/right changes sliders and lists, and the right stick scrolls. A hint bar shows the buttons (with PlayStation symbols on a PlayStation controller). While Clutch is in front, mods don't press keys or move the mouse, so nothing happens twice. On the Controller test page buttons are being tested, so hold **B** to leave. Turn it off in Settings → Controls and comfort.
+
+**New in 12.7 (all ⚠️ ban risk, paused by online-safe mode):**
+- **💫 Micro strafe:** tiny circles (or side to side) on the left stick, 2–35% of full tilt, 2–20 times a second. Turns on while shooting (aimed in or not), while aiming in, while aiming in and shooting, or while aiming in or shooting. Stored as `stick_mods` entries `micro_strafe` (+ `micro_strafe_2` for the "or" choice) with `wiggle`/`hz`/`pattern`.
+- **🦵 Rapid crouch:** holding RT also runs a repeating macro that taps your crouch button 2–10 times a second (`remap.rt = ["rt", "macro:cm_crouch_spam"]`). Can't be on with Drop shot or Jump shot.
+- **🧲 Recoil control** now goes down to 0.5% in half-percent steps (was 5% minimum).
 
 **12.6 fix (double presses with Xbox-style pads):** "Hide it for me" now hides both halves of the controller: the HID interface (`deviceInstancePath`, seen by DirectInput/HID games) and its parent device (`baseContainerDeviceInstancePath`, e.g. `USB\VID_045E&PID_02EA\…`), which is what XInput games like Fortnite read. Before, only the HID half was hidden, so XInput games still saw the real pad next to Clutch's. The double-press check now flags an XInput pad whose parent isn't hidden (`xinput_visible`).
 

@@ -957,10 +957,10 @@ const POWERUPS = [
     get: r => { const t = getPath(r,["turbo","rt"]); return (t == null || t === false) ? null : {rate: typeof t === "number" ? t : num(t.rate_hz,12)}; },
     apply: p => setIn(PT(),["turbo","rt"],{rate_hz:p.rate, duty:.5}), remove: () => off(["turbo","rt"],false)},
   {cat:"Shooters", id:"recoil", emoji:"🧲", title:"Recoil control", text:"Pulls your aim down a little while you fire, so your shots stay on target when the gun kicks.", risk:true,
-    params:[{key:"strength", label:"Pull-down strength", type:"range", min:.05, max:.6, step:.01, def:.2, fmt:pct},
+    params:[{key:"strength", label:"Pull-down strength", type:"range", min:.005, max:.6, step:.005, def:.1, fmt:v => (Math.round(v * 1000) / 10) + "%"},
             {key:"when", label:"Only when", type:"select", opts:[["fire","I'm firing"],["ads","I'm aiming and firing"]], def:"ads"}],
     get: r => { const m = findSM(r,"recoil"); return m ? {strength:-num(m.add_y,-.2), when: listify(m.while).includes("lt") ? "ads" : "fire"} : null; },
-    apply: p => upsertSM({id:"recoil", while: p.when === "ads" ? ["lt","rt"] : ["rt"], stick:"right", add_y: -p.strength}),
+    apply: p => upsertSM({id:"recoil", while: p.when === "ads" ? ["lt","rt"] : ["rt"], stick:"right", add_y: -Math.round(+p.strength * 1000) / 1000}),
     remove: () => removeSM("recoil")},
   {cat:"Shooters", id:"aa_boost", emoji:"🌀", title:"Aim assist booster", text:"While you aim, Clutch adds a tiny circle to your aim stick so the game's own aim assist keeps grabbing on. Turn the game's aim assist on and up.", risk:true,
     params:[{key:"size", label:"Strength", type:"range", min:0.02, max:0.25, step:0.01, def:0.08,
@@ -971,12 +971,36 @@ const POWERUPS = [
     get: r => { const m = findSM(r,"aa_boost"); return m ? {size: num(m.wiggle,.08), hz: num(m.hz,10), pattern: m.pattern || "circle", when: listify(m.while).includes("rt") ? "ads_fire" : "ads"} : null; },
     apply: p => upsertSM({id:"aa_boost", while: p.when === "ads_fire" ? ["lt","rt"] : ["lt"], stick:"right", wiggle: Math.round(+p.size * 100) / 100, hz: +p.hz, pattern: p.pattern}),
     remove: () => removeSM("aa_boost")},
-  {cat:"Shooters", id:"jump_shot", emoji:"🦘", title:"Jump shot", text:"You jump the moment you start shooting. Hard to hit, fun to pull off.", risk:true, conflicts:["drop_shot"],
+  {cat:"Shooters", id:"jump_shot", emoji:"🦘", title:"Jump shot", text:"You jump the moment you start shooting. Hard to hit, fun to pull off.", risk:true, conflicts:["drop_shot","crouch_spam"],
     params:[{key:"btn", label:"Your game's jump button", type:"select", opts:BTN_OPTS(["a","b","x","y","lb","rb"]), def:"a"}],
     get: r => remapHas(r,"rt","macro:cm_jump_shot") ? {btn: getPath(r,["macros","cm_jump_shot","steps",0,"tap"]) || "a"} : null,
     apply: p => { setRemap("rt",["rt","macro:cm_jump_shot"]); setMacro("cm_jump_shot",{mode:"once", steps:[{tap:p.btn}]}); },
     remove: () => { clearRemap("rt", cur => listify(cur).includes("macro:cm_jump_shot")); dropMacro("cm_jump_shot"); }},
-  {cat:"Shooters", id:"drop_shot", emoji:"⬇️", title:"Drop shot", text:"Drops you down to crouch or prone while you shoot.", risk:true, conflicts:["jump_shot"],
+  {cat:"Shooters", id:"micro_strafe", emoji:"💫", title:"Micro strafe", text:"Moves your character in tiny circles you can barely see, so you're harder to hit. Games ignore very small stick moves, so if nothing happens, turn Strength up a little.", risk:true,
+    params:[{key:"size", label:"Strength", type:"range", min:0.02, max:0.35, step:0.01, def:0.15, fmt:v => Math.round(v * 100) + "%"},
+            {key:"hz", label:"Speed", type:"range", min:2, max:20, step:1, def:8, fmt:v => Math.round(v) + "/s"},
+            {key:"pattern", label:"Pattern", type:"select", opts:[["circle","Circle"],["shake","Side to side"]], def:"circle"},
+            {key:"when", label:"Turns on when", type:"select", opts:[["fire","I'm shooting (aimed in or not)"],["ads","I'm aiming in"],["ads_fire","I'm aiming in and shooting"],["ads_or_fire","I'm aiming in or shooting"]], def:"fire"}],
+    get: r => { const m = findSM(r,"micro_strafe"); if (!m) return null;
+      const w = listify(m.while), two = !!findSM(r,"micro_strafe_2");
+      return {size: num(m.wiggle,.15), hz: num(m.hz,8), pattern: m.pattern || "circle",
+              when: two ? "ads_or_fire" : w.includes("lt") && w.includes("rt") ? "ads_fire" : w.includes("lt") ? "ads" : "fire"}; },
+    apply: p => { const base = {stick:"left", wiggle: Math.round(+p.size * 100) / 100, hz: +p.hz, pattern: p.pattern};
+      removeSM("micro_strafe_2");
+      if (p.when === "ads_or_fire"){ upsertSM({id:"micro_strafe", while:["lt"], ...base}); upsertSM({id:"micro_strafe_2", while:["rt"], ...base}); }
+      else upsertSM({id:"micro_strafe", while: p.when === "ads" ? ["lt"] : p.when === "ads_fire" ? ["lt","rt"] : ["rt"], ...base}); },
+    remove: () => { removeSM("micro_strafe"); removeSM("micro_strafe_2"); }},
+  {cat:"Shooters", id:"crouch_spam", emoji:"🦵", title:"Rapid crouch", text:"While you hold RT to shoot, Clutch taps crouch over and over, so you bob up and down and are harder to hit.", risk:true, conflicts:["drop_shot","jump_shot"],
+    params:[{key:"btn", label:"Your game's crouch button", type:"select", opts:BTN_OPTS(["b","r3","a","x","y"]), def:"b"},
+            {key:"rate", label:"Crouches per second", type:"range", min:2, max:10, step:1, def:5, fmt:v => Math.round(v) + "/s"}],
+    get: r => { if (!remapHas(r,"rt","macro:cm_crouch_spam")) return null;
+      const st = getPath(r,["macros","cm_crouch_spam","steps",0]) || {};
+      return {btn: listify(st.tap)[0] || "b", rate: Math.round(1000 / Math.max(50, num(st.ms,100) + num(st.gap,100)))}; },
+    apply: p => { const per = Math.round(1000 / Math.max(1, +p.rate)), down = Math.round(per / 2);
+      setRemap("rt", ["rt","macro:cm_crouch_spam"]);
+      setMacro("cm_crouch_spam", {mode:"repeat", steps:[{tap:p.btn, ms:down, gap:per - down}]}); },
+    remove: () => { clearRemap("rt", cur => listify(cur).includes("macro:cm_crouch_spam")); dropMacro("cm_crouch_spam"); }},
+  {cat:"Shooters", id:"drop_shot", emoji:"⬇️", title:"Drop shot", text:"Drops you down to crouch or prone while you shoot.", risk:true, conflicts:["jump_shot","crouch_spam"],
     params:[{key:"btn", label:"Your game's crouch button", type:"select", opts:BTN_OPTS(["b","r3","a","x","y"]), def:"b"}],
     get: r => { const t = listify(getPath(r,["remap","rt"])); return t.length === 2 && t[0] === "rt" && XBOX.includes(t[1]) ? {btn:t[1]} : null; },
     apply: p => setRemap("rt",["rt",p.btn]),
@@ -2745,6 +2769,9 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["💫", "Micro strafe ⚠️", "Tiny circles on your move stick while you shoot or aim (you pick), so you're harder to hit."],
+  ["🦵", "Rapid crouch ⚠️", "Hold RT and Clutch spams crouch for you, with a speed slider."],
+  ["🧲", "Gentler recoil control", "Recoil control now goes all the way down to 0.5%, in half-percent steps."],
   ["🔂", "Double presses fixed for Xbox-style controllers", "“Hide it for me” now hides the part of Xbox-style controllers (like GameSir pads) that Fortnite and other XInput games read. Before, those games could still see the real controller, so presses counted twice."],
   ["🌀", "Finer aim assist booster", "Strength is now a slider from 2% (barely there) to 25%, and Speed goes down to 2 per second, so you can turn it way down."],
   ["🎮", "Hidden controllers stay visible to Clutch", "Xbox-style controllers (including GameSir pads in PC mode) are now read in a way HidHide lets Clutch through, so hiding your controller from games no longer hides it from Clutch."],
