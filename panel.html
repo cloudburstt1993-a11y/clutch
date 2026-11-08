@@ -963,12 +963,13 @@ const POWERUPS = [
     apply: p => upsertSM({id:"recoil", while: p.when === "ads" ? ["lt","rt"] : ["rt"], stick:"right", add_y: -p.strength}),
     remove: () => removeSM("recoil")},
   {cat:"Shooters", id:"aa_boost", emoji:"🌀", title:"Aim assist booster", text:"While you aim, Clutch adds a tiny circle to your aim stick so the game's own aim assist keeps grabbing on. Turn the game's aim assist on and up.", risk:true,
-    params:[{key:"size", label:"Strength", type:"select", opts:[["0.1","Light"],["0.15","Medium"],["0.22","Strong"]], def:"0.15"},
-            {key:"hz", label:"Speed", type:"range", min:6, max:20, step:1, def:12, fmt:v => Math.round(v) + "/s"},
+    params:[{key:"size", label:"Strength", type:"range", min:0.02, max:0.25, step:0.01, def:0.08,
+              fmt:v => Math.round(v * 100) + "%"},
+            {key:"hz", label:"Speed", type:"range", min:2, max:20, step:1, def:10, fmt:v => Math.round(v) + "/s"},
             {key:"pattern", label:"Pattern", type:"select", opts:[["circle","Circle"],["shake","Side to side"]], def:"circle"},
             {key:"when", label:"Only when", type:"select", opts:[["ads","I'm aiming (LT)"],["ads_fire","I'm aiming and firing"]], def:"ads"}],
-    get: r => { const m = findSM(r,"aa_boost"); return m ? {size: String(num(m.wiggle,.15)), hz: num(m.hz,12), pattern: m.pattern || "circle", when: listify(m.while).includes("rt") ? "ads_fire" : "ads"} : null; },
-    apply: p => upsertSM({id:"aa_boost", while: p.when === "ads_fire" ? ["lt","rt"] : ["lt"], stick:"right", wiggle: +p.size, hz: +p.hz, pattern: p.pattern}),
+    get: r => { const m = findSM(r,"aa_boost"); return m ? {size: num(m.wiggle,.08), hz: num(m.hz,10), pattern: m.pattern || "circle", when: listify(m.while).includes("rt") ? "ads_fire" : "ads"} : null; },
+    apply: p => upsertSM({id:"aa_boost", while: p.when === "ads_fire" ? ["lt","rt"] : ["lt"], stick:"right", wiggle: Math.round(+p.size * 100) / 100, hz: +p.hz, pattern: p.pattern}),
     remove: () => removeSM("aa_boost")},
   {cat:"Shooters", id:"jump_shot", emoji:"🦘", title:"Jump shot", text:"You jump the moment you start shooting. Hard to hit, fun to pull off.", risk:true, conflicts:["drop_shot"],
     params:[{key:"btn", label:"Your game's jump button", type:"select", opts:BTN_OPTS(["a","b","x","y","lb","rb"]), def:"a"}],
@@ -2744,6 +2745,7 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["🌀", "Finer aim assist booster", "Strength is now a slider from 2% (barely there) to 25%, and Speed goes down to 2 per second, so you can turn it way down."],
   ["🎮", "Hidden controllers stay visible to Clutch", "Xbox-style controllers (including GameSir pads in PC mode) are now read in a way HidHide lets Clutch through, so hiding your controller from games no longer hides it from Clutch."],
   ["🌀", "Aim assist booster ⚠️", "In Power-ups: a tiny automatic circle on your aim stick while you aim, so the game's aim assist keeps grabbing on. It can get accounts banned online, so online-safe mode pauses it in online games."],
   ["🛠️", "One-click hiding fixed", "“Set it up for me” could stop with a “Permission denied” error after the Windows pop-up. That's fixed, and it now reminds you to replug the controller and restart your game."],

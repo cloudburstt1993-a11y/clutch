@@ -8,8 +8,8 @@ Controller mods for Windows. Clutch reads your real controller (Xbox, PlayStatio
 
 ### Option A: build the installer once, then install anywhere (recommended)
 1. On any Windows PC, install **Python 3.12 or 3.13** from python.org. Tick **"Add python.exe to PATH"** during setup.
-2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-12.4.exe`**. If Inno Setup is missing, it installs that through winget automatically.
-3. Run `Clutch-Setup-12.4.exe` on each PC that will use Clutch. The installer:
+2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-12.5.exe`**. If Inno Setup is missing, it installs that through winget automatically.
+3. Run `Clutch-Setup-12.5.exe` on each PC that will use Clutch. The installer:
    - installs Clutch with a Start-menu entry and, if you choose, a desktop shortcut
    - installs the **ViGEmBus** virtual-controller driver if that PC doesn't have it yet
    - can set Clutch to start in the background with Windows
@@ -53,7 +53,7 @@ Tapping Guide by itself still does its normal job. Closing the window keeps Clut
 
 **12.4 fixes:** Xbox-style controllers (including GameSir pads in PC/XInput mode) are now read through XInput inside Clutch (`SDL_JOYSTICK_RAWINPUT=0`, `SDL_JOYSTICK_WGI=0`). SDL's Raw Input and Windows.Gaming.Input paths open the device from a Windows system process, so once HidHide hid the controller, Clutch lost it too even though Clutch was allowed. Home now offers **Let Clutch see it** when no controller shows and HidHide's hiding is on. Device-ID parsing no longer mistakes name-hash GUIDs for vendor/product IDs, and a real pad plugged in at the moment Clutch makes its virtual pad is no longer mistaken for Clutch's own.
 
-**🌀 Aim assist booster (12.3, ⚠️ ban risk):** in Power-ups → Shooters. While you aim (or aim and fire), Clutch adds a small automatic circle or side-to-side motion to the right stick (Light/Medium/Strong = 0.10/0.15/0.22 of full tilt, 6–20 times a second) so the game's own aim assist keeps engaging. It's a `stick_mods` entry with `wiggle`, `hz` and `pattern`. Online-safe mode removes it in online games, and "Hide ban-risk power-ups" hides it. Clutch never reads the screen or aims for you.
+**🌀 Aim assist booster (12.3, ⚠️ ban risk):** in Power-ups → Shooters. While you aim (or aim and fire), Clutch adds a small automatic circle or side-to-side motion to the right stick (Strength slider 2–25% of full tilt, 2–20 times a second) so the game's own aim assist keeps engaging. It's a `stick_mods` entry with `wiggle`, `hz` and `pattern`. Online-safe mode removes it in online games, and "Hide ban-risk power-ups" hides it. Clutch never reads the screen or aims for you.
 
 **12.2 fixes:** one-click hiding no longer stops with "Permission denied" (the admin helper now writes into a result file Clutch made, so Clutch can read it, and if it still can't, Clutch asks HidHide directly). Setup check shows the controller's ID (VID:PID) and flags pads that share the virtual Xbox 360 ID (045E:028E), such as some GameSir controllers in PC mode. Those must be ticked in HidHide by hand. After hiding, unplug and replug the controller and restart the game.
 
