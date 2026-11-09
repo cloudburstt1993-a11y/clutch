@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /clutch/admin
-Disallow: /clutch/admin.html
-Sitemap: https://cloudburstt1993-a11y.github.io/clutch/sitemap.xml
+Disallow: /admin
+Disallow: /admin.html
+Sitemap: https://clutchmods.vercel.app/sitemap.xml
