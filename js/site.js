@@ -16,7 +16,7 @@ window.CLUTCH_CONFIG = {
   // Receives waitlist, support, and report submissions as JSON.
   FORM_ENDPOINT: '',
   DISCORD_URL: '',             // optional; forum stays the main home
-  SITE_URL: 'https://clutchmods.app',
+  SITE_URL: 'https://cloudburstt1993-a11y.github.io/clutch',
   DOWNLOAD_URL: 'https://github.com/cloudburstt1993-a11y/clutch/releases/latest/download/Clutch-Setup.exe',
   RELEASES_URL: 'https://github.com/cloudburstt1993-a11y/clutch/releases',
   SUPPORT_EMAIL: 'support@clutchmods.app',   // placeholder — change before launch
