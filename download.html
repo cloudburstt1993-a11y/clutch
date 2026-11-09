@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download — Clutch</title>
+<meta name="description" content="Download Clutch for Windows 10 and 11. Free to start. Run the installer, plug in your controller, pick a game pack.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/download">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/download">
+<meta property="og:title" content="Download — Clutch">
+<meta property="og:description" content="Download Clutch for Windows 10 and 11. Free to start. Run the installer, plug in your controller, pick a game pack.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Download — Clutch">
+<meta name="twitter:description" content="Download Clutch for Windows 10 and 11. Free to start. Run the installer, plug in your controller, pick a game pack.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Download-only styles */
+  .dl-hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 2rem; align-items: center; }
+  @media (max-width: 860px) { .dl-hero { grid-template-columns: 1fr; } }
+  .dl-btn { font-size: clamp(1.2rem, 2.6vw, 1.5rem); padding: 1.15rem 2.2rem; }
+  .dl-btn .ico { width: 1.3em; height: 1.3em; }
+  .dl-meta { color: var(--dim); font-size: .95rem; margin-top: 1rem; }
+  .dl-meta a { color: var(--cyan); }
+  .reqs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  @media (max-width: 760px) { .reqs { grid-template-columns: 1fr; } }
+  .reqs .panel { display: flex; gap: 12px; align-items: center; padding: 1.1rem; }
+  .reqs .panel .px { flex: none; width: 36px; height: 36px; }
+  .reqs .panel strong { display: block; }
+  .reqs .panel span { color: var(--muted); font-size: .92rem; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; counter-reset: step; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+  .step { counter-increment: step; }
+  .step::before { content: counter(step); font-family: var(--pixel); font-size: .9rem; color: var(--yellow); display: inline-grid; place-items: center; width: 44px; height: 44px; border: 2px solid var(--yellow); border-radius: var(--r-sm); margin-bottom: .9rem; }
+  .step h3 { font-size: 1.35rem; }
+  .step p { margin: 0; color: var(--muted); }
+  .step .shot { margin-top: 1rem; aspect-ratio: 16 / 9; }
+  .smart { border-left-width: 6px; padding: 1.25rem 1.4rem; display: grid; grid-template-columns: 1.1fr .9fr; gap: 1.5rem; align-items: center; }
+  @media (max-width: 860px) { .smart { grid-template-columns: 1fr; } }
+  .smart .shot { margin: 0; }
+  .smart h3 { margin: 0 0 .5rem; color: #ffe2a8; font-size: 1.5rem; }
+  .smart ol { margin: .5rem 0 .75rem; padding-left: 1.25rem; }
+  .smart li { margin: .3rem 0; }
+  .help { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 760px) { .help { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body data-page="download">
+<div id="site-header"></div>
+
+<main id="main">
+
+<!-- ============================== HERO ============================== -->
+<section class="page-head" aria-labelledby="page-title">
+  <div class="container dl-hero">
+    <div>
+      <p class="eyebrow">DOWNLOAD</p>
+      <h1 id="page-title">Get Clutch for <span class="grad-text">Windows</span></h1>
+      <p class="lead">Free to start. Run the installer, plug in your controller, and tap your first power-up in under a minute.</p>
+      <a class="btn btn-primary btn-lg dl-btn" data-download href="#"><i data-icon="windows" class="ico"></i> Download Clutch for Windows</a>
+      <p class="dl-meta"><a data-releases href="#" rel="noopener">Latest release</a> · Windows 10 and 11 · Free to start</p>
+      <p class="dl-meta" style="margin-top:.25rem">Already have Pro? Enter your key in Clutch under Settings → License. <a href="account.html">Find your key in your account</a>.</p>
+    </div>
+    <div class="shot"><span class="pixel">SCREENSHOT: clutch-main-window</span></div>
+  </div>
+</section>
+
+<!-- ============================ REQUIREMENTS ============================ -->
+<section class="section-tight" aria-labelledby="req-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">REQUIREMENTS</p>
+      <h2 id="req-title">What you need</h2>
+    </div>
+    <div class="reqs">
+      <div class="panel"><i data-icon="windows"></i><div><strong>Windows 10 or 11</strong><span>A regular Windows PC or laptop.</span></div></div>
+      <div class="panel"><i data-icon="controller"></i><div><strong>A game controller</strong><span>Xbox, PlayStation, Switch Pro, GameSir and more.</span></div></div>
+      <div class="panel"><i data-icon="bolt"></i><div><strong>USB or Bluetooth</strong><span>However your controller already connects.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SETUP ============================== -->
+<section class="section" aria-labelledby="setup-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">SETUP</p>
+      <h2 id="setup-title">Three steps and you're in</h2>
+    </div>
+    <div class="steps">
+      <article class="panel step">
+        <h3>Run Clutch-Setup.exe</h3>
+        <p>Open the file you downloaded and follow the installer.</p>
+        <div class="shot"><span class="pixel">SCREENSHOT: installer</span></div>
+      </article>
+      <article class="panel step">
+        <h3>Plug in your controller</h3>
+        <p>USB or Bluetooth, either works. Clutch finds it and shows it on screen.</p>
+        <div class="shot"><span class="pixel">SCREENSHOT: controller-detected</span></div>
+      </article>
+      <article class="panel step">
+        <h3>Pick a pack or tap a power-up</h3>
+        <p>Choose a game pack for the kind of game you play, or tap hair triggers, smooth aim or steady aim and go.</p>
+        <div class="shot"><span class="pixel">SCREENSHOT: first-power-up</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== SMARTSCREEN NOTICE ========================== -->
+<section class="section-tight" aria-labelledby="smart-title">
+  <div class="container">
+    <div class="notice notice-warn smart">
+      <div>
+      <h3 id="smart-title">If Windows says "Windows protected your PC"</h3>
+      <p>Windows shows this blue screen for new apps that are not yet code-signed. Clutch is one of them for now. To continue:</p>
+      <ol>
+        <li>Click <strong>More info</strong>.</li>
+        <li>Click <strong>Run anyway</strong>.</li>
+      </ol>
+      <p>This message will appear until the app is code-signed. Only download Clutch from the official GitHub release linked on this page; if you got the file anywhere else, delete it and download it again from here.</p>
+      </div>
+      <div class="shot"><span class="pixel">SCREENSHOT: windows-protected-your-pc</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== HELP ============================== -->
+<section class="section" aria-labelledby="help-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">HAVING TROUBLE?</p>
+      <h2 id="help-title">Help is one click away</h2>
+    </div>
+    <div class="help">
+      <article class="panel panel-hover">
+        <div class="icon-box"><i data-icon="star"></i></div>
+        <h3>Guides</h3>
+        <p>Setup for each controller type, double-press fixes, Steam Input, and every power-up explained.</p>
+        <a class="btn btn-ghost btn-sm" href="guides.html">Read the guides</a>
+      </article>
+      <article class="panel panel-hover panel-pink">
+        <div class="icon-box"><i data-icon="chat"></i></div>
+        <h3>Support</h3>
+        <p>Stuck on something the guides do not cover? Send us a message and we will help.</p>
+        <a class="btn btn-ghost btn-sm" href="support.html">Contact support</a>
+      </article>
+    </div>
+    <p class="dim" style="margin-top:1.5rem;font-size:.92rem">Want everything? <a href="pricing.html">Pro is $19.99 one time</a>. Pay once, no subscription. Parent or guardian purchase; buyers must be 18+.</p>
+  </div>
+</section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clutch — Your controller. Super-powered.</title>
+<meta name="description" content="Clutch is a Windows PC app that upgrades any game controller. One-tap power-ups, 48 game packs, parent controls. Pay once, no subscription.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/">
+<meta property="og:title" content="Clutch — Your controller. Super-powered.">
+<meta property="og:description" content="Clutch is a Windows PC app that upgrades any game controller. One-tap power-ups, 48 game packs, parent controls. Pay once, no subscription.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Clutch — Your controller. Super-powered.">
+<meta name="twitter:description" content="Clutch is a Windows PC app that upgrades any game controller. One-tap power-ups, 48 game packs, parent controls. Pay once, no subscription.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Home-only styles */
+  .reel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  @media (max-width: 900px) { .reel { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .reel { grid-template-columns: 1fr; } }
+  .reel .panel { padding: 1.25rem; }
+  .reel .panel .pixel { color: var(--dim); margin-top: .6rem; }
+  .wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .pack { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); padding: .9rem .8rem; display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: .95rem; transition: box-shadow .18s, border-color .18s, transform .18s; }
+  .pack:hover { border-color: rgba(255,210,63,.6); box-shadow: 0 0 14px rgba(255,210,63,.35); transform: translateY(-2px); }
+  .pack .emo { font-size: 1.5rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(255,255,255,.2)); }
+  .pack small { display: block; color: var(--dim); font-weight: 500; font-size: .8rem; }
+  .trust { background: linear-gradient(90deg, rgba(74,222,128,.08), rgba(62,198,255,.08)); border-block: 1px solid var(--line); }
+  .trust .items { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+  @media (max-width: 900px) { .trust .items { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .trust .items { grid-template-columns: 1fr; } }
+  .trust .item { display: flex; gap: 14px; align-items: flex-start; }
+  .trust .item .px { flex: none; width: 36px; height: 36px; margin-top: 2px; }
+  .trust h4 { margin: 0 0 .25rem; }
+  .trust p { margin: 0; color: var(--muted); font-size: .95rem; }
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; align-items: stretch; }
+  @media (max-width: 900px) { .plans { grid-template-columns: 1fr; } }
+  .plan { display: flex; flex-direction: column; }
+  .plan .checks { flex: 1; }
+  .plan-hot { border-color: rgba(124,92,255,.7); box-shadow: 0 0 0 1px rgba(124,92,255,.5), var(--glow-violet); }
+  .kit-strip { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 1.5rem; display: grid; grid-template-columns: auto 1fr auto; gap: 1.5rem; align-items: center; }
+  @media (max-width: 760px) { .kit-strip { grid-template-columns: 1fr; } }
+  .community-teaser { display: grid; grid-template-columns: 1.1fr .9fr; gap: 2rem; align-items: center; }
+  @media (max-width: 860px) { .community-teaser { grid-template-columns: 1fr; } }
+  .thread { display: flex; gap: 12px; align-items: flex-start; padding: .9rem 0; border-bottom: 1px solid var(--line); }
+  .thread:last-child { border-bottom: 0; }
+  .thread .meta { color: var(--dim); font-size: .85rem; }
+  .thread strong { display: block; }
+  .pack-wall-note { color: var(--dim); font-size: .9rem; }
+  .big-stat { font-family: var(--display); font-weight: 800; font-size: clamp(3rem, 8vw, 5rem); line-height: .9; }
+</style>
+</head>
+<body data-page="home">
+<div id="site-header"></div>
+
+<main id="main">
+
+<!-- ============================ HERO ============================ -->
+<section class="hero booting" aria-labelledby="hero-title">
+  <div class="hero-glow"></div>
+  <div class="hero-sun"></div>
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-scan" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="boot boot-hide" aria-hidden="true">
+        <span class="loadbar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="press-start">INSERT CONTROLLER</span>
+      </div>
+      <h1 id="hero-title" class="boot-hide">Your controller.<br><span class="grad-text">Super-powered.</span></h1>
+      <p class="lead boot-hide">Clutch is a Windows PC app that upgrades any game controller: Xbox, PlayStation, Switch Pro, GameSir and more. Tap a power-up, pick a game pack, play. No scripts or coding.</p>
+      <div class="hero-actions boot-hide">
+        <a class="btn btn-primary btn-lg" href="download.html"><i data-icon="download" class="ico"></i> Download free for Windows</a>
+        <a class="btn btn-ghost" href="features.html">See what it does</a>
+      </div>
+      <p class="hero-note boot-hide">Windows 10 and 11. Free to start. Pro is $19.99 one time, and there is no subscription.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= MARQUEE: controllers ======================= -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Xbox controllers</span><span>PlayStation controllers</span><span>Switch Pro</span><span>GameSir</span><span>One-tap power-ups</span><span>48 game packs</span><span>Pay once</span><span>Parent PIN</span><span>Online-safe mode</span>
+    <span>Xbox controllers</span><span>PlayStation controllers</span><span>Switch Pro</span><span>GameSir</span><span>One-tap power-ups</span><span>48 game packs</span><span>Pay once</span><span>Parent PIN</span><span>Online-safe mode</span>
+  </div>
+</div>
+
+<!-- ========================= FEATURE REEL ========================= -->
+<section class="section" aria-labelledby="feat-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">POWER-UPS</p>
+      <h2 id="feat-title">Tap it. Feel it. <span class="grad-text">Play better.</span></h2>
+      <p class="lead">Every power-up is one tap. No menus full of sliders, no guessing what a number does.</p>
+    </div>
+    <div class="reel">
+      <article class="panel panel-hover">
+        <div class="icon-box"><i data-icon="bolt"></i></div>
+        <h3>Hair triggers</h3>
+        <p>Fire the instant you touch the trigger instead of pulling it all the way down.</p>
+      </article>
+      <article class="panel panel-hover panel-pink">
+        <div class="icon-box"><i data-icon="target"></i></div>
+        <h3>Smooth aim &amp; steady aim</h3>
+        <p>Smooth aim takes the jitter out of your stick. Steady aim keeps your crosshair from drifting when you stop moving.</p>
+      </article>
+      <article class="panel panel-hover panel-violet">
+        <div class="icon-box"><i data-icon="wand"></i></div>
+        <h3>"How does it feel?" auto-tuning</h3>
+        <p>Play for a minute, answer one question, and Clutch tunes your settings for you.</p>
+      </article>
+      <article class="panel panel-hover">
+        <div class="icon-box"><i data-icon="eye"></i></div>
+        <h3>Custom crosshair overlay</h3>
+        <p>Pick a shape and color. It sits on top of any game.</p>
+        <p class="pixel">PRO</p>
+      </article>
+      <article class="panel panel-hover panel-pink">
+        <div class="icon-box"><i data-icon="star"></i></div>
+        <h3>Built-in Aim Lab practice</h3>
+        <p>Warm up and track your progress without leaving Clutch.</p>
+        <p class="pixel">PRO</p>
+      </article>
+      <article class="panel panel-hover panel-violet">
+        <div class="icon-box"><i data-icon="menu"></i></div>
+        <h3>In-game quick menu</h3>
+        <p>Hold a button to switch profiles mid-match. No alt-tabbing.</p>
+      </article>
+    </div>
+    <div class="row" style="margin-top:1.75rem">
+      <a class="btn btn-ghost" href="features.html">All features</a>
+      <span class="muted">One-click setup. A profile for every kid.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== GAME PACK WALL ======================== -->
+<section class="section" style="background:rgba(26,36,71,.35);border-block:1px solid var(--line)" aria-labelledby="packs-title">
+  <div class="container">
+    <div class="section-head row between" style="align-items:flex-end">
+      <div>
+        <p class="eyebrow">48 GAME PACKS</p>
+        <h2 id="packs-title">Ready-made for the games you play</h2>
+        <p class="lead">Pick a pack and the triggers, sticks and buttons are set up for that game. Here are a few; the full wall is searchable.</p>
+      </div>
+      <a class="btn btn-yellow" href="packs.html">Browse all 48</a>
+    </div>
+    <div class="wall" aria-label="Sample game packs">
+      <div class="pack"><span class="emo" aria-hidden="true">🎯</span><div>Shooters<small>12 packs</small></div></div>
+      <div class="pack"><span class="emo" aria-hidden="true">🏎️</span><div>Racing<small>8 packs</small></div></div>
+      <div class="pack"><span class="emo" aria-hidden="true">🏀</span><div>Sports<small>8 packs</small></div></div>
+      <div class="pack"><span class="emo" aria-hidden="true">🧱</span><div>Building<small>6 packs</small></div></div>
+      <div class="pack"><span class="emo" aria-hidden="true">🥊</span><div>Fighting<small>6 packs</small></div></div>
+      <div class="pack"><span class="emo" aria-hidden="true">⚔️</span><div>Action &amp; adventure<small>8 packs</small></div></div>
+    </div>
+    <p class="pack-wall-note" style="margin-top:1rem">Packs are named by genre and play style, not by game logos. Starter packs come with Free; all 48 come with Pro.</p>
+  </div>
+</section>
+
+<!-- ======================= PARENT TRUST STRIP ======================= -->
+<section class="section-tight trust" aria-labelledby="trust-title">
+  <div class="container">
+    <h2 id="trust-title" class="sr-only">Built with parents in mind</h2>
+    <div class="items">
+      <div class="item"><i data-icon="shield"></i><div><h4>Online-safe mode, on by default</h4><p>Pauses risky mods in online games so kids' accounts stay in good standing.</p></div></div>
+      <div class="item"><i data-icon="lock"></i><div><h4>Parent PIN</h4><p>Lock the settings that matter. Kids pick packs; parents hold the key.</p></div></div>
+      <div class="item"><i data-icon="clock"></i><div><h4>Quiet hours &amp; break reminders</h4><p>Set the hours Clutch is off and get a gentle "take five" on a schedule.</p></div></div>
+      <div class="item"><i data-icon="family"></i><div><h4>A profile for every kid</h4><p>Each kid gets their own settings, packs and progress. Family covers 3 PCs.</p></div></div>
+    </div>
+    <p style="margin:1.25rem 0 0"><a href="parents.html">Read the parents page, including "Will my kid get banned?" →</a></p>
+  </div>
+</section>
+
+<!-- ======================== PRICING PREVIEW ======================== -->
+<section class="section" aria-labelledby="price-title">
+  <div class="container">
+    <div class="section-head center">
+      <p class="eyebrow">PRICING</p>
+      <h2 id="price-title">Pay once. <span class="grad-text">No subscription.</span></h2>
+      <p class="lead">Start free. Upgrade when you want everything. The price you see is the price you pay, once.</p>
+    </div>
+    <div class="plans">
+      <article class="panel plan">
+        <h3>Clutch Free</h3>
+        <p class="price price-free">$0</p>
+        <ul class="checks">
+          <li>Remaps</li><li>Stick tuning</li><li>Trigger tuning</li><li>Starter game packs</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="download.html">Download free</a>
+      </article>
+      <article class="panel plan plan-hot">
+        <span class="badge badge-yellow tilt sticker-corner">MOST POPULAR</span>
+        <h3>Clutch Pro</h3>
+        <p class="price">$19.99 <small>one time</small></p>
+        <ul class="checks">
+          <li>Everything in Free</li><li>All 48 game packs</li><li>Aim Lab practice</li><li>Custom crosshair</li><li>Macros</li><li>Family controls (PIN, quiet hours, online-safe settings)</li>
+        </ul>
+        <button class="btn btn-primary btn-block" data-buy="pro">Get Pro</button>
+      </article>
+      <article class="panel plan">
+        <h3>Family</h3>
+        <p class="price">$29.99 <small>one time · 3 PCs</small></p>
+        <ul class="checks">
+          <li>Everything in Pro</li><li>3 PC activations</li><li>A profile for every kid</li>
+        </ul>
+        <button class="btn btn-ghost btn-block" data-buy="family">Get Family</button>
+      </article>
+    </div>
+    <p class="center dim" style="margin-top:1.25rem;font-size:.9rem">Parent or guardian purchase; buyers must be 18+. 14-day refund policy. <a href="pricing.html">Full pricing details</a></p>
+
+    <div class="kit-strip" style="margin-top:2.5rem">
+      <i data-icon="box" class="px-lg"></i>
+      <div>
+        <div class="row" style="gap:10px;margin-bottom:.4rem"><h3 style="margin:0">Clutch Console Kit</h3><span class="badge badge-pink">COMING SOON</span></div>
+        <p style="margin:0">A plug-in box that brings Clutch to consoles, set up from a phone app over Bluetooth. From $79 with Pro included. Waitlist only for now.</p>
+      </div>
+      <a class="btn btn-yellow" href="console-kit.html">Join the waitlist</a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= COMMUNITY TEASER ======================= -->
+<section class="section" style="background:rgba(26,36,71,.35);border-top:1px solid var(--line)" aria-labelledby="comm-title">
+  <div class="container community-teaser">
+    <div>
+      <p class="eyebrow">COMMUNITY</p>
+      <h2 id="comm-title">Share packs. Fix setups. <span class="grad-text">Talk to the founder.</span></h2>
+      <p class="lead">A forum where players post their settings, help each other with setup, vote on what gets built next, and ask the founder anything in a monthly Q&amp;A.</p>
+      <ul class="checks pink">
+        <li>Profile &amp; pack sharing</li>
+        <li>Feature requests with upvotes and Planned / In progress / Shipped statuses</li>
+        <li>"Talk to the founder" monthly Q&amp;A, pinned</li>
+        <li>13+ only, usernames only, no private messages, report button on every post</li>
+      </ul>
+      <div class="row"><a class="btn btn-primary" href="community.html">Visit the forum</a><a class="btn btn-ghost" href="guidelines.html">Community rules</a></div>
+    </div>
+    <div class="panel">
+      <div class="row between" style="margin-bottom:.5rem"><strong>Latest threads</strong><span class="badge badge-dim">PREVIEW</span></div>
+      <div class="thread"><i data-avatar="0"></i><div><strong>Welcome to Clutch: start here <span class="badge badge-violet">DEV</span></strong><span class="meta">Announcements · pinned</span></div></div>
+      <div class="thread"><i data-avatar="3"></i><div><strong>Talk to the founder: November Q&amp;A</strong><span class="meta">Announcements · pinned</span></div></div>
+      <div class="thread"><i data-avatar="5"></i><div><strong>My racing pack settings (smooth steering, hair brake)</strong><span class="meta">Profile &amp; Pack Sharing</span></div></div>
+      <div class="thread"><i data-avatar="1"></i><div><strong>Double-press on A button: the HidHide fix that worked</strong><span class="meta">Help &amp; Setup</span></div></div>
+      <div class="thread"><i data-avatar="6"></i><div><strong>Request: per-game crosshair colors <span class="badge badge-ok">PLANNED</span></strong><span class="meta">Feature Requests</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FINAL CTA ============================ -->
+<section class="section center" aria-labelledby="cta-title">
+  <div class="container">
+    <p class="press-start blink" aria-hidden="true">PRESS START</p>
+    <h2 id="cta-title" style="margin-top:.75rem">Ready when you are.</h2>
+    <p class="lead">Download Clutch, plug in your controller, and tap your first power-up in under a minute.</p>
+    <div class="row" style="justify-content:center;margin-top:1.5rem">
+      <a class="btn btn-primary btn-lg" href="download.html"><i data-icon="download" class="ico"></i> Download free for Windows</a>
+      <a class="btn btn-ghost" href="guides.html">Read the setup guide</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+</body>
+</html>

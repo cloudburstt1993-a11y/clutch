@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog &amp; news — Clutch</title>
+<meta name="description" content="What changed in Clutch and what the founder is working on. Release notes live on GitHub; dev posts live here.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/changelog">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/changelog">
+<meta property="og:title" content="Changelog &amp; news — Clutch">
+<meta property="og:description" content="What changed in Clutch and what the founder is working on. Release notes live on GitHub; dev posts live here.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Changelog &amp; news — Clutch">
+<meta name="twitter:description" content="What changed in Clutch and what the founder is working on. Release notes live on GitHub; dev posts live here.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Changelog-only styles */
+  .log-layout { display: grid; grid-template-columns: 1fr 300px; gap: 2rem; align-items: start; }
+  @media (max-width: 900px) { .log-layout { grid-template-columns: 1fr; } }
+  .pill-nav .count { font-family: var(--pixel); font-size: .5rem; margin-left: 4px; opacity: .8; }
+  .pill-nav button { min-height: 44px; }
+  .post-count { color: var(--dim); font-size: .9rem; margin: -.75rem 0 1rem; }
+  .post { margin-bottom: 1.25rem; padding: 1.5rem; }
+  .post-news { border-color: rgba(124,92,255,.45); box-shadow: inset 4px 0 0 var(--violet); }
+  .post-release { box-shadow: inset 4px 0 0 var(--cyan); }
+  .post-target { box-shadow: inset 4px 0 0 var(--yellow), 0 0 0 1px rgba(255,210,63,.5); }
+  .post-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 1rem; }
+  .post-head .avatar { width: 56px; height: 56px; }
+  .release-ico { width: 56px; height: 56px; margin: 0; flex: none; }
+  .release-ico .px { width: 32px; height: 32px; }
+  .post-meta { min-width: 0; }
+  .post-title { font-size: clamp(1.5rem, 3.5vw, 2.1rem); margin: .5rem 0 .25rem; }
+  .post-by { font-size: .9rem; margin: 0; }
+  .post-body { font-size: 1.03rem; }
+  .post-body p:last-child { margin-bottom: 0; }
+  .post-foot { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--line); font-size: .85rem; }
+  .post-foot a { min-height: 44px; display: inline-flex; align-items: center; }
+  .aside { position: sticky; top: calc(var(--nav-h) + 16px); display: grid; gap: 1rem; }
+  @media (max-width: 900px) { .aside { position: static; } }
+  .aside .panel p { font-size: .95rem; }
+  .rss { display: flex; gap: 12px; align-items: flex-start; }
+  .rss .px { flex: none; width: 36px; height: 36px; margin-top: 2px; }
+  .rss-sym { font-family: var(--pixel); font-size: .55rem; color: var(--yellow); letter-spacing: .04em; }
+</style>
+</head>
+<body data-page="changelog">
+<div id="site-header"></div>
+
+<main id="main">
+
+<section class="page-head" aria-labelledby="log-title">
+  <div class="container">
+    <p class="eyebrow">CHANGELOG &amp; NEWS</p>
+    <h1 id="log-title">What changed. <span class="grad-text">What's next.</span></h1>
+    <p class="lead">Release notes for every build, plus short posts from the founder about what is being worked on. No marketing voice, just updates.</p>
+  </div>
+</section>
+
+<section class="section-tight" aria-label="Posts">
+  <div class="container log-layout">
+    <div>
+      <nav class="pill-nav" id="post-filter" aria-label="Filter posts"></nav>
+      <p class="post-count" id="post-count" aria-live="polite"></p>
+      <div id="post-feed"></div>
+    </div>
+    <aside class="aside" aria-label="Follow Clutch">
+      <div class="panel rss">
+        <i data-icon="download"></i>
+        <div>
+          <p class="rss-sym" aria-hidden="true">▣ FEED</p>
+          <h3 style="margin:.3rem 0 .4rem">Follow releases on GitHub</h3>
+          <p class="muted">Every build is published on the GitHub releases page with its notes. Watch the repository there to get notified when a new version lands.</p>
+          <a class="btn btn-ghost btn-sm" data-releases href="#" target="_blank" rel="noopener">Releases on GitHub</a>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 style="margin:0 0 .4rem">Dev posts</h3>
+        <p class="muted">Posts marked <span class="badge badge-violet">DEV</span> are written by the founder. Announcements are also pinned in the forum's Announcements category.</p>
+        <a class="btn btn-ghost btn-sm" href="community.html">Open the forum</a>
+      </div>
+      <div class="panel">
+        <h3 style="margin:0 0 .4rem">Have a request?</h3>
+        <p class="muted">Feature requests live in the forum with upvotes and Planned / In progress / Shipped statuses, so you can see what is coming.</p>
+        <a class="btn btn-ghost btn-sm" href="community.html">Feature requests</a>
+      </div>
+    </aside>
+  </div>
+</section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/changelog-data.js"></script>
+<script src="js/changelog.js"></script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — Clutch</title>
+<meta name="description" content="Clutch pricing: Free, Pro $19.99 one time, Family $29.99 for 3 PCs. Pay once, no subscription. Console Kit from $79, coming soon.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/pricing">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/pricing">
+<meta property="og:title" content="Pricing — Clutch">
+<meta property="og:description" content="Clutch pricing: Free, Pro $19.99 one time, Family $29.99 for 3 PCs. Pay once, no subscription. Console Kit from $79, coming soon.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pricing — Clutch">
+<meta name="twitter:description" content="Clutch pricing: Free, Pro $19.99 one time, Family $29.99 for 3 PCs. Pay once, no subscription. Console Kit from $79, coming soon.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Pricing-only styles */
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; align-items: stretch; margin-top: 1rem; }
+  @media (max-width: 900px) { .plans { grid-template-columns: 1fr; } }
+  .plan { display: flex; flex-direction: column; padding-top: 1.75rem; }
+  .plan .checks { flex: 1; }
+  .plan .who { color: var(--dim); font-size: .92rem; margin-bottom: 1rem; }
+  .plan-hot { border-color: rgba(124,92,255,.7); box-shadow: 0 0 0 1px rgba(124,92,255,.5), var(--glow-violet); }
+  .table th:not(:first-child), .table td:not(:first-child) { text-align: center; width: 16%; min-width: 92px; }
+  .table th:first-child, .table td:first-child { min-width: 180px; }
+  .table thead th { font-family: var(--display); font-weight: 800; font-size: 1.15rem; color: var(--text); text-transform: uppercase; letter-spacing: .03em; }
+  .table thead th .pixel { display: block; color: var(--yellow); margin-top: 4px; font-size: .5rem; }
+  .table tbody th { font-weight: 600; color: var(--text); }
+  .table .yes, .table .no { display: inline-grid; place-items: center; width: 22px; height: 22px; }
+  .table .yes { background: var(--cyan); clip-path: polygon(0 50%, 25% 50%, 25% 75%, 50% 75%, 50% 50%, 75% 50%, 75% 25%, 100% 25%, 100% 0, 75% 0, 75% 25%, 50% 25%, 50% 50%, 25% 50%, 25% 25%, 0 25%); }
+  .table .no { background: var(--dim); opacity: .5; clip-path: polygon(0 40%, 100% 40%, 100% 60%, 0 60%); width: 14px; height: 14px; }
+  .table .sub { display: block; color: var(--dim); font-size: .85rem; font-weight: 500; }
+  .table tr.kit td, .table tr.kit th { background: rgba(124,92,255,.08); border-top: 2px solid var(--line-strong); }
+  .table tr.group th { font-family: var(--pixel); font-size: .5rem; color: var(--cyan); padding-top: 1.1rem; border-bottom: 0; }
+  .notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  @media (max-width: 900px) { .notes { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .notes { grid-template-columns: 1fr; } }
+  .notes .panel { padding: 1.1rem; display: flex; gap: 12px; align-items: flex-start; }
+  .notes .panel .px { flex: none; width: 32px; height: 32px; margin-top: 2px; }
+  .notes h4 { margin: 0 0 .25rem; }
+  .notes p { margin: 0; color: var(--muted); font-size: .95rem; }
+  .faq { max-width: 760px; }
+  .swipe-hint { display: none; color: var(--dim); font-size: .88rem; margin: 0 0 .5rem; }
+  @media (max-width: 760px) { .swipe-hint { display: block; } .table th:first-child, .table td:first-child { min-width: 150px; } .table thead th { position: sticky; top: 0; } }
+</style>
+</head>
+<body data-page="pricing">
+<div id="site-header"></div>
+
+<main id="main">
+
+<!-- ============================ PAGE HEAD ============================ -->
+<section class="page-head center" aria-labelledby="page-title">
+  <div class="container">
+    <p class="eyebrow">PRICING</p>
+    <h1 id="page-title">Pay once. <span class="grad-text">No subscription.</span></h1>
+    <p class="lead">Start free. Upgrade when you want everything. The price you see is the price you pay, one time, and it is yours for good.</p>
+  </div>
+</section>
+
+<!-- ============================== PLANS ============================== -->
+<section class="section-tight" aria-labelledby="plans-title">
+  <div class="container">
+    <h2 id="plans-title" class="sr-only">Plans</h2>
+    <div class="plans">
+
+      <article class="panel plan">
+        <h3>Clutch Free</h3>
+        <p class="price price-free">$0</p>
+        <p class="who">Try it with the controller you already own.</p>
+        <ul class="checks">
+          <li>Button remaps</li>
+          <li>Stick tuning</li>
+          <li>Trigger tuning</li>
+          <li>Starter game packs</li>
+          <li>Online-safe mode, on by default</li>
+        </ul>
+        <button class="btn btn-ghost btn-block" data-buy="free"><i data-icon="download" class="ico"></i> Download free</button>
+      </article>
+
+      <article class="panel plan plan-hot">
+        <span class="badge badge-yellow tilt sticker-corner">MOST POPULAR</span>
+        <h3>Clutch Pro</h3>
+        <p class="price">$19.99 <small>one time · 1 PC</small></p>
+        <p class="who">Everything Clutch does, on one PC.</p>
+        <ul class="checks">
+          <li>Everything in Free</li>
+          <li>All 48 game packs</li>
+          <li>Aim Lab practice</li>
+          <li>Custom crosshair overlay</li>
+          <li>Macros</li>
+          <li>Family controls: parent PIN, quiet hours, online-safe settings</li>
+        </ul>
+        <button class="btn btn-primary btn-block" data-buy="pro">Get Pro</button>
+      </article>
+
+      <article class="panel plan">
+        <h3>Clutch Family</h3>
+        <p class="price">$29.99 <small>one time · 3 PCs</small></p>
+        <p class="who">Pro for the whole house.</p>
+        <ul class="checks">
+          <li>Everything in Pro</li>
+          <li>3 PC activations</li>
+          <li>A profile for every kid on every PC</li>
+        </ul>
+        <button class="btn btn-yellow btn-block" data-buy="family">Get Family</button>
+      </article>
+
+    </div>
+    <p class="center dim" style="margin:1.25rem auto 0;font-size:.9rem">Parent or guardian purchase; buyers must be 18+. 14-day refund policy. Prices in USD.</p>
+  </div>
+</section>
+
+<!-- ============================ COMPARISON ============================ -->
+<section class="section" aria-labelledby="compare-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">COMPARE</p>
+      <h2 id="compare-title">What's in each plan</h2>
+    </div>
+    <p class="swipe-hint">Swipe sideways to see every plan.</p>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Feature</th>
+            <th scope="col">Free <span class="pixel">$0</span></th>
+            <th scope="col">Pro <span class="pixel">$19.99</span></th>
+            <th scope="col">Family <span class="pixel">$29.99</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><th scope="row" colspan="4">CONTROLLER</th></tr>
+          <tr><th scope="row">Button remaps</th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">Stick tuning</th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">Trigger tuning</th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">One-tap power-ups <span class="sub">Hair triggers, smooth aim, steady aim</span></th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">"How does it feel?" auto-tuning</th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">In-game quick menu</th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+
+          <tr class="group"><th scope="row" colspan="4">PACKS &amp; PRO TOOLS</th></tr>
+          <tr><th scope="row">Game packs</th><td>Starter packs</td><td>All 48</td><td>All 48</td></tr>
+          <tr><th scope="row">Aim Lab practice</th><td><span class="no" role="img" aria-label="Not included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">Custom crosshair overlay</th><td><span class="no" role="img" aria-label="Not included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">Macros</th><td><span class="no" role="img" aria-label="Not included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+
+          <tr class="group"><th scope="row" colspan="4">FAMILY</th></tr>
+          <tr><th scope="row">Online-safe mode <span class="sub">On by default in every plan</span></th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">Family controls <span class="sub">Parent PIN, quiet hours, break reminders, online-safe settings</span></th><td><span class="no" role="img" aria-label="Not included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">A profile for every kid</th><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td><td><span class="yes" role="img" aria-label="Included"></span></td></tr>
+          <tr><th scope="row">PC activations</th><td>1</td><td>1</td><td>3</td></tr>
+
+          <tr class="group"><th scope="row" colspan="4">PRICE</th></tr>
+          <tr><th scope="row">One-time price</th><td class="price price-free" style="font-size:.9rem">$0</td><td class="price" style="font-size:.9rem">$19.99</td><td class="price" style="font-size:.9rem">$29.99</td></tr>
+          <tr><th scope="row">Subscription</th><td>None</td><td>None</td><td>None</td></tr>
+
+          <tr class="kit">
+            <th scope="row">Clutch Console Kit <span class="badge badge-pink" style="margin-left:6px">COMING SOON</span><span class="sub">Plug-in box for consoles, set up from a phone app over Bluetooth</span></th>
+            <td colspan="3" style="text-align:left">From $79, Pro included. Waitlist only for now. <a href="console-kit.html">Join the waitlist →</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CHECKOUT NOTES ============================ -->
+<section class="section-tight" style="background:rgba(26,36,71,.35);border-block:1px solid var(--line)" aria-labelledby="notes-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">BEFORE YOU BUY</p>
+      <h2 id="notes-title">Checkout notes</h2>
+    </div>
+    <div class="notes">
+      <div class="panel"><i data-icon="family"></i><div><h4>Parent or guardian purchase</h4><p>Clutch is used by kids and teens, so a parent or guardian completes checkout and receives the license key.</p></div></div>
+      <div class="panel"><i data-icon="shield"></i><div><h4>Buyers must be 18+</h4><p>You confirm you are 18 or older before checkout opens.</p></div></div>
+      <div class="panel"><i data-icon="lock"></i><div><h4>Your license key</h4><p>It is emailed to you and shown in your <a href="account.html">account</a>. Enter it in Clutch under Settings → License.</p></div></div>
+      <div class="panel"><i data-icon="controller"></i><div><h4>Family = 3 activations</h4><p>One key, three PCs. Each PC gets its own set of kid profiles.</p></div></div>
+      <div class="panel"><i data-icon="gear"></i><div><h4>Tax and VAT</h4><p>Checkout is handled by our merchant of record, which collects sales tax or VAT where required.</p></div></div>
+      <div class="panel"><i data-icon="heart"></i><div><h4>14-day refund policy</h4><p>Changed your mind? See the <a href="refunds.html">Refund Policy</a> for how it works.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FAQ ============================== -->
+<section class="section" aria-labelledby="faq-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">FAQ</p>
+      <h2 id="faq-title">Pricing questions</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>What happens after I pay?</summary>
+        <div class="body"><p>Your license key is emailed to you and appears in your <a href="account.html">account</a>. Install Clutch from the <a href="download.html">download page</a>, open Settings → License, and paste the key. Pro features switch on right away.</p></div>
+      </details>
+      <details>
+        <summary>Can I move my license to a new PC?</summary>
+        <div class="body"><p>Yes. On the old PC, open Settings → License and choose Deactivate. Then enter your key on the new PC. Family keys have 3 activations, so you can also just add the new PC if you have one free.</p></div>
+      </details>
+      <details>
+        <summary>Can I upgrade from Free to Pro, or Pro to Family?</summary>
+        <div class="body"><p>Free to Pro or Family: just buy the plan you want and enter the key. Pro to Family: <a href="support.html">contact support</a> and we will sort it out with you.</p></div>
+      </details>
+      <details>
+        <summary>Is there really no subscription?</summary>
+        <div class="body"><p>Really. Pro is $19.99 once. Family is $29.99 once. There is nothing to cancel and nothing that renews.</p></div>
+      </details>
+      <details>
+        <summary>Can I buy the Console Kit now?</summary>
+        <div class="body"><p>Not yet. The Console Kit is coming soon, from $79 with Pro included. You can <a href="console-kit.html">join the waitlist</a>; no payment is taken and no date is promised.</p></div>
+      </details>
+    </div>
+    <div class="row" style="margin-top:2rem">
+      <button class="btn btn-primary btn-lg" data-buy="pro">Get Pro · $19.99</button>
+      <button class="btn btn-yellow" data-buy="family">Get Family · $29.99</button>
+      <a class="btn btn-ghost" href="download.html">Start free</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community — Clutch</title>
+<meta name="description" content="The Clutch forum: share pack settings, get setup help, vote on feature requests and talk to the founder. 13+, usernames only, no private messages.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/community">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/community">
+<meta property="og:title" content="Community — Clutch">
+<meta property="og:description" content="The Clutch forum: share pack settings, get setup help, vote on feature requests and talk to the founder. 13+, usernames only, no private messages.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Community — Clutch">
+<meta name="twitter:description" content="The Clutch forum: share pack settings, get setup help, vote on feature requests and talk to the founder. 13+, usernames only, no private messages.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Community-only styles */
+  .forum-strip { margin: 1rem 0 0; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; }
+  .forum-strip p { margin: 0; }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--dim); font-size: .92rem; margin: 1.25rem 0 .75rem; }
+  .crumbs a { color: var(--muted); }
+  .crumbs .sep { color: var(--dim); }
+  .forum-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; justify-content: space-between; margin-bottom: 1.25rem; }
+  .forum-head h1, .forum-head h2 { margin-bottom: .2em; }
+  .forum-head h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); }
+  .forum-head p { margin: 0; color: var(--muted); }
+  .cat-list { display: grid; gap: 10px; }
+  .cat-row { display: grid; grid-template-columns: 56px 1fr auto; gap: 1rem; align-items: center; padding: 1rem 1.2rem; text-decoration: none; color: var(--text); }
+  .cat-row:hover { text-decoration: none; }
+  .cat-row .px { width: 40px; height: 40px; }
+  .cat-row h3 { margin: 0 0 .15em; font-size: 1.3rem; }
+  .cat-row p { margin: 0; color: var(--muted); font-size: .95rem; }
+  .cat-row .latest { color: var(--dim); font-size: .85rem; margin-top: .3rem; }
+  .cat-row .count { text-align: right; min-width: 70px; }
+  .cat-row .count .stat { display: block; font-size: 1rem; }
+  .cat-row .count small { color: var(--dim); font-size: .8rem; }
+  @media (max-width: 560px) { .cat-row { grid-template-columns: 40px 1fr; } .cat-row .count { grid-column: 2; text-align: left; } }
+  .thread-list { display: grid; gap: 8px; }
+  .thread-row { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: .9rem 1rem; color: var(--text); border-left: 3px solid transparent; }
+  .thread-row:hover { text-decoration: none; }
+  .thread-row.is-dev { border-left-color: var(--violet); }
+  .thread-row.is-pinned { background: rgba(255,210,63,.05); }
+  .thread-row .title { font-weight: 600; font-size: 1.05rem; line-height: 1.3; display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+  .thread-row .meta { color: var(--dim); font-size: .85rem; margin-top: .2rem; }
+  .thread-row .meta a { color: var(--muted); }
+  .thread-row .replies { text-align: right; color: var(--muted); font-size: .9rem; white-space: nowrap; }
+  @media (max-width: 560px) { .thread-row { grid-template-columns: 40px 1fr; } .thread-row .replies { grid-column: 2; text-align: left; } }
+  .post { display: grid; grid-template-columns: 48px 1fr; gap: 14px; padding: 1.2rem; border-left: 3px solid transparent; }
+  .post + .post { margin-top: 10px; }
+  .post.is-dev { border-left-color: var(--violet); box-shadow: inset 0 0 0 1px rgba(124,92,255,.35); }
+  .post.is-op { border-left-color: var(--cyan); }
+  .post.is-removed .body { color: var(--dim); font-style: italic; }
+  .post.is-pending { opacity: .8; border-style: dashed; }
+  .post .who { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: .92rem; color: var(--muted); }
+  .post .who .name { color: var(--text); font-weight: 700; font-size: 1rem; }
+  .post .body { margin-top: .5rem; }
+  .post .body p { max-width: none; }
+  .post .body p:last-child { margin-bottom: 0; }
+  .post .actions { margin-top: .75rem; display: flex; flex-wrap: wrap; gap: 8px; }
+  .post .actions .btn-sm { padding: .45rem .8rem; font-size: .85rem; min-height: 44px; }
+  @media (max-width: 480px) { .post { grid-template-columns: 1fr; } .post .avatar { width: 36px; height: 36px; } }
+  .reply-box { margin-top: 1.5rem; }
+  .reply-box textarea { min-height: 140px; }
+  .req-toolbar { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; align-items: center; justify-content: space-between; }
+  .req-toolbar .pill-nav { margin: 0; }
+  .req-list { display: grid; gap: 10px; margin-top: 1.25rem; }
+  .req-row { display: grid; grid-template-columns: 64px 1fr; gap: 1rem; padding: 1rem 1.2rem 1rem 1rem; align-items: start; }
+  .vote { display: grid; place-items: center; gap: 2px; width: 64px; min-height: 64px; background: var(--bg); border: 2px solid var(--line-strong); border-radius: var(--r-sm); color: var(--text); cursor: pointer; padding: 6px 2px; }
+  .vote:hover { border-color: var(--cyan); }
+  .vote[aria-pressed="true"] { border-color: var(--yellow); background: rgba(255,210,63,.12); color: var(--yellow); }
+  .vote[disabled] { opacity: .6; cursor: not-allowed; }
+  .vote .n { font-family: var(--pixel); font-size: .8rem; line-height: 1; }
+  .vote .arrow { font-size: .95rem; line-height: 1; }
+  .req-row h3 { margin: 0 0 .25em; font-size: 1.25rem; }
+  .req-row .top { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .req-row p { margin: .25rem 0 0; color: var(--muted); max-width: none; }
+  .req-row .meta { color: var(--dim); font-size: .85rem; margin-top: .4rem; }
+  .profile-card { display: grid; grid-template-columns: 96px 1fr; gap: 1.25rem; align-items: center; }
+  .profile-card .avatar-lg { width: 96px; height: 96px; }
+  .profile-card h1 { margin: 0 0 .15em; font-size: clamp(2rem, 6vw, 3rem); }
+  @media (max-width: 480px) { .profile-card { grid-template-columns: 1fr; } }
+  .empty { color: var(--dim); text-align: center; padding: 2.5rem 1rem; }
+  .locked { background: rgba(255,95,162,.06); }
+  .wrap-any, .post .body, .thread-row .title, .req-row h3, .req-row p { overflow-wrap: anywhere; }
+  .sort-select { min-height: 44px; background: var(--bg); color: var(--text); border: 2px solid var(--line-strong); border-radius: var(--r-sm); padding: .4rem 2.2rem .4rem .8rem; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%; background-size: 6px 6px; background-repeat: no-repeat; }
+  .section-forum { padding: 0 0 clamp(3rem, 8vw, 5rem); }
+  .inline-login { color: var(--muted); }
+</style>
+</head>
+<body data-page="community">
+<div id="site-header"></div>
+
+<main id="main">
+  <div class="container">
+    <div class="notice notice-pink forum-strip" role="note">
+      <p><strong>13+ community</strong> · public posts only · no private messages · be kind. <a href="guidelines.html">Read the rules</a></p>
+      <span class="row" style="gap:8px"><span class="badge badge-dim" title="Forum prototype: the threads shown are sample content stored in this browser">SAMPLE CONTENT</span><span id="discord-slot"></span></span>
+    </div>
+  </div>
+
+  <section class="section-forum" aria-live="polite">
+    <div class="container" id="app">
+      <p class="dim" style="padding:2rem 0">Loading the forum…</p>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/community-data.js"></script>
+<script src="js/community.js"></script>
+</body>
+</html>

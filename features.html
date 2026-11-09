@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Features — Clutch</title>
+<meta name="description" content="Every Clutch feature explained: one-tap power-ups, 48 game packs, auto-tuning, crosshair overlay, Aim Lab practice, quick menu, and parent controls.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/features">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/features">
+<meta property="og:title" content="Features — Clutch">
+<meta property="og:description" content="Every Clutch feature explained: one-tap power-ups, 48 game packs, auto-tuning, crosshair overlay, Aim Lab practice, quick menu, and parent controls.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Features — Clutch">
+<meta name="twitter:description" content="Every Clutch feature explained: one-tap power-ups, 48 game packs, auto-tuning, crosshair overlay, Aim Lab practice, quick menu, and parent controls.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Features-only styles */
+  .feat-list { display: grid; gap: clamp(2.5rem, 6vw, 4.5rem); }
+  .feat { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
+  .feat:nth-child(even) .feat-shot { order: 2; }
+  .feat-shot { min-width: 0; }
+  .feat-body { min-width: 0; }
+  .feat-body h3 { font-size: clamp(1.6rem, 3.5vw, 2.3rem); margin-bottom: .4em; }
+  .feat-body .row { margin-bottom: .6rem; }
+  .feat-body .lead { font-size: 1.1rem; margin-bottom: .75rem; }
+  .why { display: flex; gap: 10px; align-items: flex-start; color: var(--muted); font-size: .98rem; margin: 0; padding: .75rem .9rem; background: rgba(13,19,40,.6); border: 1px solid var(--line); border-radius: var(--r-sm); border-left: 3px solid var(--yellow); }
+  .why strong { color: var(--yellow); font-weight: 700; flex: none; }
+  .feat .icon-box { margin-bottom: 0; width: 44px; height: 44px; }
+  .feat .icon-box .px { width: 30px; height: 30px; }
+  .group-head { margin: clamp(3rem, 7vw, 5rem) 0 clamp(1.5rem, 4vw, 2.5rem); padding-top: clamp(2rem, 5vw, 3rem); border-top: 1px solid var(--line); }
+  .group-head p { margin-bottom: 0; }
+  .plan-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 1.5rem; }
+  .jump { display: flex; gap: 6px; flex-wrap: wrap; margin: 0; }
+  @media (max-width: 760px) {
+    .feat { grid-template-columns: 1fr; }
+    .feat:nth-child(even) .feat-shot { order: 0; }
+  }
+  @media (max-width: 480px) { .why { flex-direction: column; gap: 4px; } }
+</style>
+</head>
+<body data-page="features">
+<div id="site-header"></div>
+
+<main id="main">
+
+<!-- ============================ PAGE HEAD ============================ -->
+<section class="page-head" aria-labelledby="page-title">
+  <div class="container">
+    <p class="eyebrow">FEATURES</p>
+    <h1 id="page-title">Everything Clutch <span class="grad-text">does</span></h1>
+    <p class="lead">Plug in a controller, tap a power-up, pick a pack. Here is every feature, what it does, and why you would want it. No scripts or coding anywhere.</p>
+    <nav class="pill-nav jump" aria-label="Jump to a section">
+      <a href="#power-ups">Power-ups</a>
+      <a href="#game-packs">Game packs</a>
+      <a href="#tuning">Tuning</a>
+      <a href="#pro-tools">Pro tools</a>
+      <a href="#everyday">Everyday</a>
+      <a href="#parents">For parents</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================ POWER-UPS ============================ -->
+<section class="section-tight" aria-labelledby="power-ups">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">ONE TAP</p>
+      <h2 id="power-ups">Power-ups</h2>
+      <p class="lead">Each one is a single button in Clutch. Tap it on, tap it off. Nothing to configure unless you want to.</p>
+    </div>
+    <div class="feat-list">
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: hair-triggers-toggle</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="bolt"></i></div><span class="badge badge-dim">FREE</span></div>
+          <h3>Hair triggers</h3>
+          <p class="lead">Fire the instant you touch the trigger instead of pulling it all the way down.</p>
+          <p class="why"><strong>Why it helps</strong><span>Less travel means your shot or brake happens the moment you decide, not a split second later.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: smooth-aim-toggle</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="target"></i></div><span class="badge badge-dim">FREE</span></div>
+          <h3>Smooth aim</h3>
+          <p class="lead">Takes the jitter out of your right stick so small movements stay small.</p>
+          <p class="why"><strong>Why it helps</strong><span>Your crosshair goes where you point it instead of twitching past the target.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: steady-aim-toggle</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="target"></i></div><span class="badge badge-dim">FREE</span></div>
+          <h3>Steady aim</h3>
+          <p class="lead">Keeps your crosshair from drifting when you let go of the stick.</p>
+          <p class="why"><strong>Why it helps</strong><span>Worn sticks drift. Steady aim stops the slow slide so you stay lined up when you stop moving.</span></p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GAME PACKS ============================ -->
+<section class="section-tight" aria-labelledby="game-packs">
+  <div class="container">
+    <div class="group-head">
+      <p class="eyebrow">READY-MADE</p>
+      <h2 id="game-packs">Game packs</h2>
+    </div>
+    <div class="feat-list">
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: game-pack-wall</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="controller"></i></div><span class="badge badge-violet">ALL 48 WITH PRO</span></div>
+          <h3>48 ready-made game packs</h3>
+          <p class="lead">Pick the kind of game you play and your triggers, sticks and buttons are set up for it in one tap.</p>
+          <p class="why"><strong>Why it helps</strong><span>You skip the guesswork. Packs are named by genre and play style, like "Battle royale shooter" or "Kart racer". Starter packs come free; all 48 come with Pro.</span></p>
+          <p style="margin-top:.9rem;margin-bottom:0"><a href="packs.html">Browse all 48 packs →</a></p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== TUNING ============================== -->
+<section class="section-tight" aria-labelledby="tuning">
+  <div class="container">
+    <div class="group-head">
+      <p class="eyebrow">NO SLIDERS</p>
+      <h2 id="tuning">Tuning that asks, not tells</h2>
+    </div>
+    <div class="feat-list">
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: how-does-it-feel-prompt</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="wand"></i></div><span class="badge badge-dim">FREE</span></div>
+          <h3>"How does it feel?" auto-tuning</h3>
+          <p class="lead">Play for a minute, answer one question, and Clutch adjusts your settings for you.</p>
+          <p class="why"><strong>Why it helps</strong><span>You never have to know what a dead zone or a curve is. You just say "too twitchy" or "too slow" and it fixes it.</span></p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================= PRO TOOLS ============================= -->
+<section class="section-tight" aria-labelledby="pro-tools">
+  <div class="container">
+    <div class="group-head">
+      <p class="eyebrow">PRO</p>
+      <h2 id="pro-tools">Pro tools</h2>
+      <p class="muted">Included with Pro and Family. Pay once, no subscription.</p>
+    </div>
+    <div class="feat-list">
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: crosshair-overlay-picker</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="eye"></i></div><span class="badge badge-violet">PRO</span></div>
+          <h3>Custom crosshair overlay</h3>
+          <p class="lead">Pick a shape, size and color. It sits on top of any game.</p>
+          <p class="why"><strong>Why it helps</strong><span>Some games hide the crosshair or make it hard to see. Yours stays exactly where you want it, in a color you can spot.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: aim-lab-practice</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="star"></i></div><span class="badge badge-violet">PRO</span></div>
+          <h3>Built-in Aim Lab practice</h3>
+          <p class="lead">Warm up and track your progress without leaving Clutch.</p>
+          <p class="why"><strong>Why it helps</strong><span>A few minutes of practice before a match beats learning mid-game, and you can see yourself get better over time.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: macro-editor</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="gear"></i></div><span class="badge badge-violet">PRO</span></div>
+          <h3>Macros</h3>
+          <p class="lead">Put a short sequence of button presses on one button.</p>
+          <p class="why"><strong>Why it helps</strong><span>Handy for combos and menus in single-player games. Online-safe mode pauses macros in online games by default.</span></p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== EVERYDAY ============================== -->
+<section class="section-tight" aria-labelledby="everyday">
+  <div class="container">
+    <div class="group-head">
+      <p class="eyebrow">EVERYDAY</p>
+      <h2 id="everyday">Small things you'll use every day</h2>
+    </div>
+    <div class="feat-list">
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: in-game-quick-menu</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="menu"></i></div><span class="badge badge-dim">FREE</span></div>
+          <h3>In-game quick menu</h3>
+          <p class="lead">Hold a button to switch profiles mid-match. No alt-tabbing.</p>
+          <p class="why"><strong>Why it helps</strong><span>Swap from your racing pack to your shooter pack without leaving the game or losing your place.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: one-click-setup</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="download"></i></div><span class="badge badge-dim">FREE</span></div>
+          <h3>One-click setup</h3>
+          <p class="lead">Run the installer, plug in your controller, and Clutch finds it.</p>
+          <p class="why"><strong>Why it helps</strong><span>Xbox, PlayStation, Switch Pro, GameSir and more work out of the box. No drivers to hunt down.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: kid-profiles</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="family"></i></div><span class="badge badge-dim">FREE</span></div>
+          <h3>A profile for every kid</h3>
+          <p class="lead">Each person gets their own settings, packs and progress.</p>
+          <p class="why"><strong>Why it helps</strong><span>Nobody messes up anybody else's setup. Family covers 3 PCs so everyone gets their own profile on their own machine.</span></p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PARENTS ============================== -->
+<section class="section-tight" aria-labelledby="parents">
+  <div class="container">
+    <div class="group-head">
+      <p class="eyebrow">FOR PARENTS</p>
+      <h2 id="parents">Parent <span class="grad-text">controls</span></h2>
+      <p class="muted">Built in from day one. Read more on the <a href="parents.html">parents page</a>.</p>
+    </div>
+    <div class="feat-list">
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: online-safe-mode</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="shield"></i></div><span class="badge badge-ok">ON BY DEFAULT</span></div>
+          <h3>Online-safe mode</h3>
+          <p class="lead">Pauses risky mods in online games, so power-ups that could get an account flagged stay off when it matters.</p>
+          <p class="why"><strong>Why it helps</strong><span>Kids keep the feel they like in single-player and stay in good standing online. It is on from the first launch; no tool can promise zero risk.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: parent-pin</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="lock"></i></div><span class="badge badge-violet">PRO</span></div>
+          <h3>Parent PIN</h3>
+          <p class="lead">Lock the settings that matter behind a PIN only you know.</p>
+          <p class="why"><strong>Why it helps</strong><span>Kids can pick packs and power-ups all day. Online-safe mode, quiet hours and profiles stay the way you set them.</span></p>
+        </div>
+      </article>
+
+      <article class="feat">
+        <div class="feat-shot"><div class="shot"><span class="pixel">SCREENSHOT: quiet-hours</span></div></div>
+        <div class="feat-body">
+          <div class="row"><div class="icon-box"><i data-icon="clock"></i></div><span class="badge badge-violet">PRO</span></div>
+          <h3>Quiet hours &amp; break reminders</h3>
+          <p class="lead">Set the hours Clutch is off, and get a gentle "take five" on a schedule.</p>
+          <p class="why"><strong>Why it helps</strong><span>School nights stay school nights, and long sessions get a built-in nudge to stretch.</span></p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PRICING CTA ============================== -->
+<section class="section center" aria-labelledby="cta-title">
+  <div class="container">
+    <p class="eyebrow">PRICING</p>
+    <h2 id="cta-title">Pay once. <span class="grad-text">No subscription.</span></h2>
+    <p class="lead">Start free. Pro is $19.99 one time and unlocks every feature on this page. Family covers 3 PCs for $29.99.</p>
+    <div class="plan-row">
+      <button class="btn btn-ghost" data-buy="free"><i data-icon="download" class="ico"></i> Download free</button>
+      <button class="btn btn-primary btn-lg" data-buy="pro">Get Pro · $19.99</button>
+      <button class="btn btn-yellow" data-buy="family">Get Family · $29.99</button>
+    </div>
+    <p class="dim" style="margin-top:1.25rem;font-size:.9rem">Parent or guardian purchase; buyers must be 18+. 14-day refund policy. <a href="pricing.html">Compare plans</a></p>
+  </div>
+</section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+</body>
+</html>

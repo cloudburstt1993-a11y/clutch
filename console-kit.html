@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console Kit (coming soon) — Clutch</title>
+<meta name="description" content="Clutch Console Kit: a plug-in box that brings Clutch to consoles, set up from a phone app over Bluetooth. From $79, Pro included. Coming soon. Join the waitlist.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/console-kit">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/console-kit">
+<meta property="og:title" content="Console Kit (coming soon) — Clutch">
+<meta property="og:description" content="Clutch Console Kit: a plug-in box that brings Clutch to consoles, set up from a phone app over Bluetooth. From $79, Pro included. Coming soon. Join the waitlist.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Console Kit (coming soon) — Clutch">
+<meta name="twitter:description" content="Clutch Console Kit: a plug-in box that brings Clutch to consoles, set up from a phone app over Bluetooth. From $79, Pro included. Coming soon. Join the waitlist.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Console Kit-only styles */
+  .kit-hero { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; }
+  @media (max-width: 760px) { .kit-hero { grid-template-columns: 1fr; } }
+  .kit-box { position: relative; width: 300px; max-width: 100%; aspect-ratio: 1; display: grid; place-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); background-image: linear-gradient(135deg, rgba(124,92,255,.18), rgba(62,198,255,.08) 60%, rgba(255,95,162,.14)); }
+  .kit-box .px-lg { width: 140px; height: 140px; }
+  .sticker { position: absolute; top: -18px; right: -14px; font-size: .85rem; padding: 14px 18px 12px; border-width: 3px; transform: rotate(6deg); box-shadow: 5px 5px 0 rgba(0,0,0,.5); }
+  @media (max-width: 760px) { .sticker { right: 8px; font-size: .7rem; } .kit-box { margin: 1rem auto 0; } }
+  .specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  @media (max-width: 760px) { .specs { grid-template-columns: 1fr; } }
+  .specs .panel { padding: 1.1rem; }
+  .specs .pixel { color: var(--cyan); margin-bottom: .4rem; }
+  .specs strong { font-family: var(--display); font-size: 1.5rem; font-weight: 800; display: block; line-height: 1; }
+  .specs p { margin: .35rem 0 0; color: var(--muted); font-size: .95rem; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; counter-reset: step; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+  .step { counter-increment: step; }
+  .step::before { content: counter(step); font-family: var(--pixel); font-size: .9rem; color: var(--yellow); display: inline-grid; place-items: center; width: 44px; height: 44px; border: 2px solid var(--yellow); border-radius: var(--r-sm); margin-bottom: .9rem; }
+  .step h3 { font-size: 1.35rem; }
+  .step p { margin: 0; color: var(--muted); }
+  .wait { display: grid; grid-template-columns: 1.1fr .9fr; gap: 2rem; align-items: start; }
+  @media (max-width: 860px) { .wait { grid-template-columns: 1fr; } }
+  .wait .panel { padding: 1.6rem; }
+</style>
+</head>
+<body data-page="console-kit">
+<div id="site-header"></div>
+
+<main id="main">
+
+<!-- ============================== HERO ============================== -->
+<section class="page-head" aria-labelledby="page-title">
+  <div class="container kit-hero">
+    <div>
+      <p class="eyebrow">CLUTCH CONSOLE KIT</p>
+      <h1 id="page-title">Clutch, on your <span class="grad-text">console</span></h1>
+      <p class="lead">A small plug-in box that brings Clutch power-ups and packs to consoles. Set it up from a phone app over Bluetooth. From $79, with Pro included.</p>
+      <div class="row">
+        <a class="btn btn-yellow btn-lg" href="#waitlist">Join the waitlist</a>
+        <a class="btn btn-ghost" href="community.html#console-kit-beta">Console Kit Beta forum</a>
+      </div>
+      <p class="hero-note">Waitlist only. No payment, no date promised.</p>
+    </div>
+    <div class="kit-box">
+      <i data-icon="box" class="px-lg"></i>
+      <span class="badge badge-pink sticker">COMING SOON</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ WHAT IT IS ============================ -->
+<section class="section-tight" aria-labelledby="what-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">WHAT IT IS</p>
+      <h2 id="what-title">The PC app, in a box</h2>
+      <p class="lead">Clutch today runs on a Windows PC. The Console Kit is a plug-in box for consoles, so the same one-tap power-ups and game packs work where there is no PC.</p>
+    </div>
+    <div class="specs">
+      <div class="panel"><p class="pixel">PLUG-IN BOX</p><strong>For consoles</strong><p>A small box that plugs in between your controller and your console.</p></div>
+      <div class="panel"><p class="pixel">PHONE APP</p><strong>Set up over Bluetooth</strong><p>Pick packs and power-ups from the Clutch phone app. No PC needed.</p></div>
+      <div class="panel"><p class="pixel">PRICE</p><strong>From $79</strong><p>Pro included. One-time purchase, no subscription.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== HOW IT WILL WORK ========================== -->
+<section class="section" aria-labelledby="how-title">
+  <div class="container">
+    <div class="section-head">
+      <div class="row" style="gap:10px;margin-bottom:.5rem"><p class="eyebrow" style="margin:0">HOW IT WILL WORK</p><span class="badge badge-dim">PLANNED</span></div>
+      <h2 id="how-title">Three steps, no PC</h2>
+      <p class="lead">This is the plan. Details can change before launch.</p>
+    </div>
+    <div class="steps">
+      <article class="panel step">
+        <h3>Plug in the box</h3>
+        <p>Connect the Console Kit between your controller and your console.</p>
+      </article>
+      <article class="panel step">
+        <h3>Open the Clutch phone app</h3>
+        <p>The app finds the box over Bluetooth.</p>
+      </article>
+      <article class="panel step">
+        <h3>Pick a pack</h3>
+        <p>Choose a game pack or power-up from your phone and play.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WAITLIST ============================== -->
+<section class="section-tight" id="waitlist" style="background:rgba(26,36,71,.35);border-block:1px solid var(--line)" aria-labelledby="wait-title">
+  <div class="container wait">
+    <div>
+      <p class="eyebrow">WAITLIST</p>
+      <h2 id="wait-title">Be first to <span class="grad-text">know</span></h2>
+      <p class="lead">Leave your email and we will tell you when the Console Kit is ready to order. That is all the waitlist does.</p>
+      <div class="notice notice-warn">
+        <p><strong>Waitlist only.</strong> Joining does not reserve a kit, no payment is taken, and we are not promising a date.</p>
+      </div>
+      <p class="muted">Want to talk about it, or help test? The <a href="community.html#console-kit-beta">Console Kit Beta</a> section of the forum is where that happens. The community is 13+.</p>
+    </div>
+
+    <form class="panel" data-form="waitlist" novalidate>
+      <h3 style="margin-top:0">Join the Console Kit waitlist</h3>
+      <div class="field">
+        <label for="wl-email">Email <span class="dim">(required)</span></label>
+        <input type="email" id="wl-email" name="email" required autocomplete="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="wl-console">Which console?</label>
+        <select id="wl-console" name="console">
+          <option value="Xbox">Xbox</option>
+          <option value="PlayStation">PlayStation</option>
+          <option value="Nintendo Switch">Nintendo Switch</option>
+          <option value="More than one">More than one</option>
+          <option value="Not sure yet" selected>Not sure yet</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="wl-use">What would you use it for? <span class="dim">(optional)</span></label>
+        <textarea id="wl-use" name="use" rows="3" placeholder="Which games, which controller, anything you want us to know"></textarea>
+        <span class="hint">Please do not include personal details like your full name or address.</span>
+      </div>
+      <input type="text" name="_gotcha" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" class="btn btn-yellow btn-block">Join the waitlist</button>
+      <p class="form-status" aria-live="polite"></p>
+      <p class="dim" style="font-size:.85rem;margin:0">How we handle your email is in the <a href="privacy.html">Privacy Policy</a>.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ============================== MEANWHILE ============================== -->
+<section class="section center" aria-labelledby="pc-title">
+  <div class="container">
+    <p class="eyebrow">IN THE MEANTIME</p>
+    <h2 id="pc-title">Clutch is on Windows today</h2>
+    <p class="lead">Play on a PC? Download Clutch free, plug in your controller, and tap your first power-up now.</p>
+    <div class="row" style="justify-content:center;margin-top:1.5rem">
+      <a class="btn btn-primary btn-lg" href="download.html"><i data-icon="download" class="ico"></i> Download free for Windows</a>
+      <a class="btn btn-ghost" href="features.html">See what it does</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script>
+  // Simple required-field check before the shared form handler sends it.
+  (function () {
+    var f = document.querySelector('form[data-form="waitlist"]'); if (!f) return;
+    f.addEventListener('submit', function (e) {
+      var em = f.querySelector('#wl-email'); var st = f.querySelector('.form-status');
+      if (!em.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value)) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        if (st) { st.textContent = 'Please enter a valid email address.'; st.style.color = 'var(--danger)'; }
+        em.focus();
+      }
+    }, true);
+  })();
+</script>
+</body>
+</html>

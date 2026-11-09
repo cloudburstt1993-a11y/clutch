@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game packs — Clutch</title>
+<meta name="description" content="Browse all 48 Clutch game packs. Shooters, racing, sports, building, fighting, action and adventure. Named by genre, ready in one tap.">
+<meta name="theme-color" content="#0D1328">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- seo -->
+<link rel="canonical" href="https://clutchmods.app/packs">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Clutch">
+<meta property="og:url" content="https://clutchmods.app/packs">
+<meta property="og:title" content="Game packs — Clutch">
+<meta property="og:description" content="Browse all 48 Clutch game packs. Shooters, racing, sports, building, fighting, action and adventure. Named by genre, ready in one tap.">
+<meta property="og:image" content="https://clutchmods.app/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Game packs — Clutch">
+<meta name="twitter:description" content="Browse all 48 Clutch game packs. Shooters, racing, sports, building, fighting, action and adventure. Named by genre, ready in one tap.">
+<meta name="twitter:image" content="https://clutchmods.app/img/og.jpg">
+
+<!-- /seo -->
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* Packs-only styles */
+  .pack-tools { display: grid; grid-template-columns: minmax(0, 420px) 1fr; gap: 1rem 1.5rem; align-items: center; }
+  @media (max-width: 760px) { .pack-tools { grid-template-columns: 1fr; } }
+  .pack-tools .search { margin: 0; }
+  .pack-tools .search input { width: 100%; background: var(--panel); color: var(--text); border: 2px solid var(--line-strong); border-radius: var(--r-sm); padding: 0.75rem 0.9rem 0.75rem 2.8rem; min-height: 48px; }
+  .pack-tools .search input:focus { border-color: var(--cyan); outline: none; box-shadow: var(--glow-cyan); }
+  .pack-count { color: var(--muted); font-weight: 600; margin: 0; }
+  .pack-count b { color: var(--yellow); font-family: var(--pixel); font-size: .7rem; }
+  .pill-nav { margin: 1rem 0 1.75rem; }
+  .pill-nav button { min-height: 44px; }
+  .pill-nav button small { font-weight: 500; color: inherit; opacity: .7; margin-left: 4px; }
+  .pack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .pack-card { position: relative; text-align: left; width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 1rem 1rem 1rem; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; cursor: pointer; color: var(--text); transition: box-shadow .18s, border-color .18s, transform .18s; min-height: 44px; }
+  .pack-card:hover { border-color: rgba(255,210,63,.6); box-shadow: 0 0 14px rgba(255,210,63,.35); transform: translateY(-2px); }
+  .pack-card .emo { font-size: 1.9rem; line-height: 1; width: 44px; height: 44px; display: grid; place-items: center; background: rgba(13,19,40,.7); border: 1px solid var(--line); border-radius: var(--r-sm); filter: drop-shadow(0 0 6px rgba(255,255,255,.2)); }
+  .pack-card .name { font-family: var(--display); font-weight: 700; font-size: 1.25rem; line-height: 1.1; display: block; padding-right: 48px; }
+  .pack-card .cat { color: var(--dim); font-size: .85rem; margin: 3px 0 0; }
+  .pack-card .badge { position: absolute; top: 10px; right: 10px; font-size: .45rem; padding: 5px 7px 4px; box-shadow: 2px 2px 0 rgba(0,0,0,.45); }
+  .pack-empty { text-align: center; padding: 3rem 1rem; display: none; }
+  .pack-empty.show { display: block; }
+  .pack-empty .emo { font-size: 3rem; line-height: 1; margin-bottom: 1rem; }
+  .tunes { list-style: none; padding: 0; margin: .5rem 0 1rem; display: flex; gap: 6px; flex-wrap: wrap; }
+  .tunes li { font-size: .88rem; font-weight: 600; color: var(--text); background: rgba(62,198,255,.12); border: 1px solid rgba(62,198,255,.35); border-radius: 999px; padding: 4px 11px; }
+  .modal-emo { font-size: 2.6rem; line-height: 1; }
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; color: var(--dim); font-size: .9rem; margin: 1.25rem 0 0; align-items: center; }
+</style>
+</head>
+<body data-page="packs">
+<div id="site-header"></div>
+
+<main id="main">
+
+<!-- ============================ PAGE HEAD ============================ -->
+<section class="page-head" aria-labelledby="page-title">
+  <div class="container">
+    <p class="eyebrow">48 GAME PACKS</p>
+    <h1 id="page-title">Ready-made for <span class="grad-text">the games you play</span></h1>
+    <p class="lead">Pick a pack and your triggers, sticks and buttons are set up for that kind of game. Packs are named by genre and play style, not by game titles. Tap any pack to see what it tunes.</p>
+  </div>
+</section>
+
+<!-- ============================ TOOLS + GRID ============================ -->
+<section class="section-tight" aria-labelledby="grid-title">
+  <div class="container">
+    <h2 id="grid-title" class="sr-only">All packs</h2>
+
+    <div class="pack-tools">
+      <div class="search">
+        <label for="pack-search" class="sr-only">Search packs</label>
+        <input type="search" id="pack-search" placeholder="Search packs, like “racing” or “smooth aim”" autocomplete="off">
+      </div>
+      <p class="pack-count" id="pack-count" aria-live="polite">Showing <b>48</b> of 48 packs</p>
+    </div>
+
+    <div class="pill-nav" id="pack-filters" role="group" aria-label="Filter by category"></div>
+
+    <div class="pack-grid" id="pack-grid" aria-live="polite"></div>
+
+    <div class="pack-empty panel" id="pack-empty">
+      <p class="emo" aria-hidden="true">🕹️</p>
+      <h3>No packs match that</h3>
+      <p class="muted">Try a shorter word, or clear the filters to see all 48.</p>
+      <button class="btn btn-yellow" id="pack-clear">Clear filters</button>
+    </div>
+
+    <p class="legend"><span class="badge badge-dim">FREE</span> Starter pack, included with Clutch Free <span class="badge badge-violet">PRO</span> Included with Pro and Family</p>
+  </div>
+</section>
+
+<!-- ============================== CTA ============================== -->
+<section class="section center" aria-labelledby="cta-title">
+  <div class="container">
+    <p class="eyebrow">ALL 48</p>
+    <h2 id="cta-title">Every pack, <span class="grad-text">one price</span></h2>
+    <p class="lead">Starter packs come free. Pro unlocks all 48 for $19.99, one time. No subscription.</p>
+    <div class="row" style="justify-content:center;margin-top:1.5rem">
+      <button class="btn btn-primary btn-lg" data-buy="pro">Get Pro · $19.99</button>
+      <a class="btn btn-ghost" href="pricing.html">Compare plans</a>
+    </div>
+    <p class="dim" style="margin-top:1.25rem;font-size:.9rem">Parent or guardian purchase; buyers must be 18+. 14-day refund policy.</p>
+  </div>
+</section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/packs-data.js"></script>
+<script src="js/packs.js"></script>
+</body>
+</html>
