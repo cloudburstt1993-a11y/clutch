@@ -27,8 +27,8 @@
   const lastPost = (tid) => posts().filter(p => p.thread === tid && !p.pending).sort((a, b) => b.created.localeCompare(a.created))[0];
   const catThreads = (slug) => threads().filter(t => t.cat === slug && !t.removed);
   const hasPostedBefore = (name) => posts().some(p => p.author === name && !p.pending);
-  const nextParam = () => encodeURIComponent('community.html' + location.hash);
-  const loginLink = (txt) => `<a href="account.html?next=${nextParam()}">${txt || 'Log in or create an account'}</a>`;
+  const nextParam = () => encodeURIComponent('community' + location.hash);
+  const loginLink = (txt) => `<a href="account?next=${nextParam()}">${txt || 'Log in or create an account'}</a>`;
 
   /* ------------------------------ small views ----------------------------- */
   const crumbs = (items) => `<nav class="crumbs" aria-label="Breadcrumb"><a href="#home">Forum</a>${items.map(([h, l]) => `<span class="sep" aria-hidden="true">›</span>${h ? `<a href="${h}">${esc(l)}</a>` : `<span>${esc(l)}</span>`}`).join('')}</nav>`;
@@ -73,7 +73,7 @@
     app.innerHTML = `
       <div class="forum-head" style="margin-top:1.5rem">
         <div><p class="eyebrow">COMMUNITY</p><h1>Share packs. Fix setups. <span class="grad-text">Talk to the founder.</span></h1><p>Pick a category. Pinned Dev posts have a violet edge.</p></div>
-        <div class="row">${s ? `<span class="muted">Hi, <a href="#u-${F.slug(s.username)}">${esc(s.username)}</a></span>` : `<a class="btn btn-ghost btn-sm" href="account.html?next=${nextParam()}">Log in</a>`}<a class="btn btn-ghost btn-sm" href="#rules">Rules</a></div>
+        <div class="row">${s ? `<span class="muted">Hi, <a href="#u-${F.slug(s.username)}">${esc(s.username)}</a></span>` : `<a class="btn btn-ghost btn-sm" href="account?next=${nextParam()}">Log in</a>`}<a class="btn btn-ghost btn-sm" href="#rules">Rules</a></div>
       </div>
       <div class="cat-list">${list}</div>`;
   }
@@ -209,7 +209,7 @@
           <li>13 and up. Younger kids can use the app with a parent’s help, but not the forum.</li>
           <li>See something off? Use Report on the post. A moderator will look.</li>
         </ul>
-        <div class="row"><a class="btn btn-primary" href="guidelines.html">Read the full Community Guidelines</a><a class="btn btn-ghost" href="#home">Back to the forum</a></div>
+        <div class="row"><a class="btn btn-primary" href="guidelines">Read the full Community Guidelines</a><a class="btn btn-ghost" href="#home">Back to the forum</a></div>
       </div>`;
   }
 

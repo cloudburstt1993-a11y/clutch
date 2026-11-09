@@ -29,7 +29,7 @@
   function shell(tab, inner) {
     const s = me();
     const openCount = reports().filter(r => r.status === 'open').length + posts().filter(p => p.pending).length;
-    app.innerHTML = `<div class="admin-head"><div><p class="eyebrow">ADMIN</p><h1>Dashboard</h1><p>Signed in as <strong>${esc(s.username)}</strong> (${esc(s.role)}). <a href="community.html">Open the forum</a></p></div><span class="badge badge-dim">Prototype · local data</span></div>
+    app.innerHTML = `<div class="admin-head"><div><p class="eyebrow">ADMIN</p><h1>Dashboard</h1><p>Signed in as <strong>${esc(s.username)}</strong> (${esc(s.role)}). <a href="community">Open the forum</a></p></div><span class="badge badge-dim">Prototype · local data</span></div>
       <nav class="pill-nav" id="tabs" aria-label="Admin sections">${TABS.map(([k, l]) => `<a href="#${k}" ${k === tab ? 'aria-current="page"' : ''}>${l}${k === 'mod-queue' && openCount ? ` (${openCount})` : ''}</a>`).join('')}</nav>
       <div id="tab-body">${inner}</div>`;
   }
@@ -38,7 +38,7 @@
     const s = me();
     app.innerHTML = `<div class="panel locked-panel">${window.Clutch.pxIcon('lock', 'px-lg')}<h1 style="font-size:2.2rem;margin-top:1rem">Moderators only</h1>
       <p class="muted">${s ? `You’re logged in as <strong>${esc(s.username)}</strong>, but this dashboard is for the founder and moderators.` : 'Log in with a founder or moderator account to open the dashboard.'}</p>
-      <div class="row" style="justify-content:center"><a class="btn btn-primary" href="account.html?next=admin.html">${s ? 'Switch account' : 'Log in'}</a><a class="btn btn-ghost" href="community.html">Back to the forum</a></div>
+      <div class="row" style="justify-content:center"><a class="btn btn-primary" href="account?next=admin">${s ? 'Switch account' : 'Log in'}</a><a class="btn btn-ghost" href="community">Back to the forum</a></div>
       <p class="dim" style="font-size:.9rem;margin-top:1.5rem">Prototype: on the account page, use “Log in as founder (Dillon)” at the bottom to demo this dashboard.</p></div>`;
   }
 
@@ -89,7 +89,7 @@
       return `<article class="panel queue-item">
         <div class="row between"><div><strong>${esc(r.reason)}</strong> <span class="meta">· reported by ${esc(r.reporter)} · ${F.timeEl(r.at)}</span></div>${p && p.removed ? '<span class="badge badge-dim">post removed</span>' : ''}</div>
         <div class="excerpt">${p ? (p.removed ? '<em>[removed by a moderator]</em>' : excerpt(p.body, 240)) : '<em>Post no longer exists.</em>'}</div>
-        <div class="meta">Post by <strong>${esc(who)}</strong>${st.state !== 'ok' ? ` (${esc(st.label)})` : ''}${t ? ` in <a href="community.html#t-${esc(t.id)}">${esc(t.title)}</a>` : ''}${r.note ? ` · Note: “${esc(r.note)}”` : ''}</div>
+        <div class="meta">Post by <strong>${esc(who)}</strong>${st.state !== 'ok' ? ` (${esc(st.label)})` : ''}${t ? ` in <a href="community#t-${esc(t.id)}">${esc(t.title)}</a>` : ''}${r.note ? ` · Note: “${esc(r.note)}”` : ''}</div>
         <div class="acts">
           <button class="btn btn-ghost btn-sm" data-act="dismiss" data-id="${esc(r.id)}">Dismiss</button>
           ${p && !p.removed ? `<button class="btn btn-warn btn-sm" data-act="remove-post" data-id="${esc(r.id)}" data-post="${esc(p.id)}">Remove post</button>` : ''}
@@ -101,7 +101,7 @@
     const pend = (p) => { const t = threads().find(x => x.id === p.thread); return `<article class="panel queue-item is-pending">
         <div class="row between"><div><strong>First post awaiting approval</strong> <span class="meta">· by ${esc(p.author)} · ${F.timeEl(p.created)}</span></div></div>
         <div class="excerpt">${excerpt(p.body, 240)}</div>
-        <div class="meta">${t ? `In <a href="community.html#t-${esc(t.id)}">${esc(t.title)}</a>` : ''}</div>
+        <div class="meta">${t ? `In <a href="community#t-${esc(t.id)}">${esc(t.title)}</a>` : ''}</div>
         <div class="acts"><button class="btn btn-primary btn-sm" data-act="approve" data-post="${esc(p.id)}">Approve</button><button class="btn btn-warn btn-sm" data-act="reject" data-post="${esc(p.id)}">Remove</button></div></article>`; };
     shell('mod-queue', `<h2 style="font-size:1.5rem;margin-top:1rem">Moderation queue</h2>
       ${pending.length ? `<h3 style="font-size:1.1rem">Awaiting approval (${pending.length})</h3><div class="list-gap" style="margin-bottom:1.5rem">${pending.map(pend).join('')}</div>` : ''}
@@ -301,7 +301,7 @@
       const err = F.checkPost(body) || F.checkPost(title); if (err) { st.textContent = err; st.style.color = 'var(--danger)'; return; }
       const t = { id: F.uid('t'), cat: 'announcements', title, author: s.username, created: new Date().toISOString(), pinned: f.pinned.checked };
       DB.set('threads', [...threads(), t]); DB.set('posts', [...posts(), { id: F.uid('p'), thread: t.id, author: s.username, body, created: t.created }]);
-      toast('Announcement posted'); f.reset(); st.textContent = `Posted. View it in the forum: community.html#t-${t.id}`; st.style.color = 'var(--ok)';
+      toast('Announcement posted'); f.reset(); st.textContent = `Posted. View it in the forum: community#t-${t.id}`; st.style.color = 'var(--ok)';
     } else if (f.matches('[data-cms-form]')) cmsSave(f);
   });
 

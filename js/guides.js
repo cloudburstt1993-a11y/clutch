@@ -89,7 +89,7 @@
         <p class="pixel" style="color:var(--pink)">NO MATCHES</p>
         <h3>Nothing found for that</h3>
         <p class="muted">Try a shorter word, or ask in the forum. Someone has probably hit the same thing.</p>
-        <div class="row"><button type="button" class="btn btn-ghost btn-sm" id="clear-search">Clear search</button><a class="btn btn-primary btn-sm" href="community.html">Ask in Help &amp; Setup</a><a class="btn btn-ghost btn-sm" href="support.html">Contact support</a></div>
+        <div class="row"><button type="button" class="btn btn-ghost btn-sm" id="clear-search">Clear search</button><a class="btn btn-primary btn-sm" href="community">Ask in Help &amp; Setup</a><a class="btn btn-ghost btn-sm" href="support">Contact support</a></div>
       </div>`;
       const c = $('clear-search'); if (c) c.onclick = () => { search.value = ''; query = ''; cat = 'all'; route(); search.focus(); };
       return;
@@ -129,7 +129,7 @@
             <button type="button" class="btn btn-ghost btn-sm" data-helpful="yes">Yes</button>
             <button type="button" class="btn btn-ghost btn-sm" data-helpful="no">Not really</button>
           </div>
-          <p class="dim" style="font-size:.9rem;margin:0">Still stuck? Ask in the forum's <a href="community.html">Help &amp; Setup</a> category or <a href="support.html">contact support</a>.</p>
+          <p class="dim" style="font-size:.9rem;margin:0">Still stuck? Ask in the forum's <a href="community">Help &amp; Setup</a> category or <a href="support">contact support</a>.</p>
         </div>
         ${next ? `<p class="next-up"><span class="dim">Next in ${esc(g.category)}:</span> <a href="#${esc(next.slug)}">${esc(next.title)}</a></p>` : ''}
       </article>`;

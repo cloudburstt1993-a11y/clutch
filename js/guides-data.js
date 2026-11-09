@@ -24,7 +24,7 @@ window.CLUTCH_GUIDES = [
     updated: '2026-11',
     body: `
 <ol>
-  <li><strong>Download and install.</strong> Get the Windows installer from the <a href="download.html">download page</a> and run it. Clutch runs on Windows 10 and 11. If Windows shows a blue box that says "Windows protected your PC", that is expected until the app is code-signed. <a href="#windows-protected-your-pc">Here is what to click.</a></li>
+  <li><strong>Download and install.</strong> Get the Windows installer from the <a href="download">download page</a> and run it. Clutch runs on Windows 10 and 11. If Windows shows a blue box that says "Windows protected your PC", that is expected until the app is code-signed. <a href="#windows-protected-your-pc">Here is what to click.</a></li>
   <li><strong>Plug in your controller.</strong> USB or Bluetooth, whichever you have. Clutch finds Xbox, PlayStation, Switch Pro, GameSir and most other controllers on its own. When the controller card lights up in Clutch, you are connected. Having trouble? See <a href="#connect-controllers">Connecting your controller</a>.</li>
   <li><strong>Pick a game pack and tap a power-up.</strong> Choose the pack that matches the kind of game you are about to play, tap a power-up such as Hair triggers, then launch your game. That is it. No scripts, no coding.</li>
 </ol>
@@ -71,7 +71,7 @@ window.CLUTCH_GUIDES = [
   <li>If it paired before, remove it from the Bluetooth device list and pair again from scratch.</li>
   <li>Try a different USB port, ideally one on the back of a desktop PC.</li>
   <li>Make sure only one program is trying to talk to the controller. Close other controller tools and check the <a href="#steam-input">Steam Input guide</a>.</li>
-  <li>Still stuck? Ask in the forum's <a href="community.html">Help &amp; Setup</a> category or <a href="support.html">contact support</a> and tell us which controller you have.</li>
+  <li>Still stuck? Ask in the forum's <a href="community">Help &amp; Setup</a> category or <a href="support">contact support</a> and tell us which controller you have.</li>
 </ul>`
   },
 
@@ -109,7 +109,7 @@ window.CLUTCH_GUIDES = [
   <li>Windows may then ask "Do you want to allow this app to make changes to your device?" Click <strong>Yes</strong>. The installer needs this to set up the HidHide driver.</li>
 </ol>
 <h3>Only run installers from the official source</h3>
-<p>Because the warning is normal, it is extra important to download Clutch only from the <a href="download.html">download page</a> on this site or from the official <a data-releases href="#">GitHub releases page</a>. If you got the installer anywhere else, delete it and download it again from one of those two places.</p>
+<p>Because the warning is normal, it is extra important to download Clutch only from the <a href="download">download page</a> on this site or from the official <a data-releases href="#">GitHub releases page</a>. If you got the installer anywhere else, delete it and download it again from one of those two places.</p>
 <h3>No "More info" link?</h3>
 <p>If the box has no More info link, SmartScreen is being managed by a policy on your PC, which is common on school or work computers. Ask whoever manages the computer. If a separate antivirus program removed the file, restore it from the antivirus quarantine and add an exception for the Clutch install folder.</p>
 <p>If you are a parent and want to check before approving: the HidHide driver is a well-known open-source project, and every Clutch release is published on the official GitHub releases page, so you can see exactly what you are installing.</p>`
@@ -158,7 +158,7 @@ window.CLUTCH_GUIDES = [
 <h3>Still doubling?</h3>
 <ul>
   <li>Unplug the controller, restart the game, plug the controller back in.</li>
-  <li>If it only happens with one power-up on, turn that power-up off and tell us which one in the forum's <a href="community.html">Help &amp; Setup</a> category.</li>
+  <li>If it only happens with one power-up on, turn that power-up off and tell us which one in the forum's <a href="community">Help &amp; Setup</a> category.</li>
   <li>Check for a sticky or worn button by testing the controller in <code>joy.cpl</code> with Clutch closed. If it doubles there too, the controller itself is the problem.</li>
 </ul>`
   },
@@ -352,7 +352,7 @@ window.CLUTCH_GUIDES = [
 <p class="ban-note">⚠️ Ban-risk: using this in an online game can get an account banned. Online-safe mode pauses it in online games by default.</p>
 
 <h3>Our position</h3>
-<p>Clutch's everyday power-ups (hair triggers, smooth aim, steady aim, the crosshair, game packs, profiles) shape your own input and are what the app is about. The advanced mods exist for offline play and are off by default. If you are under 18, talk to a parent before turning any of them on. Breaking a game's rules is your responsibility, not the game's and not ours; see the <a href="terms.html#acceptable-use">Terms</a>.</p>`
+<p>Clutch's everyday power-ups (hair triggers, smooth aim, steady aim, the crosshair, game packs, profiles) shape your own input and are what the app is about. The advanced mods exist for offline play and are off by default. If you are under 18, talk to a parent before turning any of them on. Breaking a game's rules is your responsibility, not the game's and not ours; see the <a href="terms#acceptable-use">Terms</a>.</p>`
   },
 
   /* ----------------------------- Family controls ------------------------ */
@@ -402,7 +402,7 @@ window.CLUTCH_GUIDES = [
   <li>Enter it twice to confirm. Protected settings now show a lock.</li>
 </ol>
 <h3>Forgot the PIN?</h3>
-<p>If the PIN is lost, <a href="support.html">contact support</a> from the account that bought Clutch. We verify the purchase before resetting anything, so a kid can't reset it on their own.</p>
+<p>If the PIN is lost, <a href="support">contact support</a> from the account that bought Clutch. We verify the purchase before resetting anything, so a kid can't reset it on their own.</p>
 <p>The parent PIN is part of family controls, included with Clutch Pro and Family.</p>`
   },
 
@@ -443,7 +443,7 @@ window.CLUTCH_GUIDES = [
 <h3>How it knows a game is online</h3>
 <p>Clutch keeps a list of known online games and game modes and watches which game is in focus. If a game is not on the list, Clutch treats it as online to be safe. You can mark a game as offline-only in Clutch if you know it is, but that setting is protected by the <a href="#parent-pin">parent PIN</a>.</p>
 <h3>Can it promise no bans?</h3>
-<p>No. No tool can promise zero risk, and we will not pretend otherwise. What Online-safe mode does is make the risky things off by default in the places where they are risky, and make turning them on a deliberate, PIN-protected choice. Breaking a game's rules is always the player's responsibility; see the <a href="terms.html#acceptable-use">Terms</a>.</p>
+<p>No. No tool can promise zero risk, and we will not pretend otherwise. What Online-safe mode does is make the risky things off by default in the places where they are risky, and make turning them on a deliberate, PIN-protected choice. Breaking a game's rules is always the player's responsibility; see the <a href="terms#acceptable-use">Terms</a>.</p>
 <p>Online-safe mode is on in every plan, including Free. Turning it off requires the parent PIN on Pro and Family.</p>`
   },
 
@@ -456,10 +456,10 @@ window.CLUTCH_GUIDES = [
     updated: '2026-11',
     body: `
 <h3>Where your key is</h3>
-<p>When a parent or guardian buys Clutch Pro or Family, the license key is emailed to the address used at checkout and also shown on the <a href="account.html">account page</a>. It looks like <code>CLUTCH-XXXXX-XXXXX-XXXXX</code>. Keep the email; it is your proof of purchase.</p>
+<p>When a parent or guardian buys Clutch Pro or Family, the license key is emailed to the address used at checkout and also shown on the <a href="account">account page</a>. It looks like <code>CLUTCH-XXXXX-XXXXX-XXXXX</code>. Keep the email; it is your proof of purchase.</p>
 <h3>Entering the key</h3>
 <ol>
-  <li>Install Clutch from the <a href="download.html">download page</a> if you have not already.</li>
+  <li>Install Clutch from the <a href="download">download page</a> if you have not already.</li>
   <li>Open Clutch → Settings → License.</li>
   <li>Paste the key and choose Activate. All 48 game packs, Aim Lab practice, the crosshair overlay, macros and family controls switch on right away. No restart needed.</li>
 </ol>
@@ -475,8 +475,8 @@ window.CLUTCH_GUIDES = [
   <li>Profiles live on the PC, so set them up again on the new one, or copy your Clutch settings folder across if you are comfortable doing that.</li>
 </ol>
 <h3>Old PC died or was wiped?</h3>
-<p>If you cannot deactivate from the old PC, use the <a href="account.html">account page</a> to see your activations and release one, or <a href="support.html">contact support</a> with the email you bought with and we will free it up.</p>
+<p>If you cannot deactivate from the old PC, use the <a href="account">account page</a> to see your activations and release one, or <a href="support">contact support</a> with the email you bought with and we will free it up.</p>
 <h3>Refunds</h3>
-<p>Clutch has a 14-day refund policy. Ask through <a href="support.html">support</a> within 14 days of purchase; the license is deactivated when the refund goes through. Details are in the <a href="refunds.html">refund policy</a>. If you are under 18, ask a parent or guardian to send purchase or refund questions.</p>`
+<p>Clutch has a 14-day refund policy. Ask through <a href="support">support</a> within 14 days of purchase; the license is deactivated when the refund goes through. Details are in the <a href="refunds">refund policy</a>. If you are under 18, ask a parent or guardian to send purchase or refund questions.</p>`
   }
 ];

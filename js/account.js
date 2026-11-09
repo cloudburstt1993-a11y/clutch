@@ -24,12 +24,12 @@
     const n = next(); if (n) { location.href = n; return; }
     location.hash = '#overview';
   }
-  function logout() { DB.remove('session'); toast('Logged out'); const a = document.querySelector('.nav-cta a[href="account.html"]'); if (a) a.textContent = 'Log in'; location.hash = '#login'; route(); }
+  function logout() { DB.remove('session'); toast('Logged out'); const a = document.querySelector('.nav-cta a[href="account"]'); if (a) a.textContent = 'Log in'; location.hash = '#login'; route(); }
   function setStatus(id, msg, ok) { const el = document.getElementById(id); if (el) { el.textContent = msg; el.style.color = ok ? 'var(--ok)' : 'var(--danger)'; } }
 
   /* ------------------------------ auth views ----------------------------- */
   const authTabs = (which) => `<div class="pill-nav auth-tabs" role="tablist" aria-label="Log in or create account"><a href="#login" ${which === 'login' ? 'aria-current="page"' : ''}>Log in</a><a href="#signup" ${which === 'signup' ? 'aria-current="page"' : ''}>Create account</a></div>`;
-  const protoLine = () => `<div class="proto-line"><span><strong>Prototype:</strong> demo control, not part of the real site.</span><button type="button" class="btn btn-ghost btn-sm" data-act="founder-login">Log in as founder (Dillon)</button><span>Sets the Founder role so Announcements and the <a href="admin.html">admin dashboard</a> can be demoed.</span></div>`;
+  const protoLine = () => `<div class="proto-line"><span><strong>Prototype:</strong> demo control, not part of the real site.</span><button type="button" class="btn btn-ghost btn-sm" data-act="founder-login">Log in as founder (Dillon)</button><span>Sets the Founder role so Announcements and the <a href="admin">admin dashboard</a> can be demoed.</span></div>`;
 
   function renderLogin() {
     app.innerHTML = `<div class="auth-wrap">
@@ -60,7 +60,7 @@
         <p class="form-status" aria-live="polite" id="ag-status"></p>
         <div class="row"><button class="btn btn-primary" type="submit">Continue</button><a class="btn btn-ghost" href="#login">I have an account</a></div>
       </form>
-      ${ui.signupMsg ? `<div class="notice notice-pink" role="alert"><p>${esc(ui.signupMsg)}</p><p><a href="download.html">Download Clutch</a> · <a href="parents.html">For parents</a></p></div>` : ''}`;
+      ${ui.signupMsg ? `<div class="notice notice-pink" role="alert"><p>${esc(ui.signupMsg)}</p><p><a href="download">Download Clutch</a> · <a href="parents">For parents</a></p></div>` : ''}`;
     } else {
       body = `<form class="panel" data-signup novalidate>
         <div class="notice notice-ok" style="margin-top:0"><p>Age check passed. Now pick how you’ll appear.</p></div>
@@ -70,7 +70,7 @@
         <fieldset class="field" style="border:0;padding:0;margin:0 0 1rem"><legend style="font-weight:600;font-size:.95rem;margin-bottom:6px">Pick a pixel avatar</legend>
           <div class="avatar-grid">${Array.from({ length: window.Clutch.AVATARS }, (_, i) => `<label class="avatar-tile"><input type="radio" name="avatar" value="${i}" class="sr-only" ${i === 0 ? 'checked' : ''}>${window.Clutch.pxAvatar(i)}</label>`).join('')}</div>
           <span class="hint">Preset avatars only. No photo uploads, ever.</span></fieldset>
-        <label class="check" style="margin-bottom:1rem"><input type="checkbox" name="agree" required> <span>I’ve read and agree to the <a href="guidelines.html">Community Guidelines</a>: be kind, no personal info, no selling or trading, no private messages.</span></label>
+        <label class="check" style="margin-bottom:1rem"><input type="checkbox" name="agree" required> <span>I’ve read and agree to the <a href="guidelines">Community Guidelines</a>: be kind, no personal info, no selling or trading, no private messages.</span></label>
         <p class="form-status" aria-live="polite" id="su-status"></p>
         <div class="row"><button class="btn btn-primary" type="submit">Create account</button><a class="btn btn-ghost" href="#login">Cancel</a></div>
       </form>`;
@@ -87,7 +87,7 @@
     const s = me();
     app.innerHTML = `<div class="page-head" style="padding-bottom:1.25rem"><div class="row between"><div><p class="eyebrow">ACCOUNT</p><h1 style="font-size:clamp(2rem,6vw,3.4rem)">Hi, <span class="grad-text wrap-any">${esc(s.username)}</span></h1></div><button type="button" class="btn btn-ghost btn-sm" data-act="logout">Log out</button></div></div>
     <div class="two-col">
-      <nav class="side-nav" aria-label="Account sections">${SECTIONS.map(([k, l]) => `<a href="#${k}" ${k === section ? 'aria-current="page" class="active"' : ''}>${l}</a>`).join('')}${F.isMod(s) ? `<a href="admin.html">Admin dashboard →</a>` : ''}</nav>
+      <nav class="side-nav" aria-label="Account sections">${SECTIONS.map(([k, l]) => `<a href="#${k}" ${k === section ? 'aria-current="page" class="active"' : ''}>${l}</a>`).join('')}${F.isMod(s) ? `<a href="admin">Admin dashboard →</a>` : ''}</nav>
       <div>${inner}</div>
     </div>
     ${protoLine()}`;
@@ -100,7 +100,7 @@
     shell('overview', `<div class="panel me-card">${F.avatar(u, 'avatar-lg')}<div><h1>${esc(s.username)}</h1><div class="row" style="gap:6px">${F.badges(u.badges)}</div><p class="dim" style="margin:.6rem 0 0">Joined ${esc(F.fmtMonth(u.joined))} · ${esc(s.role)}${st.state !== 'ok' ? ` · <span style="color:var(--warn)">${esc(st.label)}</span>` : ''}</p></div></div>
       <div class="grid grid-2" style="margin-top:1.25rem">
         <div class="panel"><h3>Licenses</h3><p class="muted">${lic.length ? `${lic.length} license${lic.length > 1 ? 's' : ''} on this account.` : 'No license yet. Free works without one.'}</p><a class="btn btn-ghost btn-sm" href="#licenses">Open licenses</a></div>
-        <div class="panel"><h3>Forum</h3><p class="muted">Post as ${esc(s.username)} with your pixel avatar. No real names, ever.</p><a class="btn btn-ghost btn-sm" href="community.html">Go to the forum</a></div>
+        <div class="panel"><h3>Forum</h3><p class="muted">Post as ${esc(s.username)} with your pixel avatar. No real names, ever.</p><a class="btn btn-ghost btn-sm" href="community">Go to the forum</a></div>
       </div>`);
   }
 
@@ -108,7 +108,7 @@
     const lic = DB.get('licenses') || [];
     let inner;
     if (!lic.length) {
-      inner = `<div class="panel center" style="padding:2.5rem 1.5rem"><p class="eyebrow">NO LICENSE YET</p><h3>Free is free. Pro is one payment.</h3><p class="muted">Clutch Free works with no key at all. Pro unlocks all 48 packs, Aim Lab, the crosshair, macros and family controls for $19.99, once.</p><div class="row" style="justify-content:center"><button class="btn btn-primary" data-buy="pro">Get Pro</button><a class="btn btn-ghost" href="pricing.html">Compare plans</a></div></div>`;
+      inner = `<div class="panel center" style="padding:2.5rem 1.5rem"><p class="eyebrow">NO LICENSE YET</p><h3>Free is free. Pro is one payment.</h3><p class="muted">Clutch Free works with no key at all. Pro unlocks all 48 packs, Aim Lab, the crosshair, macros and family controls for $19.99, once.</p><div class="row" style="justify-content:center"><button class="btn btn-primary" data-buy="pro">Get Pro</button><a class="btn btn-ghost" href="pricing">Compare plans</a></div></div>`;
     } else {
       inner = lic.map((l, i) => `<div class="panel lic" style="margin-bottom:1rem">
         <div class="row between"><h3 style="margin:0">${esc(l.plan)}</h3>${l.test ? '<span class="badge badge-dim">test mode</span>' : ''}</div>
@@ -125,7 +125,7 @@
     shell('downloads', `<h2 style="font-size:1.8rem">Downloads</h2>
       <div class="panel"><h3>Clutch for Windows</h3><p class="muted">Windows 10 and 11. Free to start; your license key unlocks Pro inside the app.</p>
         <div class="row"><a class="btn btn-primary" data-download href="${esc(C.DOWNLOAD_URL || '#')}">${window.Clutch.pxIcon('download', 'ico')} Download installer</a><a class="btn btn-ghost" data-releases href="${esc(C.RELEASES_URL || '#')}" rel="noopener">All releases</a></div>
-        <p class="dim" style="font-size:.9rem;margin:1rem 0 0">Windows may show “Windows protected your PC” until the app is code-signed. Click More info, then Run anyway. <a href="download.html">Setup guide</a></p></div>`);
+        <p class="dim" style="font-size:.9rem;margin:1rem 0 0">Windows may show “Windows protected your PC” until the app is code-signed. Click More info, then Run anyway. <a href="download">Setup guide</a></p></div>`);
   }
 
   function renderProfile() {
@@ -145,7 +145,7 @@
         <div class="toggle"><label for="tg-ot">Hide Off-Topic<span class="hint">Takes the Off-Topic category off your forum home.</span></label><span class="switch"><input type="checkbox" id="tg-ot" data-act="toggle" data-key="hideOffTopic" ${s.hideOffTopic ? 'checked' : ''}><span></span></span></div>
         <div class="toggle"><label for="tg-em">Email me when someone replies<span class="hint">Prototype toggle. Email sending arrives with the backend.</span></label><span class="switch"><input type="checkbox" id="tg-em" data-act="toggle" data-key="emailReplies" ${s.emailReplies ? 'checked' : ''}><span></span></span></div>
       </div>
-      <div class="panel" style="margin-top:1rem"><h3>Need a hand?</h3><p class="muted">Someone bothering you or breaking the rules? Report the post, or tell us directly.</p><a class="btn btn-ghost btn-sm" href="support.html">Report a problem with a user</a></div>
+      <div class="panel" style="margin-top:1rem"><h3>Need a hand?</h3><p class="muted">Someone bothering you or breaking the rules? Report the post, or tell us directly.</p><a class="btn btn-ghost btn-sm" href="support">Report a problem with a user</a></div>
       <div class="panel danger-zone" style="margin-top:1rem"><h3>Delete my account</h3><p class="muted">Removes your account and your local data from this browser. Your posts show as “deleted account”. This can’t be undone.</p><button type="button" class="btn btn-danger btn-sm" data-act="delete-account">Delete my account</button></div>`);
   }
 

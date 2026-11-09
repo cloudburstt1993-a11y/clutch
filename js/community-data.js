@@ -1,6 +1,6 @@
 /* ==========================================================================
    CLUTCH — community-data.js
-   Shared by community.html, account.html and admin.html.
+   Shared by community.html, account and admin.html.
    1. ClutchDB  — storage adapter (localStorage today, API later)
    2. CLUTCH_SEED — demo content the prototype starts with
    3. ClutchForum — small shared helpers (filter, users, time, badges)
@@ -269,12 +269,12 @@ window.ClutchDB = {
   const userBySlug = (sl) => users().find(u => slug(u.username) === sl) || null;
   function qs(name) { return new URLSearchParams(location.search).get(name); }
   // Only allow same-site relative targets for ?next=
-  function safeNext(v) { return v && /^[a-z0-9-]+\.html(?:[?#].*)?$/i.test(v) ? v : null; }
+  function safeNext(v) { return v && /^[a-z0-9-]+(?:\.html)?(?:[?#].*)?$/i.test(v) ? v : null; }
 
   // Header tweak: show "My account" when logged in (header itself lives in site.js).
   function decorateHeader() {
     const s = session(); if (!s) return;
-    const a = document.querySelector('.nav-cta a[href="account.html"]'); if (a) a.textContent = 'My account';
+    const a = document.querySelector('.nav-cta a[href="account"]'); if (a) a.textContent = 'My account';
   }
 
   window.ClutchForum = { checkPost, users, user, saveUser, session, syncSession, isFounder, isMod, moderation, userStatus, postBlock, badge, badges, avatar, ago, fmtDate, fmtMonth, timeEl, textToHtml, mdLite, uid, slug, userBySlug, qs, safeNext, decorateHeader, BADGE_CLASS, BAD_WORDS };

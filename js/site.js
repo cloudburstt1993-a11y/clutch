@@ -319,24 +319,24 @@ window.CLUTCH_CONFIG = {
 
   /* ----------------------------- Header/Footer -------------------------- */
   const NAV = [
-    ['features.html', 'Features', 'features'],
-    ['packs.html', 'Game packs', 'packs'],
-    ['parents.html', 'For parents', 'parents'],
-    ['pricing.html', 'Pricing', 'pricing'],
-    ['console-kit.html', 'Console Kit', 'console-kit'],
-    ['guides.html', 'Guides', 'guides'],
-    ['community.html', 'Community', 'community'],
+    ['features', 'Features', 'features'],
+    ['packs', 'Game packs', 'packs'],
+    ['parents', 'For parents', 'parents'],
+    ['pricing', 'Pricing', 'pricing'],
+    ['console-kit', 'Console Kit', 'console-kit'],
+    ['guides', 'Guides', 'guides'],
+    ['community', 'Community', 'community'],
   ];
   function header() {
     const links = NAV.map(([href, label, key]) => `<li><a href="${href}" ${page === key ? 'aria-current="page"' : ''}>${label}</a></li>`).join('');
     return `<a class="skip" href="#main">Skip to content</a>
 <header class="site-header"><div class="container nav" id="nav">
-  <a class="brand" href="index.html" aria-label="Clutch home">${LOGO}<span>CLUTCH</span></a>
+  <a class="brand" href="/" aria-label="Clutch home">${LOGO}<span>CLUTCH</span></a>
   <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu"><span></span><span></span><span></span></button>
-  <ul class="nav-links" id="nav-links">${links}<li class="show-m"><a href="changelog.html" ${page === 'changelog' ? 'aria-current="page"' : ''}>Changelog</a></li><li class="show-m"><a href="support.html" ${page === 'support' ? 'aria-current="page"' : ''}>Support</a></li></ul>
+  <ul class="nav-links" id="nav-links">${links}<li class="show-m"><a href="changelog" ${page === 'changelog' ? 'aria-current="page"' : ''}>Changelog</a></li><li class="show-m"><a href="support" ${page === 'support' ? 'aria-current="page"' : ''}>Support</a></li></ul>
   <div class="nav-cta">
-    <a class="btn btn-ghost btn-sm hide-m" href="account.html" ${page === 'account' ? 'aria-current="page"' : ''}>Log in</a>
-    <a class="btn btn-primary btn-sm" href="download.html">${pxIcon('download', 'ico')} Download</a>
+    <a class="btn btn-ghost btn-sm hide-m" href="account" ${page === 'account' ? 'aria-current="page"' : ''}>Log in</a>
+    <a class="btn btn-primary btn-sm" href="download">${pxIcon('download', 'ico')} Download</a>
   </div>
 </div></header>`;
   }
@@ -344,23 +344,23 @@ window.CLUTCH_CONFIG = {
     return `<footer class="site-footer"><div class="container">
   <div class="footer-grid">
     <div>
-      <a class="brand" href="index.html" aria-label="Clutch home">${LOGO}<span>CLUTCH</span></a>
+      <a class="brand" href="/" aria-label="Clutch home">${LOGO}<span>CLUTCH</span></a>
       <p style="margin-top:.8rem">Your controller. Super-powered. A Windows PC app that upgrades any game controller, no scripts or coding.</p>
       <p class="pixel" style="color:var(--yellow)">PAY ONCE. NO SUBSCRIPTION.</p>
     </div>
     <div><h4>Product</h4><ul>
-      <li><a href="features.html">Features</a></li><li><a href="packs.html">Game packs</a></li><li><a href="pricing.html">Pricing</a></li>
-      <li><a href="console-kit.html">Console Kit <span class="tag">soon</span></a></li><li><a href="download.html">Download</a></li><li><a href="changelog.html">Changelog</a></li></ul></div>
+      <li><a href="features">Features</a></li><li><a href="packs">Game packs</a></li><li><a href="pricing">Pricing</a></li>
+      <li><a href="console-kit">Console Kit <span class="tag">soon</span></a></li><li><a href="download">Download</a></li><li><a href="changelog">Changelog</a></li></ul></div>
     <div><h4>Help</h4><ul>
-      <li><a href="guides.html">Guides &amp; help center</a></li><li><a href="parents.html">For parents</a></li><li><a href="support.html">Support</a></li>
-      <li><a href="community.html">Community forum</a></li><li><a href="account.html">Account</a></li></ul></div>
+      <li><a href="guides">Guides &amp; help center</a></li><li><a href="parents">For parents</a></li><li><a href="support">Support</a></li>
+      <li><a href="community">Community forum</a></li><li><a href="account">Account</a></li></ul></div>
     <div><h4>Legal</h4><ul>
-      <li><a href="terms.html">Terms of Service</a></li><li><a href="privacy.html">Privacy Policy</a></li>
-      <li><a href="refunds.html">Refund Policy</a></li><li><a href="guidelines.html">Community Guidelines</a></li></ul></div>
+      <li><a href="terms">Terms of Service</a></li><li><a href="privacy">Privacy Policy</a></li>
+      <li><a href="refunds">Refund Policy</a></li><li><a href="guidelines">Community Guidelines</a></li></ul></div>
   </div>
   <div class="footer-bottom">
     <span>© ${new Date().getFullYear()} Clutch. Works with Xbox, PlayStation, Switch Pro, GameSir and other controllers. Platform names belong to their owners; Clutch is not affiliated with them.</span>
-    <span>Community is 13+. No private messages. <a href="guidelines.html">Rules</a></span>
+    <span>Community is 13+. No private messages. <a href="guidelines">Rules</a></span>
   </div>
 </div></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -427,7 +427,7 @@ window.CLUTCH_CONFIG = {
   }
   function checkout(planId) {
     const plan = PLANS[planId]; if (!plan) return;
-    if (planId === 'free') { location.href = 'download.html'; return; }
+    if (planId === 'free') { location.href = 'download'; return; }
     const url = C.STORE[planId];
     openModal(`
       <div class="row between"><h3 id="modal-title">Buy ${esc(plan.name)}</h3><span class="price">${money(plan.price)}</span></div>
@@ -459,8 +459,8 @@ window.CLUTCH_CONFIG = {
         <h3 id="modal-title">You’re in. <span class="grad-text">Clutch ${esc(plan.name.replace('Clutch ', ''))}</span> unlocked</h3>
         <p class="muted">Test-mode purchase. Here is your demo license key:</p>
         <p class="pixel-lg" style="color:var(--yellow);word-break:break-all">${key}</p>
-        <ol class="muted" style="padding-left:1.2rem"><li>Install Clutch from the <a href="download.html">download page</a>.</li><li>Open Settings → License and paste the key.</li><li>All 48 packs, Aim Lab, crosshair, macros and family controls switch on.</li></ol>
-        <div class="row"><a class="btn btn-primary" href="account.html">Open my account</a><button class="btn btn-ghost" id="modal-close">Close</button></div>`);
+        <ol class="muted" style="padding-left:1.2rem"><li>Install Clutch from the <a href="download">download page</a>.</li><li>Open Settings → License and paste the key.</li><li>All 48 packs, Aim Lab, crosshair, macros and family controls switch on.</li></ol>
+        <div class="row"><a class="btn btn-primary" href="account">Open my account</a><button class="btn btn-ghost" id="modal-close">Close</button></div>`);
       document.getElementById('modal-close').onclick = closeModal;
       toast('Demo license key saved to your account');
     };

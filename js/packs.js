@@ -79,7 +79,7 @@
       <div class="row" style="margin-top:1.2rem">
         ${pro
           ? '<button class="btn btn-primary" id="pack-buy" data-buy="pro">Get Pro · $19.99</button>'
-          : '<a class="btn btn-primary" href="download.html">' + K.pxIcon('download', 'ico') + ' Download free</a>'}
+          : '<a class="btn btn-primary" href="download">' + K.pxIcon('download', 'ico') + ' Download free</a>'}
         <button class="btn btn-ghost" id="pack-close">Close</button>
       </div>`);
     const close = document.getElementById('pack-close'); if (close) close.onclick = K.closeModal;

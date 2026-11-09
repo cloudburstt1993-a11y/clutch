@@ -28,8 +28,8 @@ window.CLUTCH_POSTS = [
 <p>Hi. I build Clutch, and I want to tell you where it came from.</p>
 <p>My kids wanted controller mods. The kind of thing their friends talked about: hair triggers, a steadier stick, a profile for each game. Everything I found either meant pasting scripts from a forum, paying a monthly fee, or trusting something I would not have let them run on a PC I cared about. So I built the thing I wished existed: a Windows app where you tap a power-up and it just works, with controls a parent can actually set.</p>
 <p>That is still the whole idea. Pay once. No scripts, no coding. Online-safe mode on by default, because I do not want anyone's kid losing an account over a setting they did not understand.</p>
-<p>What is next: the <a href="console-kit.html">Clutch Console Kit</a>, a small box that brings Clutch to consoles and is set up from a phone. It is in development, and the waitlist is open. I will post progress here as it happens, honestly, including the parts that are slow.</p>
-<p>If you have a question, a bug or an idea, the <a href="community.html">forum</a> is where to talk. I read it, I answer there, and once a month there is a pinned "Talk to the founder" thread where anything goes.</p>
+<p>What is next: the <a href="console-kit">Clutch Console Kit</a>, a small box that brings Clutch to consoles and is set up from a phone. It is in development, and the waitlist is open. I will post progress here as it happens, honestly, including the parts that are slow.</p>
+<p>If you have a question, a bug or an idea, the <a href="community">forum</a> is where to talk. I read it, I answer there, and once a month there is a pinned "Talk to the founder" thread where anything goes.</p>
 <p>Thanks for being here this early.</p>`
   }
 ];
