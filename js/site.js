@@ -496,6 +496,8 @@ window.CLUTCH_CONFIG = {
         let i = 0; const t = setInterval(() => { if (i < bar.length) bar[i++].classList.add('on'); else { clearInterval(t); hero.classList.remove('booting'); hero.classList.add('booted'); } }, 55);
       }
     }
+    // Animated synthwave background (js/bg.js): fixed canvas behind the page.
+    if (!document.getElementById('bg-canvas')) { const bg = document.createElement('script'); bg.src = 'js/bg.js'; bg.defer = true; document.body.appendChild(bg); }
     // Load Lemon Squeezy overlay only if a store link is configured.
     if (Object.values(C.STORE).some(u => /lemonsqueezy/.test(u))) {
       const s = document.createElement('script'); s.src = 'https://app.lemonsqueezy.com/js/lemon.js'; s.defer = true; s.onload = () => window.createLemonSqueezy && window.createLemonSqueezy(); document.head.appendChild(s);

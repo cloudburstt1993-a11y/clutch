@@ -335,6 +335,11 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
 .boot { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 1.4rem; }
 .hero.booted .boot .press-start { color: var(--ok); }
 
+/* Animated background (js/bg.js) replaces the hero's static grid when present */
+body.has-bg .hero-grid { display: none; }
+body.has-bg .hero-glow { opacity: .6; }
+body.has-bg .site-footer { background: rgba(13,19,40,.55); }
+
 /* ------------------------------ Pixel icons ----------------------------- */
 .px { width: 48px; height: 48px; shape-rendering: crispEdges; image-rendering: pixelated; }
 .px-sm { width: 28px; height: 28px; }
