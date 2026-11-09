@@ -48,16 +48,12 @@ Open `index.html` in a browser, or run `python3 -m http.server` in this folder.
 
 ## Hosting (live)
 
-The site is served by **GitHub Pages** from the `gh-pages` branch of `cloudburstt1993-a11y/clutch`, custom domain `clutchmods.app` (the `CNAME` file). To update the site: edit files on `gh-pages`, commit, push. Pages redeploys in about a minute.
+**https://clutchmods.vercel.app** — Vercel project `clutchmods`, deploying the `gh-pages` branch of `cloudburstt1993-a11y/clutch` (production branch set under Settings → Environments → Production). Clean URLs are on (`vercel.json`), so links are `/features`, not `/features.html`. To update: edit on `gh-pages`, commit, push; Vercel redeploys in about a minute.
 
-### DNS at Porkbun (do once after buying clutchmods.app)
+GitHub Pages also serves the branch at `cloudburstt1993-a11y.github.io/clutch/` as a backup, but links there need `.html`, so treat Vercel as the real site.
 
-| Type | Host | Answer |
-|---|---|---|
-| A | (blank / @) | 185.199.108.153 |
-| A | (blank / @) | 185.199.109.153 |
-| A | (blank / @) | 185.199.110.153 |
-| A | (blank / @) | 185.199.111.153 |
-| CNAME | www | cloudburstt1993-a11y.github.io |
+### Adding the real domain (after buying, e.g. clutchmods.app)
 
-Delete Porkbun's default parking records first. Then in GitHub → repo Settings → Pages, wait for the DNS check to pass and tick **Enforce HTTPS** (the certificate takes a few minutes to issue). `www.clutchmods.app` will redirect to the bare domain.
+1. Vercel → clutchmods → Settings → Domains → Add `clutchmods.app` (and `www.clutchmods.app`, redirecting to the bare domain).
+2. At Porkbun, add the records Vercel shows: an `A` record `@ → 76.76.21.21` and `CNAME www → cname.vercel-dns.com` (confirm against what Vercel displays). Delete the parking records first.
+3. Replace `https://clutchmods.vercel.app` with the new domain in every `.html`, `sitemap.xml`, `robots.txt` and `js/site.js`, commit, push. Vercel keeps the `.vercel.app` address working as a redirect.
