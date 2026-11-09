@@ -45,3 +45,19 @@ The forum, account area and admin dashboard are complete front-ends with every s
 ## Local preview
 
 Open `index.html` in a browser, or run `python3 -m http.server` in this folder.
+
+## Hosting (live)
+
+The site is served by **GitHub Pages** from the `gh-pages` branch of `cloudburstt1993-a11y/clutch`, custom domain `clutchmods.app` (the `CNAME` file). To update the site: edit files on `gh-pages`, commit, push. Pages redeploys in about a minute.
+
+### DNS at Porkbun (do once after buying clutchmods.app)
+
+| Type | Host | Answer |
+|---|---|---|
+| A | (blank / @) | 185.199.108.153 |
+| A | (blank / @) | 185.199.109.153 |
+| A | (blank / @) | 185.199.110.153 |
+| A | (blank / @) | 185.199.111.153 |
+| CNAME | www | cloudburstt1993-a11y.github.io |
+
+Delete Porkbun's default parking records first. Then in GitHub → repo Settings → Pages, wait for the DNS check to pass and tick **Enforce HTTPS** (the certificate takes a few minutes to issue). `www.clutchmods.app` will redirect to the bare domain.
