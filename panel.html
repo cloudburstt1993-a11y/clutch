@@ -435,6 +435,35 @@ button:active:not(:disabled){transform:scale(.97)}
 }
 
 /* ---- 6-10: family, streaks, overlays ---- */
+.prochip{border-radius:999px;padding:6px 14px;font-weight:800;font-size:13.5px;border:1px solid var(--line);background:var(--raise);color:var(--ink);white-space:nowrap}
+.prochip.on{background:linear-gradient(135deg,#ffd23f,#ff9c3d);color:#2a1800;border-color:transparent}
+.prochip.trial{border-color:#ffd23f;color:#ffe48a}
+.prochip.free{color:#ffd23f}
+.protag{display:inline-block;margin-left:8px;vertical-align:2px;font-size:10.5px;font-weight:900;letter-spacing:.06em;padding:1px 7px;border-radius:6px;background:#ffd23f;color:#2a1800}
+.pu.locked .badge, .pack.locked .emo{filter:grayscale(.75);opacity:.75}
+.pack.locked{border-style:dashed}
+.prolock{text-align:center;max-width:620px}
+.prolock .lockemo{font-size:54px}
+.prolock .prolist, .prolock .proprice{text-align:left}
+.prolist{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:10px}
+.prolist li{display:flex;gap:12px;align-items:center}
+.prolist .emo{font-size:24px}
+.prolist b{display:block}
+.prolist small{color:var(--muted)}
+.proprice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.proprice div{background:var(--raise);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.proprice b{display:block;font-size:22px;color:#ffd23f}
+.proprice span{color:var(--muted);font-size:13px}
+.prokeyrow{display:flex;gap:8px}
+.prokeyrow .prokey{flex:1;min-width:0;font-family:inherit;letter-spacing:.02em}
+.procard{background:var(--card,var(--raise));border:1px solid var(--line);border-radius:var(--r-xl,18px);padding:18px 20px;max-width:640px}
+.procard.on{border-color:#ffd23f}
+.procard.trial{border-color:rgba(255,210,63,.55)}
+.pchead{display:flex;gap:14px;align-items:center;margin-bottom:6px}
+.pchead .emo{font-size:34px}
+.pchead b{display:block;font-size:18px}
+.pchead small{color:var(--muted)}
+.pronudge{border:1px solid rgba(255,210,63,.45)}
 .kidchip{display:flex;align-items:center;gap:8px;background:var(--raise);border:1px solid var(--line);border-radius:999px;padding:5px 14px 5px 8px;font-weight:700;color:var(--ink)}
 .kidchip .emo{font-size:20px}
 .kidpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
@@ -541,6 +570,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none !important;an
   <div class="logo"><img src="/icon.png" alt="">Clutch</div>
   <div class="pill off" id="status"><span class="dot"></span><span id="statusText">Connecting…</span></div><span class="batt" id="batt" hidden></span>
   <button id="kidChip" class="kidchip" hidden onclick="whoIsPlaying()"></button>
+  <button id="proChip" class="prochip" hidden onclick="go('settings', {scrollTo:'pro'})"></button>
   <label class="playing">Playing <select id="liveProfile" aria-label="Profile your controller is using"></select></label>
   <div class="spacer"></div>
   <span class="save-state" id="saveState"></span>
@@ -880,6 +910,7 @@ function renderSidebar(){
   $("#setupBadge").hidden = !setupProblems();
 }
 function renderHeader(){
+  proChip();
   const kc = $("#kidChip"), kk = curKid();
   kc.hidden = !kids().length;
   if (kids().length) kc.replaceChildren(h("span", {class:"emo"}, kk ? kk.emoji || "🙂" : "👥"), kk ? kk.name : "Who's playing?");
@@ -1193,14 +1224,17 @@ function puCard(pu, r){
   const on = !!cur;
   const ownOn = pu.global ? on : !!puOn(pu, Object.assign({}, CFG.profiles[puTarget()]));
   const inherited = on && !ownOn && CFG.profiles[puTarget()].extends;
-  const card = h("div", {class:"pu" + (on ? " on" : "")});
+  const locked = PRO_PU.has(pu.id) && !isPro();
+  const card = h("div", {class:"pu" + (on ? " on" : "") + (locked ? " locked" : "")});
   const toggle = swtch(on, nv => {
+    if (nv && locked){ toggle.setAttribute("aria-checked", "false"); proUpsell(pu.title); return; }
     const before = snap();
     if (nv){ applyPU(pu); toast(`${pu.emoji} ${pu.title} is on`, before); } else { pu.remove(); toast(`${pu.title} is off`, before); }
     changed(); renderAll();
   }, pu.title);
   card.append(h("div", {class:"top3"}, h("div", {class:"badge emo"}, pu.emoji),
-    h("div", {class:"txt"}, h("b", {}, pu.title), h("p", {}, pu.text),
+    h("div", {class:"txt"}, h("b", {}, pu.title, PRO_PU.has(pu.id) ? proTag() : null), h("p", {}, pu.text),
+      locked && on ? h("span", {class:"risk"}, "⭐ Paused: unlock Clutch Pro to use it") : null,
       pu.risk ? h("span", {class:"risk", title:"Against the rules in most online games"}, (!CFG.online_safe || CFG.online_safe.enabled !== false) ? "⚠️ Paused in online games" : "⚠️ Ban risk online") : null,
       inherited ? h("div", {class:"from"}, "Comes from your " + CFG.profiles[puTarget()].extends + " profile.") : null),
     toggle));
@@ -1852,6 +1886,12 @@ function stepDuration(steps){
 }
 let macroRec = false;
 function renderMacros(body){
+  if (!isPro()){
+    body.append(h("div", {class:"bigcard prolock"}, h("div", {class:"lockemo"}, "🎬"), h("h2", {style:"margin:6px 0 4px"}, "Macros are Clutch Pro"),
+      h("p", {class:"muted"}, "Record a combo once and play it back with one button. Your saved macros are kept and come back when Pro is unlocked."),
+      h("button", {class:"primary", onclick: () => proUpsell("Macros")}, "See Clutch Pro")));
+    return;
+  }
   const r = R();
   const globals = Object.keys(CFG.macros || {});
   const owns = Object.keys(own().macros || {});
@@ -2121,6 +2161,7 @@ const X_PRESETS = [
   {name:"Chevron", c:{style:"chevron", color:"#b18cff", size:9, thickness:2, gap:2, dot:true, dot_size:1.5, outline:true, opacity:1}},
 ];
 function renderCrosshair(v){
+  if (!isPro()) return proLocked(v, "🎯", "Crosshair", "Draw your own crosshair over any game: dot, cross, circle, your color and size. Shows only while aiming if you like.");
   const c = xc();
   const status = h("div", {class:"tag", id:"xStatus"});
   const preview = h("div", {class:"xprev " + xBg, id:"xPrev"},
@@ -2478,14 +2519,135 @@ function renderPacks(v){
     packFilterBar(),
     h("div", {class:"packs"}, PACKS.filter(packVisible).map(pk => {
       const have = packProfile(pk.id);
-      return h("div", {class:"pack" + (have ? " have" : ""), style:`--pc:${pk.color}`},
-        h("span", {class:"emo big"}, pk.emoji), h("b", {}, pk.name), h("small", {class:"muted"}, pk.cat || ""), h("p", {}, pk.text),
+      const lock = packIsPro(pk) && !have && !isPro();
+      return h("div", {class:"pack" + (have ? " have" : "") + (lock ? " locked" : ""), style:`--pc:${pk.color}`},
+        h("span", {class:"emo big"}, pk.emoji), h("b", {}, pk.name, packIsPro(pk) ? proTag() : null), h("small", {class:"muted"}, pk.cat || ""), h("p", {}, pk.text),
         h("ul", {}, pk.bullets.map(b => h("li", {}, b))),
         pk.note ? h("p", {class:"help"}, pk.note) : null,
         h("div", {class:"foot"}, have
           ? [h("button", {class:"small", onclick: () => go("profile", {profile:have})}, "Open " + have), h("button", {class:"small ghost", onclick: () => switchLive(have)}, "Play with it")]
+          : lock ? h("button", {class:"small", onclick: () => proUpsell(`The ${pk.name} pack`)}, "⭐ Unlock with Pro")
           : h("button", {class:"primary small", onclick: () => { const n = addPack(pk); renderAll(); setTimeout(() => go("profile", {profile:n}), 50); }}, "Add this pack")));
     })));
+}
+
+/* ================================================================ CLUTCH PRO (13.0) */
+const PRICE = {pro:"$19.99", family:"$29.99"};
+const PRO_PU = new Set(["auto_sprint","slide_cancel","jump_shot","crouch_spam","quick_scope","quick_turn","crosshair"]);
+const FREE_PACKS = () => PACKS.filter(p => !packIsPro(p)).length;
+const proSt = () => (STATE && STATE.pro) || null;
+const isPro = () => { const p = proSt(); return !p || !!p.pro; };   // until the app answers, don't flash locks
+const FREE_GENERIC = new Set(["shooter","racing","keyboard","couch"]);   // the "any game" packs stay free
+const packIsPro = pk => !pk.popular && !FREE_GENERIC.has(pk.id);
+const proTag = () => h("span", {class:"protag", title:"Part of Clutch Pro"}, "PRO");
+const proDate = t => new Date(t * 1000).toLocaleDateString(undefined, {month:"short", day:"numeric"});
+const PRO_LIST = () => [
+  ["🕹️", `All ${PACKS.length} game packs`, `${FREE_PACKS()} are free`],
+  ["🎬", "Macros", "Slide cancel, jump shot, quick scope, auto sprint, and your own"],
+  ["🎯", "Crosshair overlay", "Your own crosshair over any game"],
+  ["🏹", "Aim Lab", "Practice your aim and beat your best"],
+];
+function proKeyBox(after){
+  const f = h("input", {type:"text", placeholder:"CLUTCH-… or the key from your receipt", "aria-label":"Clutch Pro key", spellcheck:"false", autocomplete:"off", class:"prokey"});
+  const go = h("button", {class:"primary small", type:"button"}, "Unlock");
+  const run = async () => {
+    if (!f.value.trim()) { f.focus(); return; }
+    go.disabled = true; go.textContent = "Checking…";
+    try {
+      const r = await action("license_activate", {key: f.value});
+      if (STATE) STATE.pro = r.pro;
+      sfx("chime"); toast("🎉 " + r.message);
+      if (after) after(); renderAll();
+    } catch (e){ toast(e.message); go.disabled = false; go.textContent = "Unlock"; }
+  };
+  go.addEventListener("click", run);
+  f.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); run(); } });
+  return h("div", {class:"prokeyrow"}, f, go);
+}
+async function buyPro(){
+  try { await action("license_buy"); toast("🛒 Opened the Clutch store in your browser"); }
+  catch (e){ toast("🛒 " + e.message); }
+}
+function proPitch(){
+  const p = proSt() || {};
+  return [
+    h("ul", {class:"prolist"}, PRO_LIST().map(([e, t, s]) => h("li", {}, h("span", {class:"emo"}, e), h("span", {}, h("b", {}, t), h("small", {}, s))))),
+    h("div", {class:"proprice"},
+      h("div", {}, h("b", {}, PRICE.pro), h("span", {}, "Pro, 1 PC")),
+      h("div", {}, h("b", {}, PRICE.family), h("span", {}, "Family, 3 PCs"))),
+    h("p", {class:"help", style:"margin:10px 0 0"}, "Pay once, keep it forever. No subscription. Free mods, online-safe mode and parent controls stay free."),
+    p.store_open ? null : h("p", {class:"help", style:"margin:6px 0 0"}, "The Clutch store is opening soon. Got a key already? Paste it below."),
+  ];
+}
+async function proUpsell(what){
+  const p = proSt() || {};
+  const ended = p.source === "free" && p.trial_ends;
+  const body = h("div", {},
+    h("p", {style:"margin:0 0 12px;color:var(--muted)"}, (what ? what + " is part of Clutch Pro. " : "") +
+      (ended ? `Your free trial ended ${proDate(p.trial_ends)}. ` : "") + "Kids: ask a grown-up. Clutch never asks for card details itself."),
+    ...proPitch(), h("div", {style:"margin-top:14px"}, proKeyBox(() => closeDialog(true))));
+  const acts = [{label:"Not now", value:false}];
+  if (p.store_open) acts.push({label:"Get Clutch Pro", value:"buy", primary:true});
+  const v = await dialog({title:"⭐ Unlock Clutch Pro", body, actions: acts});
+  if (v === "buy") buyPro();
+}
+async function proGate(what){ if (isPro()) return true; sfx && sfx("tick"); await proUpsell(what); return false; }
+function proLocked(v, emoji, title, text){
+  add(v, h("div", {class:"ph"}, h("h1", {}, title)),
+    h("div", {class:"bigcard prolock"},
+      h("div", {class:"lockemo"}, emoji), h("h2", {style:"margin:6px 0 4px"}, title + " is Clutch Pro"), h("p", {class:"muted"}, text),
+      ...proPitch(), h("div", {style:"margin-top:16px"}, proKeyBox()),
+      (proSt() || {}).store_open ? h("button", {class:"primary", style:"margin-top:14px", onclick: buyPro}, "Get Clutch Pro") : null));
+}
+function proChip(){
+  const c = $("#proChip"), p = proSt();
+  if (!c) return;
+  c.hidden = !p;
+  if (!p) return;
+  const fam = p.plan === "family";
+  c.className = "prochip " + (p.source === "trial" ? "trial" : p.pro ? "on" : "free");
+  c.replaceChildren(p.source === "trial" ? `🎁 Pro trial · ${p.trial_days_left} day${p.trial_days_left === 1 ? "" : "s"}` : p.pro ? (fam ? "⭐ Family" : "⭐ Pro") : "⭐ Get Pro");
+  c.title = p.source === "trial" ? `Everything's unlocked until ${proDate(p.trial_ends)}` : p.pro ? "Clutch Pro is unlocked on this PC" : "See what Clutch Pro adds";
+}
+function proBanner(){
+  const p = proSt();
+  if (!p || (p.pro && p.source !== "trial")) return null;
+  if (p.source === "trial" && p.trial_days_left > 3) return null;
+  if (p.source === "free" && recall("proNudge", 0) > Date.now()) return null;
+  const trial = p.source === "trial";
+  return h("div", {class:"nudge pronudge"},
+    h("span", {class:"emo"}, trial ? "⏳" : "⭐"),
+    h("span", {}, h("b", {}, trial ? `Your Pro trial ends in ${p.trial_days_left} day${p.trial_days_left === 1 ? "" : "s"}` : "Your Pro trial ended"),
+      h("small", {}, trial ? "After that, macros, the crosshair, Aim Lab and the extra game packs lock. Your free mods keep working." : "Your free mods still work. Unlock Pro for every pack, macros, the crosshair and Aim Lab.")),
+    h("span", {class:"cellrow", style:"margin-left:auto;flex-wrap:nowrap"},
+      p.source === "free" ? h("button", {class:"ghost small", onclick: () => { store("proNudge", Date.now() + 7 * 864e5); renderAll(); }}, "Not now") : null,
+      h("button", {class:"go", onclick: () => go("settings", {scrollTo:"pro"})}, trial ? "See Pro" : "Unlock Pro")));
+}
+function proSection(){
+  const p = proSt();
+  if (!p) return [];
+  const fam = p.plan === "family";
+  let card;
+  if (p.pro && p.source !== "trial"){
+    card = h("div", {class:"procard on"},
+      h("div", {class:"pchead"}, h("span", {class:"emo"}, "⭐"), h("div", {}, h("b", {}, `Clutch ${fam ? "Family" : "Pro"} is unlocked`),
+        h("small", {}, [p.name ? "For " + p.name : null, fam ? "covers 3 PCs" : "covers 1 PC", p.key_hint ? "key ending " + p.key_hint : null].filter(Boolean).join(", ") + "."))),
+      h("p", {class:"help"}, "Thanks for supporting Clutch! Every pack, macros, the crosshair and Aim Lab are yours for good."),
+      h("div", {class:"cellrow"}, h("button", {class:"small ghost", onclick: async () => {
+        if (!await confirmBox("Remove Clutch Pro from this PC?", "Use this before moving Pro to a different PC. You can put the same key back in any time.", "Remove")) return;
+        try { const r = await action("license_remove"); if (STATE) STATE.pro = r.pro; toast(r.message); renderAll(); } catch (e){ toast(e.message); }
+      }}, "Remove from this PC")));
+  } else {
+    const trial = p.source === "trial";
+    card = h("div", {class:"procard" + (trial ? " trial" : "")},
+      h("div", {class:"pchead"}, h("span", {class:"emo"}, trial ? "🎁" : "⭐"), h("div", {},
+        h("b", {}, trial ? `Pro trial: ${p.trial_days_left} day${p.trial_days_left === 1 ? "" : "s"} left` : "You're on Clutch Free"),
+        h("small", {}, trial ? `Everything is unlocked until ${proDate(p.trial_ends)}. After that, your free mods keep working.` : "Your free mods work as long as you like. Pro adds these:"))),
+      ...proPitch(),
+      p.store_open ? h("button", {class:"primary", style:"margin-top:14px", onclick: buyPro}, "Get Clutch Pro") : null,
+      h("div", {class:"lab", style:"margin-top:16px"}, "Have a key?"), proKeyBox());
+  }
+  return [h("div", {class:"section-title", id:"pro"}, "⭐ Clutch Pro"), card];
 }
 
 /* ================================================================ WELCOME TOUR */
@@ -2501,7 +2663,7 @@ let wz = {step:0, games:new Set(), pressed:false, tried:{}};
 function renderWelcome(v){
   const bar = h("div", {class:"steps3"}, [0,1,2,3].map(i => h("span", {class: i <= wz.step ? "on" : ""})));
   const finish = () => {
-    for (const id of wz.games){ const pk = PACKS.find(p => p.id === id); if (pk) addPack(pk, true); }
+    for (const id of wz.games){ const pk = PACKS.find(p => p.id === id); if (pk && (isPro() || !packIsPro(pk))) addPack(pk, true); }
     for (const g of (GAMES && GAMES.games) || []) if (g.pack && g.exe && wz.games.has(g.pack) && !gameRule(g)) linkGame(g, packProfile(g.pack));
     CFG.welcome_done = true; changed();
     toast(wz.games.size ? `🎉 You're all set! Added ${wz.games.size} game pack${wz.games.size > 1 ? "s" : ""}.` : "🎉 You're all set!");
@@ -2769,6 +2931,8 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["⭐", "Clutch Pro is here", "Everything is unlocked free for 14 days. After that your free mods keep working, and Pro (pay once) keeps every game pack, macros, the crosshair and Aim Lab. Online-safe mode and parent controls are always free."],
+  ["🔑", "Unlock with a key", "Got a Clutch Pro key? Paste it in Settings, Clutch Pro. Family keys cover 3 PCs."],
   ["💫", "Micro strafe ⚠️", "Tiny circles on your move stick while you shoot or aim (you pick), so you're harder to hit."],
   ["🦵", "Rapid crouch ⚠️", "Hold RT and Clutch spams crouch for you, with a speed slider."],
   ["🧲", "Gentler recoil control", "Recoil control now goes all the way down to 0.5%, in half-percent steps."],
@@ -2824,8 +2988,8 @@ function renderHome(v){
         h("small", {}, unsetGames().slice(0, 3).map(g => g.name).join(", ") + (unsetGames().length > 3 ? "…" : ""))), h("span", {class:"go"}, "Set up")) : null,
     h("div", {class:"section-title"}, "Quick switches"),
     h("div", {class:"quick"},
-      quickSwitch("➕", "Crosshair", STATE && STATE.crosshair_visible ? "Showing now" : CFG.crosshair.enabled ? "On" : "Off", !!CFG.crosshair.enabled,
-        nv => { CFG.crosshair.enabled = nv; changed(); toast(nv ? "➕ Crosshair on" : "Crosshair off"); }),
+      quickSwitch("➕", "Crosshair", !isPro() ? "⭐ Pro" : STATE && STATE.crosshair_visible ? "Showing now" : CFG.crosshair.enabled ? "On" : "Off", isPro() && !!CFG.crosshair.enabled,
+        nv => { if (!isPro()){ renderAll(); proUpsell("The crosshair"); return; } CFG.crosshair.enabled = nv; changed(); toast(nv ? "➕ Crosshair on" : "Crosshair off"); }),
       ...["hair","precision","ads_slow","gyro","auto_walk","mouse_mode"].map(id => puById(id)).filter(pu => pu && !(pu.risk && hideRisky()) && (pu.id !== "gyro" || (STATE && STATE.has_gyro)))
         .slice(0, 5).map(pu => quickSwitch(pu.emoji, pu.title, "in " + live, !!puOn(pu, r), nv => {
           const before = snap(); puProfile = live; if (nv) applyPU(pu); else pu.remove(); changed(); toast(nv ? `${pu.emoji} ${pu.title} is on` : `${pu.title} is off`, before); renderAll(); })),
@@ -2876,6 +3040,7 @@ function renderSettings(v){
   const panel = CFG.panel;
   add(v, ...[
     h("div", {class:"ph"}, h("h1", {}, "Settings")),
+    ...proSection(),
     warns.length ? h("div", {class:"banner", style:"display:block"}, h("b", {}, "Clutch found these problems in your settings"), h("ul", {class:"warnlist"}, warns.map(w => h("li", {}, w.replace(/^\[warning\]\s*/, ""))))) : null,
     h("div", {class:"section-title"}, "Games see your controller as"),
     h("p", {class:"section-sub"}, "Pick Xbox for PC games. Pick PlayStation for PS Remote Play and PlayStation Plus on your PC. A profile can choose its own on its 🎨 Profile tab."),
@@ -3079,6 +3244,8 @@ function updateLive(){
 }
 function onState(st){
   const prev = STATE; STATE = st; offline = false;
+  if (prev && JSON.stringify(prev.pro) !== JSON.stringify(st.pro)){ proChip(); if (!document.activeElement.matches("input,select,textarea")) renderAll(); }
+  else if (!prev) proChip();
   const el = $("#status"), txt = $("#statusText");
   if (st.connected){ el.className = "pill ok"; txt.textContent = st.controller + (st.test_mode ? " (test mode)" : st.output === "playstation" ? " (PS mode)" : "") + ((st.players || []).length ? ` +${st.players.length} player${st.players.length > 1 ? "s" : ""}` : ""); renderBattery(st.battery); }
   else { el.className = "pill wait"; txt.textContent = "Plug in a controller"; renderBattery(null); }
@@ -3149,6 +3316,7 @@ const gameRule = g => gameExes(g).map(e => CFG.auto_profiles[e]).find(Boolean);
 function linkGame(g, prof){ for (const e of gameExes(g)){ if (prof) CFG.auto_profiles[e] = prof; else delete CFG.auto_profiles[e]; } }
 function setupGame(g, quiet){
   const pk = gamePack(g); if (!pk) return null;
+  if (packIsPro(pk) && !packProfile(pk.id) && !isPro()){ if (!quiet) proUpsell(`The ${pk.name} pack`); return null; }
   const n = addPack(pk, true); linkGame(g, n);
   if (!quiet){ changed(); sfx("chime"); toast(`${pk.emoji} ${g.name} is ready. ${n} switches on when you open it.`); }
   return n;
@@ -3401,6 +3569,7 @@ function aimBest(){ return recall("aimBest", {}); }
 const aimFront = () => !document.hidden && (META && META.windows ? !!(STATE && STATE.front) : document.hasFocus());
 document.addEventListener("visibilitychange", () => { if (document.hidden && AIM.running) aimStop(false); });
 function renderAim(v){
+  if (!isPro()) return proLocked(v, "🏹", "Aim Lab", "Practice flicks, tracking and tiny targets with your real controller and profile, and beat your best score.");
   const live = (STATE && STATE.profile && CFG.profiles[STATE.profile]) ? STATE.profile : curProfile;
   const r = resolve(live);
   const mouseStick = ((r.sticks || {}).right || {}).output === "mouse";
@@ -3689,6 +3858,7 @@ function gameNameFor(exe){
 }
 function homeBanners(){
   const out = [], u = STATE && STATE.update, fs = (STATE && STATE.fullscreen_games) || [];
+  const pb = proBanner(); if (pb) out.push(pb);
   if (u && u.newer) out.push(h("button", {class:"nudge", onclick: () => go("settings", {scrollTo:"updates"})}, h("span", {class:"emo"}, "🎁"),
     h("span", {}, h("b", {}, `Clutch ${u.latest} is out`), h("small", {}, "New stuff is ready to install.")), h("span", {class:"go"}, "See it")));
   if (fs.length) out.push(h("div", {class:"banner", style:"display:block;margin-top:16px"},

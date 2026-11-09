@@ -49,7 +49,7 @@ os.environ.setdefault("SDL_XINPUT_ENABLED", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "12.7"
+VERSION = "13.0"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -244,6 +244,333 @@ def online_safe_profile(p):
     return p
 
 
+def free_profile(p):
+    """A copy of a resolved profile without the Clutch Pro extras: macros and anything a macro button would play.
+    Everything else (remaps, curves, rapid fire, recoil, aim assist booster...) stays free."""
+    p = copy.deepcopy(p)
+
+    def clean(rm):
+        out = {}
+        for k, v in (rm or {}).items():
+            if isinstance(v, list):
+                v = [x for x in v if not (isinstance(x, str) and x.startswith("macro:"))]
+                if not v:
+                    continue
+                v = v[0] if len(v) == 1 else v
+            if isinstance(v, str) and v.startswith("macro:"):
+                continue
+            out[k] = v
+        return out
+    if isinstance(p.get("remap"), dict):
+        p["remap"] = clean(p["remap"])
+    sh = p.get("shift")
+    if isinstance(sh, dict) and isinstance(sh.get("remap"), dict):
+        sh["remap"] = clean(sh["remap"])
+    p.pop("macros", None)
+    p.pop("crosshair_on", None)
+    return p
+
+
+# --------------------------------------------------------------------------------------
+# Clutch Pro: 14-day trial, signed offline keys and (once the store is open) Lemon Squeezy keys
+# --------------------------------------------------------------------------------------
+TRIAL_DAYS = 14
+PRO_PUBLIC_KEY = "5d9be2b89aefc5200f8da5d1c5934b9b7ce2011fd347b95bb5615162dc15afc5"       # Ed25519 public key (hex). The private key never ships.
+STORE_URL = ""                              # checkout page, e.g. https://clutch.lemonsqueezy.com/buy/... ("" = store not open yet)
+LS_STORE_ID = 0                             # Lemon Squeezy store id; 0 = store keys switched off
+LS_API = "https://api.lemonsqueezy.com/v1/licenses/"
+LS_RECHECK_DAYS, LS_GRACE_DAYS = 7, 30      # re-check store keys weekly; keep working 30 days offline
+KEY_PREFIX = "CLUTCH"
+PLANS = {1: "pro", 2: "family"}
+_KEY_EPOCH = 1767225600                     # 2026-01-01 UTC: key issue dates count days from here
+
+# Ed25519 signature check (RFC 8032), pure Python so the app needs no crypto library.
+_ED_P = 2 ** 255 - 19
+_ED_L = 2 ** 252 + 27742317777372353535851937790883648493
+_ED_D = -121665 * pow(121666, _ED_P - 2, _ED_P) % _ED_P
+_ED_I = pow(2, (_ED_P - 1) // 4, _ED_P)
+
+
+def _ed_add(P, Q):
+    p = _ED_P
+    A, B = (P[1] - P[0]) * (Q[1] - Q[0]) % p, (P[1] + P[0]) * (Q[1] + Q[0]) % p
+    C, D = 2 * P[3] * Q[3] * _ED_D % p, 2 * P[2] * Q[2] % p
+    E, F, G, H = B - A, D - C, D + C, B + A
+    return (E * F % p, G * H % p, F * G % p, E * H % p)
+
+
+def _ed_mul(s, P):
+    Q = (0, 1, 1, 0)
+    while s > 0:
+        if s & 1:
+            Q = _ed_add(Q, P)
+        P = _ed_add(P, P)
+        s >>= 1
+    return Q
+
+
+def _ed_eq(P, Q):
+    p = _ED_P
+    return (P[0] * Q[2] - Q[0] * P[2]) % p == 0 and (P[1] * Q[2] - Q[1] * P[2]) % p == 0
+
+
+def _ed_recover_x(y, sign):
+    p = _ED_P
+    if y >= p:
+        return None
+    x2 = (y * y - 1) * pow(_ED_D * y * y + 1, p - 2, p)
+    if x2 == 0:
+        return None if sign else 0
+    x = pow(x2, (p + 3) // 8, p)
+    if (x * x - x2) % p:
+        x = x * _ED_I % p
+    if (x * x - x2) % p:
+        return None
+    if (x & 1) != sign:
+        x = p - x
+    return x
+
+
+def _ed_decompress(s):
+    if len(s) != 32:
+        return None
+    y = int.from_bytes(s, "little")
+    sign = y >> 255
+    y &= (1 << 255) - 1
+    x = _ed_recover_x(y, sign)
+    return None if x is None else (x, y, 1, x * y % _ED_P)
+
+
+_ED_G = (lambda y: (_ed_recover_x(y, 0), y, 1, _ed_recover_x(y, 0) * y % _ED_P))(4 * pow(5, _ED_P - 2, _ED_P) % _ED_P)
+
+
+def ed25519_verify(public, msg, sig):
+    import hashlib
+    if len(public) != 32 or len(sig) != 64:
+        return False
+    A, R = _ed_decompress(public), _ed_decompress(sig[:32])
+    if A is None or R is None:
+        return False
+    s = int.from_bytes(sig[32:], "little")
+    if s >= _ED_L:
+        return False
+    h = int.from_bytes(hashlib.sha512(sig[:32] + public + msg).digest(), "little") % _ED_L
+    return _ed_eq(_ed_mul(s, _ED_G), _ed_add(R, _ed_mul(h, A)))
+
+
+def _key_bytes(key):
+    """'CLUTCH-ABCDE-...' -> raw bytes, or None. Forgives spaces, dashes, lower case and 0/1/8 typos."""
+    import base64
+    k = re.sub(r"[^A-Za-z0-9]", "", str(key or "")).upper()
+    if not k.startswith(KEY_PREFIX):
+        return None
+    k = k[len(KEY_PREFIX):].translate(str.maketrans("018", "OIB"))
+    try:
+        return base64.b32decode(k + "=" * (-len(k) % 8))
+    except (ValueError, TypeError):
+        return None
+
+
+def parse_offline_key(key, public_hex=None):
+    """Check a signed Clutch key. Returns {plan, seats, issued, serial, name} or None if it isn't genuine."""
+    import struct
+    raw = _key_bytes(key)
+    pub = public_hex or PRO_PUBLIC_KEY
+    if not raw or len(raw) < 9 + 64 or not re.fullmatch(r"[0-9a-f]{64}", pub or ""):
+        return None
+    payload, sig = raw[:-64], raw[-64:]
+    if payload[0] != 1 or not ed25519_verify(bytes.fromhex(pub), b"clutch-pro-v1" + payload, sig):
+        return None
+    _, plan, seats, days, serial = struct.unpack(">BBBHI", payload[:9])
+    if plan not in PLANS:
+        return None
+    return {"plan": PLANS[plan], "seats": seats, "issued": _KEY_EPOCH + days * 86400, "serial": serial,
+            "name": payload[9:].decode("utf-8", "replace")[:24]}
+
+
+def looks_like_store_key(key):
+    return bool(re.fullmatch(r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}", str(key or "").strip()))
+
+
+def ls_call(op, fields, timeout=10.0):
+    """POST to the Lemon Squeezy License API (no account key needed). Returns the JSON reply."""
+    import urllib.request
+    import urllib.parse
+    import urllib.error
+    req = urllib.request.Request(LS_API + op, data=urllib.parse.urlencode(fields).encode(),
+                                 headers={"Accept": "application/json", "User-Agent": f"{APP_NAME}/{VERSION}"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read(200_000).decode("utf-8", "replace"))
+    except urllib.error.HTTPError as e:   # 4xx replies still carry {"error": ...}
+        try:
+            return json.loads(e.read(200_000).decode("utf-8", "replace"))
+        except ValueError:
+            raise OSError(f"The store answered {e.code}.")
+
+
+def _machine_name():
+    import platform
+    return (platform.node() or "This PC")[:60]
+
+
+class License:
+    """Who has Clutch Pro on this PC. Saved in license.json next to the settings (plus the trial start in the
+    registry on Windows, so deleting the file doesn't restart the trial)."""
+    REG_KEY = r"Software\Clutch"
+
+    def __init__(self, folder, now=None, call=None, reg=None):
+        self.path = os.path.join(folder, "license.json")
+        self.call = call or ls_call          # swapped out by the tests
+        self.reg = reg if reg is not None else IS_WINDOWS
+        self.lock = threading.Lock()
+        self.data = {}
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                d = json.load(f)
+            self.data = d if isinstance(d, dict) else {}
+        except (OSError, ValueError):
+            pass
+        now = time.time() if now is None else now
+        starts = [t for t in (num(self.data.get("trial_start"), 0), self._reg_get()) if t and t <= now + 86400]
+        start = min(starts) if starts else now
+        if self.data.get("trial_start") != start:
+            self.data["trial_start"] = start
+            self.save()
+        self._reg_set(start)
+        self._info = None
+        self._recheck()
+
+    # registry copy of the trial start (Windows only, best effort)
+    def _reg_get(self):
+        if not self.reg:
+            return 0
+        try:
+            import winreg
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.REG_KEY) as k:
+                return float(winreg.QueryValueEx(k, "t")[0])
+        except (OSError, ValueError, ImportError):
+            return 0
+
+    def _reg_set(self, t):
+        if not self.reg:
+            return
+        try:
+            import winreg
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.REG_KEY) as k:
+                if not self._reg_get():
+                    winreg.SetValueEx(k, "t", 0, winreg.REG_SZ, str(int(t)))
+        except (OSError, ImportError):
+            pass
+
+    def save(self):
+        try:
+            tmp = self.path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(self.data, f, indent=1)
+            os.replace(tmp, self.path)
+        except OSError:
+            pass
+
+    def _recheck(self):
+        key = self.data.get("key")
+        self._info = None
+        if key and self.data.get("kind") == "offline":
+            self._info = parse_offline_key(key)
+        elif key and self.data.get("kind") == "store":
+            last = num(self.data.get("last_ok"), 0)
+            if time.time() - last < LS_GRACE_DAYS * 86400:
+                self._info = {"plan": self.data.get("plan", "pro"), "seats": self.data.get("seats", 1),
+                              "name": self.data.get("name", ""), "serial": None}
+
+    # ---- what the app asks ----
+    def status(self, now=None):
+        now = time.time() if now is None else now
+        left = TRIAL_DAYS * 86400 - (now - num(self.data.get("trial_start"), now))
+        st = {"pro": False, "source": "free", "plan": None, "name": "", "seats": None,
+              "trial_days_left": max(0, math.ceil(left / 86400)), "trial_ends": num(self.data.get("trial_start"), now) + TRIAL_DAYS * 86400,
+              "store_open": bool(STORE_URL), "store_keys": bool(LS_STORE_ID), "key_hint": None, "trial_days": TRIAL_DAYS}
+        if self._info:
+            st.update(pro=True, source=self.data.get("kind", "offline"), plan=self._info.get("plan"),
+                      name=self._info.get("name") or "", seats=self._info.get("seats"),
+                      key_hint=re.sub(r"[^A-Za-z0-9]", "", str(self.data.get("key", "")))[-5:].upper())
+        elif left > 0:
+            st.update(pro=True, source="trial")
+        return st
+
+    def is_pro(self, now=None):
+        return self.status(now)["pro"]
+
+    def activate(self, key):
+        key = str(key or "").strip()
+        with self.lock:
+            info = parse_offline_key(key)
+            if info:
+                self.data.update(key=key, kind="offline", plan=info["plan"], seats=info["seats"], name=info["name"])
+                for k in ("instance_id", "last_ok", "last_check"):
+                    self.data.pop(k, None)
+                self.save()
+                self._recheck()
+                return self.status()
+            if looks_like_store_key(key):
+                if not LS_STORE_ID:
+                    raise ValueError("Store keys work once the Clutch store opens. Check the key for typos.")
+                try:
+                    r = self.call("activate", {"license_key": key, "instance_name": _machine_name()})
+                except OSError:
+                    raise ValueError("Clutch couldn't reach the store. Check the internet and try again.")
+                if not r.get("activated"):
+                    err = str(r.get("error") or "")
+                    if "limit" in err.lower():
+                        raise ValueError("This key is already on all the PCs it covers. Remove it from an old PC first (Settings, Clutch Pro, Remove from this PC).")
+                    raise ValueError("That key didn't work. Check it against your receipt email.")
+                meta = r.get("meta") or {}
+                if int(num(meta.get("store_id"), 0)) != LS_STORE_ID:
+                    raise ValueError("That key is for a different product.")
+                lk = r.get("license_key") or {}
+                limit = int(num(lk.get("activation_limit"), 1) or 1)
+                self.data.update(key=key, kind="store", instance_id=(r.get("instance") or {}).get("id"),
+                                 plan="family" if limit >= 3 else "pro", seats=limit,
+                                 name=str(meta.get("customer_name") or "")[:24], last_ok=time.time(), last_check=time.time())
+                self.save()
+                self._recheck()
+                return self.status()
+            raise ValueError("That doesn't look like a Clutch Pro key. It starts with CLUTCH- (or comes in your receipt email).")
+
+    def deactivate(self):
+        with self.lock:
+            if self.data.get("kind") == "store" and self.data.get("instance_id"):
+                try:
+                    self.call("deactivate", {"license_key": self.data["key"], "instance_id": self.data["instance_id"]})
+                except OSError:
+                    pass   # still remove it here; the store frees the seat when it next hears from us
+            for k in ("key", "kind", "plan", "seats", "name", "instance_id", "last_ok", "last_check"):
+                self.data.pop(k, None)
+            self.save()
+            self._recheck()
+            return self.status()
+
+    def background_check(self, now=None):
+        """Store keys: re-check about once a week. A refunded or disabled key stops; no internet is fine for 30 days."""
+        now = time.time() if now is None else now
+        if self.data.get("kind") != "store" or now - num(self.data.get("last_check"), 0) < LS_RECHECK_DAYS * 86400:
+            self._recheck()
+            return False
+        self.data["last_check"] = now
+        try:
+            r = self.call("validate", {"license_key": self.data.get("key", ""), "instance_id": self.data.get("instance_id", "")})
+            lk = r.get("license_key") or {}
+            if r.get("valid") and int(num((r.get("meta") or {}).get("store_id"), 0)) == LS_STORE_ID:
+                self.data["last_ok"] = now
+            elif str(lk.get("status", "")).lower() in ("disabled", "expired") or r.get("valid") is False:
+                self.data["last_ok"] = 0
+        except (OSError, ValueError, AttributeError):
+            pass
+        self.save()
+        self._recheck()
+        return True
+
+
 class RawState:
     __slots__ = ("buttons", "lx", "ly", "rx", "ry", "lt", "rt", "gx", "gy", "gz", "has_gyro", "touch", "tx", "ty")
 
@@ -424,6 +751,7 @@ class Engine:
         self.menu = None  # in-game quick menu: {'items': [(kind, value)], 'sel': i, 'since': t}
         self.menu_allowed = True  # off for co-op players 2-4 and when the overlay can't draw it
         self.online_safe = False  # True while an online game is in front (online-safe mode)
+        self.pro = True           # False = free version: macros and the crosshair are Clutch Pro
         self._tp_last, self._tp_acc, self._tp_zone = None, [0.0, 0.0], None
         self.gyro_bias, self._still, self._gyro_ema = (0.0, 0.0, 0.0), 0.0, (0.0, 0.0, 0.0)
         self.shift_mod = Modifier()
@@ -483,6 +811,8 @@ class Engine:
         macro_cfgs = deep_merge(self.cfg.get("macros") or {}, self.p.get("macros") or {})
         if self.online_safe:
             self.p, macro_cfgs = online_safe_profile(self.p), {}
+        if not self.pro:
+            self.p, macro_cfgs = free_profile(self.p), {}
         self.macros = {n: Macro(n, c, self._warn) for n, c in macro_cfgs.items()}
         self.toggle_state = {}
         self.turbo_start = {}
@@ -985,6 +1315,17 @@ class Engine:
             keep = self.crosshair_on
             self.set_profile(self.active, announce=False)
             self.crosshair_on = keep
+            return True
+        return False
+
+    def set_pro(self, on):
+        """Clutch Pro on (trial or key) or off (free version), keeping the same profile."""
+        on = bool(on)
+        if on != self.pro:
+            self.pro = on
+            keep = self.crosshair_on
+            self.set_profile(self.active, announce=False)
+            self.crosshair_on = keep and on
             return True
         return False
 
@@ -3446,6 +3787,10 @@ class ModRunner:
         self.panel = PanelServer(cfg_path, self)
         cfg = ensure_config(cfg_path, recover=app_mode, log=log)
         self.engine = Engine(cfg, profile, log=self.warn)
+        self.license = License(os.path.dirname(cfg_path) or ".")   # 13.0: Clutch Pro (trial / key / free)
+        self.engine.set_pro(self.license.is_pro())
+        self._pro_seen = self.engine.pro
+        self._lic_next = 0.0
         self.stop_event = threading.Event()
         self.thread = None
         self.pad = self.vpad = self.kmo = None
@@ -3575,7 +3920,7 @@ class ModRunner:
         if eng.menu is not None:  # keep the middle of the screen clear for the quick menu
             return False, crosshair_settings(eng.cfg)
         c = crosshair_settings(eng.cfg)
-        vis = bool(eng.crosshair_on and eng.enabled)
+        vis = bool(eng.crosshair_on and eng.enabled and eng.pro)
         aiming = "lt" in eng.last_active
         mode = str(c.get("show", "always"))
         if mode == "aiming":
@@ -3676,6 +4021,8 @@ class ModRunner:
         if name == "crosshair":
             self.toggle_crosshair()
             return {"ok": True}
+        if str(name or "").startswith("license_"):
+            return self.pro_action(name, body)
         raise ValueError(f"Unknown action {name!r}")
 
     # ---- main loop ----
@@ -3792,6 +4139,8 @@ class ModRunner:
                 n = next(k for k in (2, 3, 4) if k not in taken)
                 start = (co.get("profiles") or {}).get(str(n))
                 eng = Engine(self.engine.cfg, start, log=self.warn)
+                eng.set_pro(self.engine.pro)
+                eng.set_online_safe(self.engine.online_safe)
                 eng.events.clear()
                 eng.menu_allowed = False  # nothing draws a menu for extra players
                 self.slots.append(PlayerSlot(n, pad, eng))
@@ -4214,6 +4563,43 @@ class ModRunner:
         if changed:
             self._changed()
 
+    # ---- 13.0: Clutch Pro ----
+    def _pro_tick(self, announce=False):
+        """Apply the current Pro state to every player. Store keys are re-checked in the background now and then."""
+        now = time.time()
+        if now >= self._lic_next and self.license.data.get("kind") == "store":
+            self._lic_next = now + 3600
+            threading.Thread(target=self.license.background_check, daemon=True).start()
+        st = self.license.status(now)
+        on = st["pro"]
+        changed = [e.set_pro(on) for e in [self.engine] + [sl.engine for sl in self.slots]]
+        if on != self._pro_seen:
+            self._pro_seen = on
+            if on and announce:
+                self.osd("Clutch Pro unlocked", "Every pack, macros, the crosshair and Aim Lab", accent="#ffd23f", secs=4)
+            elif not on:
+                self.osd("Your Pro trial ended", "Free mods still work. Unlock Pro in Settings.", accent="#ffd23f", secs=6)
+                self._notify("Your Clutch Pro trial ended", "Your free mods still work. Unlock Pro any time in Settings.")
+        if changed[0]:
+            self._changed()
+
+    def pro_action(self, name, body):
+        if name == "license_activate":
+            st = self.license.activate(body.get("key"))   # ValueError -> shown to the person
+            self.panel.commands.put(("pro", True))
+            plan = "Family" if st.get("plan") == "family" else "Pro"
+            return {"ok": True, "pro": st, "message": f"Clutch {plan} unlocked. Thanks for supporting Clutch!"}
+        if name == "license_remove":
+            st = self.license.deactivate()
+            self.panel.commands.put(("pro", False))
+            return {"ok": True, "pro": st, "message": "Removed Clutch Pro from this PC."}
+        if name == "license_buy":
+            if not STORE_URL:
+                raise ValueError("The Clutch store is opening soon.")
+            shell_open(STORE_URL)
+            return {"ok": True}
+        raise ValueError(f"Unknown action {name!r}")
+
     @staticmethod
     def _in_window(now_min, start, end):
         return start <= now_min < end if start <= end else (now_min >= start or now_min < end)
@@ -4308,7 +4694,7 @@ class ModRunner:
             "overlay_error": self.overlay.error if self.overlay else None,
             "recent_apps": list(self.auto.recent), "warnings": list(self.panel.warnings),
             "config_mtime": self.cfg_mtime, "nav_mute": self.nav_mute(), "front": bool(self.auto.watch.own),
-            "kid": self.kid, "quiet": self._quiet_off,
+            "kid": self.kid, "quiet": self._quiet_off, "pro": self.license.status(),
             "online_safe": {"active": self.engine.online_safe, "game": self.online_game},
             "setup_job": self.setup_job or None, "double_input": self.double, "hidhide_cloak": self.hh_cloak, "fullscreen_games": sorted(self.fullscreen_seen),
             "update": {k: v for k, v in self.update.items() if k in ("state", "busy", "latest", "newer", "page", "notes", "error", "downloading", "progress", "ready")},
@@ -4340,6 +4726,8 @@ class ModRunner:
         self.engine.load(new_cfg)
         for sl in self.slots:
             sl.engine.load(new_cfg)
+        if not self.engine.pro:
+            self.engine.crosshair_on = False
         self.cfg_mtime = os.path.getmtime(self.cfg_path)
         self._last_led = None  # light show re-sends the color
         self._trig_sent = None
@@ -4375,6 +4763,8 @@ class ModRunner:
                 eng.cycle_profile(int(val or 1))
             elif kind == "kid":
                 self.set_kid(val, announce=True)
+            elif kind == "pro":
+                self._pro_tick(announce=bool(val))
             elif kind == "test" and self.pad is not None:
                 act = (val or {}).get("action")
                 if act == "rumble":
@@ -4433,6 +4823,7 @@ class ModRunner:
                         next_quiet = t0 + 5.0
                         self._family_tick()
                         self._fullscreen_tick()
+                        self._pro_tick()
                 if self.app_mode and t0 >= next_own:
                     next_own = t0 + 0.02
                     self.auto.watch.refresh_own()
@@ -4551,6 +4942,8 @@ class ModRunner:
                         buzz_until = t0 + (0.15 if val else 0.35)
                         self._notify("Mods on" if val else "Mods off",
                                      "Your mods are active." if val else "Your controller works like normal.")
+                    elif kind == "crosshair" and not eng.pro:
+                        self.osd("Crosshair is Clutch Pro", "Unlock it in Settings, Clutch Pro", accent="#ffd23f", secs=3)
                     elif kind == "crosshair":
                         self._notify("Crosshair " + ("on" if val else "off"), "Hold Guide + press R3 to flip it.")
                         self.osd("Crosshair " + ("on" if val else "off"))

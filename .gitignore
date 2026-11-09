@@ -12,3 +12,9 @@ config.backup.jsonc
 stats.json
 backups/
 webview/
+# Clutch Pro: per-PC license and the owner's signing kit must never be committed
+license.json
+clutch_private_key.txt
+issued_keys.csv
+clutch_keygen.py
+owner-kit/

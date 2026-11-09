@@ -8,8 +8,8 @@ Controller mods for Windows. Clutch reads your real controller (Xbox, PlayStatio
 
 ### Option A: build the installer once, then install anywhere (recommended)
 1. On any Windows PC, install **Python 3.12 or 3.13** from python.org. Tick **"Add python.exe to PATH"** during setup.
-2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-12.7.exe`**. If Inno Setup is missing, it installs that through winget automatically.
-3. Run `Clutch-Setup-12.7.exe` on each PC that will use Clutch. The installer:
+2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-13.0.exe`**. If Inno Setup is missing, it installs that through winget automatically.
+3. Run `Clutch-Setup-13.0.exe` on each PC that will use Clutch. The installer:
    - installs Clutch with a Start-menu entry and, if you choose, a desktop shortcut
    - installs the **ViGEmBus** virtual-controller driver if that PC doesn't have it yet
    - can set Clutch to start in the background with Windows
@@ -50,6 +50,11 @@ Open Clutch and go to **🔧 Setup check**. It shows what's missing, and each it
 Tapping Guide by itself still does its normal job. Closing the window keeps Clutch running in the tray. Right-click the tray icon to switch profiles, toggle mods or the crosshair, or quit.
 
 **🕹️ Drive Clutch with your controller:** with the Clutch window in front, the D-pad or left stick moves around, **A** picks, **B** goes back or closes a pop-up, **LB / RB** flip between pages, left/right changes sliders and lists, and the right stick scrolls. A hint bar shows the buttons (with PlayStation symbols on a PlayStation controller). While Clutch is in front, mods don't press keys or move the mouse, so nothing happens twice. On the Controller test page buttons are being tested, so hold **B** to leave. Turn it off in Settings → Controls and comfort.
+
+**New in 13.0: ⭐ Clutch Pro**
+- **Free vs Pro.** Free keeps every power-up except the macro ones, the 19 popular and "any game" packs, online-safe mode, parent PIN, quiet hours, couch co-op, stats and the controller test. **Pro** adds all 48 game packs, macros (the macro editor plus Auto sprint, Slide cancel, Jump shot, Rapid crouch, Quick scope, Quick 180° turn), the crosshair overlay and Aim Lab. Prices: Pro $19.99 once (1 PC), Family $29.99 once (3 PCs).
+- **14-day trial** starts the first time 13.0 runs (existing installs too). The start date is kept in `license.json` next to the settings and in `HKCU\Software\Clutch`. When it ends, macros and the crosshair pause (the engine strips `macro:` targets and macros, like online-safe mode does), saved settings are kept, and they come back as soon as Pro is unlocked.
+- **Keys.** Settings → ⭐ Clutch Pro takes two kinds of key: signed **CLUTCH-…** keys (Ed25519, checked offline, no internet needed) and Lemon Squeezy store keys (activated per PC through the public License API, re-checked weekly, 30 days of grace offline). Store keys stay off until `LS_STORE_ID` and `STORE_URL` are set in `clutch.py`. The private signing key and key maker are NOT in this repo.
 
 **New in 12.7 (all ⚠️ ban risk, paused by online-safe mode):**
 - **💫 Micro strafe:** tiny circles (or side to side) on the left stick, 2–35% of full tilt, 2–20 times a second. Turns on while shooting (aimed in or not), while aiming in, while aiming in and shooting, or while aiming in or shooting. Stored as `stick_mods` entries `micro_strafe` (+ `micro_strafe_2` for the "or" choice) with `wiggle`/`hz`/`pattern`.
