@@ -112,6 +112,19 @@ main{padding:26px 32px 80px;max-width:1280px;width:100%}
 .banner.info{border-color:var(--line);background:var(--panel);color:var(--text)}
 .section-title{font-size:21px;font-weight:700;margin:34px 0 6px}
 .section-sub{color:var(--muted);margin:0 0 14px;font-size:14.5px}
+.wizard{display:flex;flex-direction:column;gap:2px;margin:6px 0 4px}
+.wizrow{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.wizrow:last-child{border-bottom:0}
+.wiznum{flex:none;width:28px;height:28px;border-radius:50%;background:var(--raise);color:var(--accent);font-weight:800;display:grid;place-items:center;font-size:14px}
+.advice{border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;background:var(--raise)}
+.advice-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.advice-head b{font-size:16px}
+.advice-rows{display:flex;flex-direction:column}
+.advice-row{display:grid;grid-template-columns:minmax(150px,1.3fr) minmax(130px,1fr) 2fr;gap:10px 16px;padding:10px 0;border-top:1px solid var(--line);align-items:baseline}
+.advice-row:first-child{border-top:0}
+.ar-set{font-weight:600}
+.ar-val{font-weight:700;color:var(--accent)}
+@media(max-width:620px){.advice-row{grid-template-columns:1fr 1fr}.ar-note{grid-column:1/-1}}
 
 /* ---------- controller diagram ---------- */
 .stage{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:24px;align-items:center;margin:6px 0 16px}
@@ -590,6 +603,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none !important;an
     <button class="nav" data-view="crosshair"><span class="emo">🎯</span><span class="pname">Crosshair</span></button>
     <button class="nav" data-view="aim"><span class="emo">🏹</span><span class="pname">Aim Lab</span></button>
     <button class="nav" data-view="packs"><span class="emo">🕹️</span><span class="pname">My games</span></button>
+    <button class="nav" data-view="console"><span class="emo">📺</span><span class="pname">Console</span></button>
     <button class="nav" data-view="stats"><span class="emo">📊</span><span class="pname">Stats</span></button>
     <h2>Profiles</h2>
     <ul id="profileList"></ul>
@@ -887,7 +901,7 @@ function renderAll(){
   const v = $("#view");
   v.replaceChildren();
   ({profile: renderProfileView, powerups: renderPowerups, crosshair: renderCrosshair, setup: renderSetup, settings: renderSettings,
-    packs: renderPacks, aim: renderAim, help: renderHelp, welcome: renderWelcome, tester: renderTester, stats: renderStats, home: renderHome})[view](v);
+    packs: renderPacks, aim: renderAim, help: renderHelp, welcome: renderWelcome, tester: renderTester, stats: renderStats, console: renderConsole, home: renderHome})[view](v);
   if (lastView !== view){ v.classList.remove("enter"); void v.offsetWidth; v.classList.add("enter"); lastView = view; }
   updateSaveUI();
   updateLive();
@@ -2884,6 +2898,77 @@ function updateTester(){
 let STATS = null, statsTimer = null;
 const fmtTime = s => { s = Math.round(s || 0); const hh = Math.floor(s / 3600), mm = Math.floor(s % 3600 / 60); return hh ? `${hh}h ${mm}m` : mm ? `${mm}m` : `${s}s`; };
 const fmtNum = n => Math.round(n || 0).toLocaleString();
+let consoleGame = "generic", consoleAdvice = null, consoleAdviceFor = null;
+const CONSOLE_GAME_LIST = [["generic", "Most games"], ["cod", "Call of Duty"], ["fortnite", "Fortnite"], ["apex", "Apex Legends"], ["halo", "Halo Infinite"]];
+
+async function loadConsoleAdvice(){
+  const liveProfile = (STATE && STATE.profile) || curProfile;
+  try {
+    consoleAdvice = await api("/api/console_advice?game=" + encodeURIComponent(consoleGame));
+    consoleAdviceFor = { game: consoleGame, profile: liveProfile };
+  } catch(e){ consoleAdvice = null; }
+  if (view === "console") renderAll();
+}
+
+function renderConsole(v){
+  const on = !!(STATE && STATE.console);
+  const liveProfile = (STATE && STATE.profile) || curProfile;
+  add(v, h("div", {class:"ph"}, h("h1", {}, "📺 Console")),
+    h("p", {class:"lede"}, "Clutch runs on your PC, so there are two honest ways to get your tuning onto a console — no extra hardware for either."));
+
+  /* ---- 1. Remote Play mode ---- */
+  add(v, h("div", {class:"section-title"}, "🎮 Remote Play mode"),
+    h("p", {class:"section-sub"}, "Stream your Xbox to this PC with Microsoft's own Xbox app. Clutch's tuned controller rides that official connection to the console, so your curves, deadzones, gyro, crosshair and macros all apply while you play. Nothing on the console is modified — the Xbox app does the talking, Clutch just shapes the stick input first."),
+    h("div", {class:"form"},
+      h("div", {class:"lab"}, "Console (Remote Play) tuning",
+        h("div", {class:"help"}, "Re-tunes the sticks for the small input delay a stream adds: a bit less aim sensitivity, a firmer deadzone and a steadier near-center curve, so aim stays predictable over the stream.")),
+      swtch(on, async nv => {
+        try { await api("/api/console", {on: nv}); toast(nv ? "📺 Console mode on — tuned for Remote Play" : "Console mode off"); }
+        catch(e){ toast("⚠️ " + e.message); }
+      }, "Console Remote Play tuning")));
+
+  add(v, h("div", {class:"wizard", style:"margin-top:4px"},
+    h("div", {class:"section-sub", style:"margin-bottom:10px"}, "One-time setup"),
+    wizStep(1, "Turn on remote features on your Xbox", "On the console: Settings → Devices & connections → Remote features → tick “Enable remote features.” Leave the Xbox on or in sleep/instant-on."),
+    wizStep(2, "Get the Xbox app on this PC", "Install the free Xbox app from the Microsoft Store, sign in with the same account, and open Remote Play to your console."),
+    wizStep(3, "Keep Clutch running with your controller", "Clutch's virtual controller is what the Xbox app sends to the console, so your profile rides along. If you've run the one-click controller hide in Setup, this is automatic."),
+    wizStep(4, "Flip Console mode on (above) and play", "Start your game from the Remote Play window. Switch profiles and the crosshair the same way you always do.")));
+
+  /* ---- 2. Settings Advisor ---- */
+  add(v, h("div", {class:"section-title", style:"margin-top:26px"}, "🎚️ Console Settings Advisor"),
+    h("p", {class:"section-sub"}, "Playing straight on the console with a normal controller? Clutch can't reach in there — but the game's own settings menu can get you most of the way. This turns your current profile (" + liveProfile + ") into starting values to type into that menu."));
+
+  add(v, h("div", {class:"cellrow", style:"flex-wrap:wrap;margin-bottom:12px"},
+    CONSOLE_GAME_LIST.map(([id, label]) => h("button",
+      {class: "chip" + (consoleGame === id ? "" : " ghost"),
+       onclick: () => { consoleGame = id; loadConsoleAdvice(); }}, label))));
+
+  const fresh = consoleAdvice && consoleAdviceFor && consoleAdviceFor.game === consoleGame && consoleAdviceFor.profile === liveProfile;
+  if (!fresh){ loadConsoleAdvice(); add(v, h("div", {class:"banner info"}, "Working out your settings…")); }
+  else {
+    const A = consoleAdvice;
+    add(v, h("div", {class:"advice"},
+      h("div", {class:"advice-head"}, h("b", {}, A.game_label), h("span", {class:"muted"}, A.summary)),
+      h("div", {class:"advice-rows"}, A.rows.map(r => h("div", {class:"advice-row"},
+        h("div", {class:"ar-set"}, r.setting),
+        h("div", {class:"ar-val"}, r.value, r.scale10 != null ? h("span", {class:"muted", style:"font-weight:400"}, "  (≈ " + r.scale10 + " on a 0–10 slider)") : null),
+        h("div", {class:"ar-note help"}, r.note)))),
+      h("p", {class:"help", style:"margin-top:12px"}, "ℹ️ " + A.disclaimer),
+      h("div", {class:"cellrow", style:"margin-top:12px"},
+        h("button", {class:"small", onclick: () => {
+          const txt = A.game_label + " — starting controller settings (from Clutch “" + liveProfile + "”)\n" +
+            A.rows.map(r => "• " + r.setting + ": " + r.value + (r.note ? "  — " + r.note : "")).join("\n");
+          navigator.clipboard.writeText(txt).then(() => toast("📋 Copied these settings"), () => toast("Couldn't copy"));
+        }}, "📋 Copy settings"))));
+  }
+}
+
+function wizStep(n, title, body){
+  return h("div", {class:"wizrow"},
+    h("div", {class:"wiznum"}, String(n)),
+    h("div", {}, h("b", {}, title), h("div", {class:"help", style:"margin-top:3px"}, body)));
+}
+
 function renderStats(v){
   clearTimeout(statsTimer);
   const S = STATS;
@@ -2931,6 +3016,8 @@ async function loadStats(){ try { STATS = await api("/api/stats"); } catch(e){} 
 
 /* ================================================================ WHAT'S NEW */
 const WHATS_NEW = [
+  ["📺", "Console (Remote Play) mode", "New Console page. Stream your Xbox to this PC with the Xbox app and your tuned controller rides along, so your mods work on the console. Flip on Console mode and Clutch re-tunes the sticks for the slight delay a stream adds."],
+  ["🎚️", "Console Settings Advisor", "Playing straight on the console? Clutch turns your profile into the exact deadzone, curve and sensitivity to type into the game's own settings menu — pick your game and copy the values."],
   ["⭐", "Clutch Pro is here", "Everything is unlocked free for 14 days. After that your free mods keep working, and Pro (pay once) keeps every game pack, macros, the crosshair and Aim Lab. Online-safe mode and parent controls are always free."],
   ["🔑", "Unlock with a key", "Got a Clutch Pro key? Paste it in Settings, Clutch Pro. Family keys cover 3 PCs."],
   ["💫", "Micro strafe ⚠️", "Tiny circles on your move stick while you shoot or aim (you pick), so you're harder to hit."],
@@ -3265,6 +3352,7 @@ function onState(st){
   const jsonDiff = k => prev && JSON.stringify(prev[k] || {}) !== JSON.stringify(st[k] || {});
   if (prev && view === "setup" && (prev.connected !== st.connected || prev.problem !== st.problem || jsonDiff("setup_job") || jsonDiff("double_input"))) loadHealth().then(() => { if (view === "setup") renderAll(); });
   if (view === "home" && (jsonDiff("double_input") || (prev && prev.hidhide_cloak !== st.hidhide_cloak))) renderAll();
+  if (view === "console" && prev && (prev.console !== st.console || prev.profile !== st.profile)) renderAll();
   if (st.config_mtime && CFG && st.config_mtime > CFG_MTIME + 0.001 && !dirty() && !saving){
     CFG_MTIME = st.config_mtime;
     loadConfig().then(ok => { if (ok){ renderAll(); toast("Loaded changes from the settings file"); } });

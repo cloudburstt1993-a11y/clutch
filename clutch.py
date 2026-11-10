@@ -49,7 +49,7 @@ os.environ.setdefault("SDL_XINPUT_ENABLED", "1")
 IS_WINDOWS = sys.platform == "win32"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "Clutch"
-VERSION = "13.0"
+VERSION = "13.1"
 # Where one-click updates come from: your GitHub "owner/repo". Set this before building; kids can't change it.
 UPDATE_REPO = "cloudburstt1993-a11y/clutch"
 
@@ -269,6 +269,110 @@ def free_profile(p):
     p.pop("macros", None)
     p.pop("crosshair_on", None)
     return p
+
+
+# --------------------------------------------------------------------------------------
+# Console (Remote Play): run Clutch on the PC, stream the Xbox/PlayStation to it over the
+# console maker's own Remote Play app, and your tuned virtual pad rides that official channel
+# to the console. Nothing is injected and no controller authentication is touched: the Remote
+# Play app does the talking to the console, Clutch only shapes the controller input first.
+# --------------------------------------------------------------------------------------
+CONSOLE_TUNE = {               # gentle latency compensation for a Remote Play stream
+    "right_sensitivity": 0.9,  # a little less aim sensitivity: overshoot hurts more when inputs are late
+    "min_deadzone": 0.06,      # a firmer inner deadzone so stream jitter doesn't drift the view
+    "min_outer": 0.03,         # a touch of outer deadzone so the stick still reaches full tilt
+    "curve_bump": 0.1,         # nudge the aim curve up for steadier near-center control
+}
+
+
+def console_profile(p, tune=None):
+    """A copy of a resolved profile re-tuned for the input latency a Remote Play stream adds:
+    slightly lower aim sensitivity, a firmer deadzone, and a gentler near-center curve so small
+    stick moves stay predictable when every input lands a few frames late. Only the sticks are
+    touched; the output is still ordinary controller input."""
+    t = {**CONSOLE_TUNE, **(tune or {})}
+    p = copy.deepcopy(p)
+    sticks = p.get("sticks")
+    if not isinstance(sticks, dict):
+        sticks = {}
+        p["sticks"] = sticks
+    for side in ("left", "right"):
+        c = sticks.get(side)
+        if not isinstance(c, dict):
+            c = {}
+            sticks[side] = c
+        c["deadzone"] = round(max(num(c.get("deadzone"), 0.08), t["min_deadzone"]), 3)
+        c["outer_deadzone"] = round(max(num(c.get("outer_deadzone"), 0.02), t["min_outer"]), 3)
+    rc = sticks["right"]   # aim stick only: steadier curve, a little less speed
+    rc["curve"] = round(max(0.05, num(rc.get("curve"), 1.0)) + t["curve_bump"], 3)
+    rc["sensitivity"] = round(num(rc.get("sensitivity"), 1.0) * t["right_sensitivity"], 3)
+    return p
+
+
+# Console Settings Advisor: Clutch can't reach into a console, but a console game's own settings
+# menu can reproduce most of a profile's feel. This turns a profile's aim tuning into starting
+# values to type into that menu.
+CONSOLE_GAMES = {
+    "generic": "Most console games",
+    "cod": "Call of Duty",
+    "fortnite": "Fortnite",
+    "apex": "Apex Legends",
+    "halo": "Halo Infinite",
+}
+
+
+def console_advice(p, game="generic"):
+    """Translate a profile's aim tuning into starting values for a console game's own settings.
+    Clutch isn't running on the console here, so these are numbers you set in the game's menu to
+    make it feel like your Clutch profile. Ranges and labels differ per game; treat them as a
+    starting point and nudge from there. `p` is a resolved profile (before any console/online-safe
+    transform)."""
+    sticks = (p.get("sticks") or {}) if isinstance(p, dict) else {}
+    rc = sticks.get("right") or {}
+    lc = sticks.get("left") or {}
+    dz = clamp(num(rc.get("deadzone"), 0.08), 0.0, 0.5)
+    ldz = clamp(num(lc.get("deadzone"), 0.08), 0.0, 0.5)
+    outer = clamp(num(rc.get("outer_deadzone"), 0.02), 0.0, 0.4)
+    curve = max(0.05, num(rc.get("curve"), 1.0))
+    sens = num(rc.get("sensitivity"), 1.0)
+
+    if curve <= 0.85:
+        curve_name, curve_note = "Linear", "quick, 1:1 aim — raise it if the aim feels twitchy"
+    elif curve < 1.15:
+        curve_name, curve_note = "Standard / Dynamic", "balanced; the default most players keep"
+    elif curve < 1.6:
+        curve_name, curve_note = "Dynamic / Exponential", "steadier near center, faster at the edges"
+    else:
+        curve_name, curve_note = "Exponential", "very precise near center, ramps up hard at the edges"
+
+    def pct(x):
+        return f"{round(x * 100)}%"
+
+    def ten(x):
+        return round(x * 10, 1)
+
+    sens_pct = round(sens * 100)
+    rows = [
+        {"setting": "Left stick deadzone (move)", "value": pct(ldz), "scale10": ten(ldz),
+         "note": "lower until your character just stops drifting"},
+        {"setting": "Right stick deadzone (aim)", "value": pct(dz), "scale10": ten(dz),
+         "note": "lower until the aim just stops drifting when you let go"},
+        {"setting": "Right stick max / outer deadzone", "value": pct(outer), "scale10": ten(outer),
+         "note": "keep small — raise only if the stick can't reach full turn speed"},
+        {"setting": "Aim response curve", "value": curve_name, "note": curve_note},
+        {"setting": "Look / aim sensitivity", "value": f"~{sens_pct}% of your baseline",
+         "note": ("match your current in-game sensitivity" if abs(sens - 1.0) < 0.02
+                  else f"scale your usual sensitivity to about {sens_pct}%")},
+    ]
+    return {
+        "game": game if game in CONSOLE_GAMES else "generic",
+        "game_label": CONSOLE_GAMES.get(game, CONSOLE_GAMES["generic"]),
+        "rows": rows,
+        "summary": f"{curve_name} curve · aim deadzone {pct(dz)} · sensitivity ~{sens_pct}%",
+        "disclaimer": ("Clutch isn't running on the console for this — these are values you set in the "
+                       "game's own menu so it feels like your profile. Every game labels and scales these "
+                       "differently, so treat them as a starting point."),
+    }
 
 
 # --------------------------------------------------------------------------------------
@@ -751,6 +855,7 @@ class Engine:
         self.menu = None  # in-game quick menu: {'items': [(kind, value)], 'sel': i, 'since': t}
         self.menu_allowed = True  # off for co-op players 2-4 and when the overlay can't draw it
         self.online_safe = False  # True while an online game is in front (online-safe mode)
+        self.console = False      # True = Console (Remote Play) tuning: latency-compensated sticks
         self.pro = True           # False = free version: macros and the crosshair are Clutch Pro
         self._tp_last, self._tp_acc, self._tp_zone = None, [0.0, 0.0], None
         self.gyro_bias, self._still, self._gyro_ema = (0.0, 0.0, 0.0), 0.0, (0.0, 0.0, 0.0)
@@ -813,6 +918,8 @@ class Engine:
             self.p, macro_cfgs = online_safe_profile(self.p), {}
         if not self.pro:
             self.p, macro_cfgs = free_profile(self.p), {}
+        if self.console:   # last layer: re-tune the sticks for Remote Play stream latency
+            self.p = console_profile(self.p, self.cfg.get("console") if isinstance(self.cfg.get("console"), dict) else None)
         self.macros = {n: Macro(n, c, self._warn) for n, c in macro_cfgs.items()}
         self.toggle_state = {}
         self.turbo_start = {}
@@ -1312,6 +1419,17 @@ class Engine:
         on = bool(on)
         if on != self.online_safe:
             self.online_safe = on
+            keep = self.crosshair_on
+            self.set_profile(self.active, announce=False)
+            self.crosshair_on = keep
+            return True
+        return False
+
+    def set_console(self, on):
+        """Turn Console (Remote Play) stick tuning on (on=True) or off, keeping the same profile."""
+        on = bool(on)
+        if on != self.console:
+            self.console = on
             keep = self.crosshair_on
             self.set_profile(self.active, announce=False)
             self.crosshair_on = keep
@@ -3652,6 +3770,11 @@ class PanelServer:
                     return self._send(200, {"backups": srv.list_backups()})
                 if path == "/api/health":
                     return self._send(200, srv.runner.health() if srv.runner else {})
+                if path == "/api/console_advice" and srv.runner:
+                    from urllib.parse import parse_qs
+                    eng = srv.runner.engine
+                    game = parse_qs(query).get("game", ["generic"])[0]
+                    return self._send(200, console_advice(eng._resolve(eng.active), game))
                 if path == "/api/menu.png" and srv.runner:
                     import io
                     eng, rn = srv.runner.engine, srv.runner
@@ -3744,6 +3867,9 @@ class PanelServer:
                     return self._send(200, {"ok": True})
                 if path == "/api/enabled":
                     srv.commands.put(("enabled", bool(body.get("on"))))
+                    return self._send(200, {"ok": True})
+                if path == "/api/console":
+                    srv.commands.put(("console", bool(body.get("on"))))
                     return self._send(200, {"ok": True})
                 if path == "/api/kid":
                     srv.commands.put(("kid", body.get("id") or None))
@@ -4141,6 +4267,7 @@ class ModRunner:
                 eng = Engine(self.engine.cfg, start, log=self.warn)
                 eng.set_pro(self.engine.pro)
                 eng.set_online_safe(self.engine.online_safe)
+                eng.set_console(self.engine.console)
                 eng.events.clear()
                 eng.menu_allowed = False  # nothing draws a menu for extra players
                 self.slots.append(PlayerSlot(n, pad, eng))
@@ -4696,6 +4823,7 @@ class ModRunner:
             "config_mtime": self.cfg_mtime, "nav_mute": self.nav_mute(), "front": bool(self.auto.watch.own),
             "kid": self.kid, "quiet": self._quiet_off, "pro": self.license.status(),
             "online_safe": {"active": self.engine.online_safe, "game": self.online_game},
+            "console": self.engine.console,
             "setup_job": self.setup_job or None, "double_input": self.double, "hidhide_cloak": self.hh_cloak, "fullscreen_games": sorted(self.fullscreen_seen),
             "update": {k: v for k, v in self.update.items() if k in ("state", "busy", "latest", "newer", "page", "notes", "error", "downloading", "progress", "ready")},
             "pad_key": getattr(self.pad, "key", None) if self.pad else None,
@@ -4763,6 +4891,14 @@ class ModRunner:
                 eng.cycle_profile(int(val or 1))
             elif kind == "kid":
                 self.set_kid(val, announce=True)
+            elif kind == "console":
+                changed = False
+                for e in [eng] + [sl.engine for sl in self.slots]:
+                    changed = e.set_console(bool(val)) or changed
+                if changed:
+                    self.osd("Console mode " + ("on" if val else "off"),
+                             "Remote Play tuning" if val else None, accent="#37e08b")
+                    self._changed()
             elif kind == "pro":
                 self._pro_tick(announce=bool(val))
             elif kind == "test" and self.pad is not None:
@@ -5043,6 +5179,7 @@ DEFAULT_CONFIG_TEXT = r'''// Clutch settings. Easiest way to change them: the Cl
   // Online-safe mode: while an online game (Fortnite, Call of Duty, Apex...) is in front, turbo, macros,
   // multi-action buttons and recoil pull are paused so they can't get an account banned
   "online_safe": { "enabled": true, "games": [], "offline": [] },
+  "console": { "right_sensitivity": 0.9, "min_deadzone": 0.06, "min_outer": 0.03, "curve_bump": 0.1 },
   // Hold Guide for a moment (without pressing anything else) to open the quick menu over your game
   "quick_menu": { "enabled": true, "hold_ms": 450 },
   // Controller light (PlayStation and some others): auto, profile, breathe, rainbow, battery, off

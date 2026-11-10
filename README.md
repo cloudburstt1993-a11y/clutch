@@ -8,8 +8,8 @@ Controller mods for Windows. Clutch reads your real controller (Xbox, PlayStatio
 
 ### Option A: build the installer once, then install anywhere (recommended)
 1. On any Windows PC, install **Python 3.12 or 3.13** from python.org. Tick **"Add python.exe to PATH"** during setup.
-2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-13.0.exe`**. If Inno Setup is missing, it installs that through winget automatically.
-3. Run `Clutch-Setup-13.0.exe` on each PC that will use Clutch. The installer:
+2. Double-click **`build_installer.bat`**. It installs the build tools, builds `Clutch.exe`, and makes **`installer_output\Clutch-Setup-13.1.exe`**. If Inno Setup is missing, it installs that through winget automatically.
+3. Run `Clutch-Setup-13.1.exe` on each PC that will use Clutch. The installer:
    - installs Clutch with a Start-menu entry and, if you choose, a desktop shortcut
    - installs the **ViGEmBus** virtual-controller driver if that PC doesn't have it yet
    - can set Clutch to start in the background with Windows
@@ -50,6 +50,10 @@ Open Clutch and go to **🔧 Setup check**. It shows what's missing, and each it
 Tapping Guide by itself still does its normal job. Closing the window keeps Clutch running in the tray. Right-click the tray icon to switch profiles, toggle mods or the crosshair, or quit.
 
 **🕹️ Drive Clutch with your controller:** with the Clutch window in front, the D-pad or left stick moves around, **A** picks, **B** goes back or closes a pop-up, **LB / RB** flip between pages, left/right changes sliders and lists, and the right stick scrolls. A hint bar shows the buttons (with PlayStation symbols on a PlayStation controller). While Clutch is in front, mods don't press keys or move the mouse, so nothing happens twice. On the Controller test page buttons are being tested, so hold **B** to leave. Turn it off in Settings → Controls and comfort.
+
+**New in 13.1: 📺 Console**
+- **Console (Remote Play) mode.** A new Console page. Clutch runs on the PC; you stream the Xbox to it with Microsoft's own Xbox app, and Clutch's tuned virtual controller rides that official Remote Play connection to the console, so your profile — curves, deadzones, gyro, crosshair, macros — applies while you play. No extra hardware, and no controller authentication is touched: the Xbox app does the talking to the console, Clutch only shapes the stick input first. Turning the mode on re-tunes the sticks (a little less aim sensitivity, a firmer deadzone, a steadier near-center curve) to compensate for the small input delay a stream adds. Tunable under `"console"` in the config. The engine flag is `Engine.console` / `set_console()`, toggled from `POST /api/console`.
+- **Console Settings Advisor.** For playing straight on the console with a normal controller: Clutch can't reach into the console, but the game's own settings menu can reproduce most of a profile's feel. The advisor turns the active profile's aim tuning into starting values (deadzone %, response-curve name, sensitivity) to type into that menu, with a per-game label and a copy button. Pure guidance — nothing is injected. Served by `console_advice()` / `GET /api/console_advice?game=…`.
 
 **New in 13.0: ⭐ Clutch Pro**
 - **Free vs Pro.** Free keeps every power-up except the macro ones, the 19 popular and "any game" packs, online-safe mode, parent PIN, quiet hours, couch co-op, stats and the controller test. **Pro** adds all 48 game packs, macros (the macro editor plus Auto sprint, Slide cancel, Jump shot, Rapid crouch, Quick scope, Quick 180° turn), the crosshair overlay and Aim Lab. Prices: Pro $19.99 once (1 PC), Family $29.99 once (3 PCs).
