@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clutch — Controller tuning that wins the moment</title>
+<meta name="description" content="Clutch tunes your controller like pros tune a car — response curves, deadzones, gyro aim, one-tap game profiles, and a Console mode that works over Remote Play. Windows 10 & 11.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0f13;--surface:#16181f;--surface-2:#1d202a;--surface-3:#242836;
+    --line:#2a2e3a;--line-soft:#21242e;--text:#f4f5f7;--muted:#99a0ae;--muted-dim:#6b7080;
+    --redline:#ff4b2b;--redline-soft:#ff6a4d;--safe:#37e08b;--safe-dim:#1f8f5a;--maxw:1160px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  h1,h2,h3,.display{font-family:'Archivo',sans-serif;letter-spacing:-0.02em;line-height:1.02}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .accent{color:var(--redline)}
+  header{position:sticky;top:0;z-index:50;background:rgba(14,15,19,0.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:11px;font-family:'Archivo';font-weight:900;font-size:20px;letter-spacing:-0.03em}
+  .logo .mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(145deg,var(--redline),#c7331d);position:relative;flex:none;box-shadow:0 0 18px rgba(255,75,43,0.45)}
+  .logo .mark::after{content:"";position:absolute;inset:7px 7px auto 7px;height:4px;border-radius:2px;background:#fff;opacity:.92}
+  .logo .mark::before{content:"";position:absolute;left:7px;right:7px;bottom:7px;height:4px;border-radius:2px;background:rgba(255,255,255,0.35)}
+  nav .links{display:flex;gap:30px;align-items:center}
+  nav .links a{color:var(--muted);font-size:14px;font-weight:500;transition:color .15s}
+  nav .links a:hover{color:var(--text)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:14.5px;border-radius:10px;padding:11px 20px;cursor:pointer;border:1px solid transparent;transition:transform .12s,box-shadow .2s,background .2s}
+  .btn-primary{background:var(--redline);color:#fff;box-shadow:0 6px 22px rgba(255,75,43,0.32)}
+  .btn-primary:hover{background:var(--redline-soft);transform:translateY(-1px)}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--muted);background:var(--surface)}
+  .btn-lg{padding:15px 28px;font-size:16px;border-radius:12px}
+  nav .btn{padding:9px 18px}
+  :focus-visible{outline:2px solid var(--safe);outline-offset:3px;border-radius:4px}
+  .hero{position:relative;padding:76px 0 60px;overflow:hidden}
+  .hero::before{content:"";position:absolute;top:-220px;right:-140px;width:620px;height:620px;background:radial-gradient(circle,rgba(255,75,43,0.18),transparent 62%);pointer-events:none}
+  .hero-grid{display:grid;grid-template-columns:1.02fr 0.98fr;gap:56px;align-items:center;position:relative}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:6px 14px;border-radius:40px;margin-bottom:24px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--safe);box-shadow:0 0 10px var(--safe)}
+  h1{font-size:clamp(40px,6vw,66px);font-weight:900}
+  h1 .line2{color:var(--redline)}
+  .hero p.sub{color:var(--muted);font-size:18.5px;margin:22px 0 34px;max-width:468px}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .hero-note{margin-top:20px;font-size:13.5px;color:var(--muted-dim);display:flex;align-items:center;gap:8px}
+  .hero-note svg{flex:none}
+  .mock{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 30px 80px -30px rgba(0,0,0,0.8);overflow:hidden}
+  .mock-bar{display:flex;align-items:center;gap:7px;padding:13px 16px;border-bottom:1px solid var(--line-soft);background:var(--surface-2)}
+  .mock-bar .tl{width:11px;height:11px;border-radius:50%;background:var(--line)}
+  .mock-bar .tl.r{background:#3a3340}
+  .mock-title{margin-left:10px;font-family:'Archivo';font-weight:700;font-size:13.5px;color:var(--muted)}
+  .mock-pro{margin-left:auto;font-size:11px;font-weight:700;font-family:'Archivo';color:var(--redline);border:1px solid rgba(255,75,43,0.4);padding:3px 9px;border-radius:5px;background:rgba(255,75,43,0.08)}
+  .mock-body{padding:20px}
+  .chips{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .chip{font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:8px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line-soft)}
+  .chip.on{background:rgba(255,75,43,0.12);color:var(--redline-soft);border-color:rgba(255,75,43,0.35)}
+  .slider-row{margin-bottom:16px}
+  .slider-row .lab{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:7px}
+  .slider-row .lab .v{color:var(--text);font-weight:600;font-family:'Archivo'}
+  .slider-row .lab .k{color:var(--muted)}
+  .track{height:7px;border-radius:5px;background:var(--surface-3);position:relative;overflow:hidden}
+  .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:linear-gradient(90deg,#ff7a2b,var(--redline))}
+  .knob{position:absolute;top:50%;width:15px;height:15px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,0.5)}
+  .mock-foot{display:flex;align-items:center;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)}
+  .safe-pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--safe);background:rgba(55,224,139,0.09);border:1px solid rgba(55,224,139,0.3);padding:7px 13px;border-radius:8px}
+  .safe-pill .sw{width:26px;height:15px;border-radius:9px;background:var(--safe-dim);position:relative}
+  .safe-pill .sw::after{content:"";position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+  .xhair{margin-left:auto;width:44px;height:44px;border:1px solid var(--line);border-radius:9px;position:relative;background:var(--surface-2)}
+  .xhair::before,.xhair::after{content:"";position:absolute;background:var(--redline)}
+  .xhair::before{left:50%;top:9px;bottom:9px;width:2px;transform:translateX(-50%)}
+  .xhair::after{top:50%;left:9px;right:9px;height:2px;transform:translateY(-50%)}
+  section{padding:84px 0}
+  .sec-head{max-width:640px;margin-bottom:52px}
+  .sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+  .kicker{font-family:'Archivo';font-weight:700;font-size:14px;color:var(--redline);margin-bottom:14px}
+  h2{font-size:clamp(30px,4vw,44px);font-weight:800}
+  .sec-head p{color:var(--muted);font-size:17px;margin-top:16px}
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .feat{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:26px 24px;transition:border-color .2s}
+  .feat:hover{border-color:var(--line)}
+  .feat.wide{grid-column:span 2}
+  .feat .ico{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);margin-bottom:18px}
+  .feat h3{font-size:19px;font-weight:700;margin-bottom:9px}
+  .feat p{color:var(--muted);font-size:14.5px}
+  .feat .pro-tag{font-size:10.5px;font-weight:700;font-family:'Archivo';color:var(--redline);vertical-align:middle;margin-left:8px;border:1px solid rgba(255,75,43,0.35);padding:1px 6px;border-radius:4px}
+  .feat.safe-feat{background:linear-gradient(160deg,rgba(55,224,139,0.07),var(--surface));border-color:rgba(55,224,139,0.22)}
+  .feat.safe-feat .ico{background:rgba(55,224,139,0.1);border-color:rgba(55,224,139,0.3)}
+  .band{background:var(--surface);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+  .band-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+  .band h2{margin-bottom:18px}
+  .band p{color:var(--muted);font-size:16.5px;margin-bottom:16px}
+  .band ul{list-style:none;display:grid;gap:13px;margin-top:24px}
+  .band li{display:flex;gap:12px;font-size:15px;align-items:flex-start}
+  .band li .ck{flex:none;margin-top:3px;color:var(--safe)}
+  .console-card{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:26px}
+  .console-steps{list-style:none;counter-reset:cs;display:grid;gap:4px}
+  .console-steps li{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line-soft)}
+  .console-steps li:last-child{border-bottom:0}
+  .console-steps li .n{counter-increment:cs;flex:none;width:28px;height:28px;border-radius:50%;background:var(--surface-2);color:var(--safe);font-family:'Archivo';font-weight:800;display:grid;place-items:center;font-size:14px}
+  .console-steps li .n::before{content:counter(cs)}
+  .console-steps li b{font-size:15px}
+  .console-steps li p{font-size:13.5px;margin:3px 0 0}
+  .prices{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch}
+  .price{background:var(--surface);border:1px solid var(--line-soft);border-radius:16px;padding:30px 26px;display:flex;flex-direction:column}
+  .price.pop{border-color:var(--redline);box-shadow:0 0 0 1px var(--redline),0 24px 60px -30px rgba(255,75,43,0.5);position:relative}
+  .price .pop-tag{position:absolute;top:-12px;left:26px;background:var(--redline);color:#fff;font-size:11.5px;font-weight:700;font-family:'Archivo';padding:4px 12px;border-radius:20px}
+  .price .pname{font-family:'Archivo';font-weight:700;font-size:17px;color:var(--muted);margin-bottom:14px}
+  .price .amt{font-family:'Archivo';font-weight:900;font-size:46px;letter-spacing:-0.03em}
+  .price .amt small{font-size:16px;font-weight:600;color:var(--muted);letter-spacing:0}
+  .price .per{font-size:13px;color:var(--muted-dim);margin-top:4px;margin-bottom:22px}
+  .price ul{list-style:none;display:grid;gap:11px;margin-bottom:26px;flex:1}
+  .price li{font-size:14px;color:var(--text);display:flex;gap:10px;align-items:flex-start}
+  .price li .ck{flex:none;margin-top:3px;color:var(--redline)}
+  .price li.off{color:var(--muted-dim)}
+  .price li.off .ck{color:var(--muted-dim)}
+  .price .btn{width:100%}
+  .faq{max-width:760px;margin:0 auto}
+  details{border:1px solid var(--line-soft);border-radius:12px;margin-bottom:12px;background:var(--surface);overflow:hidden}
+  details summary{list-style:none;cursor:pointer;padding:20px 24px;font-family:'Archivo';font-weight:600;font-size:16.5px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  details summary::-webkit-details-marker{display:none}
+  details summary .pl{flex:none;color:var(--redline);font-size:22px;transition:transform .2s;font-weight:400}
+  details[open] summary .pl{transform:rotate(45deg)}
+  details .ans{padding:0 24px 22px;color:var(--muted);font-size:15px}
+  .final{text-align:center;padding:96px 0}
+  .final h2{font-size:clamp(32px,5vw,52px);margin-bottom:20px}
+  .final p{color:var(--muted);font-size:18px;margin-bottom:34px}
+  .final .hero-cta{justify-content:center}
+  footer{border-top:1px solid var(--line-soft);padding:40px 0;background:var(--surface)}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .foot .by{font-size:13.5px;color:var(--muted-dim)}
+  .foot .by a{color:var(--muted);font-weight:600}
+  .foot .by a:hover{color:var(--redline)}
+  .foot .meta{font-size:12.5px;color:var(--muted-dim)}
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+  @keyframes sweep{0%{width:12%}100%{width:68%}}
+  .fill.anim{animation:sweep 1.6s cubic-bezier(.22,1,.36,1) forwards}
+  @media(max-width:860px){
+    .hero-grid,.band-grid{grid-template-columns:1fr;gap:40px}
+    .features,.prices{grid-template-columns:1fr}
+    .feat.wide{grid-column:span 1}
+    nav .links{display:none}
+    .hero{padding:48px 0 40px}
+    section{padding:60px 0}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .fill.anim{animation:none;width:60%}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo"><span class="mark"></span>Clutch</a>
+    <nav class="links">
+      <a href="#features">Features</a>
+      <a href="#console">Console</a>
+      <a href="#safe">Online-safe</a>
+      <a href="buy.html">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a href="buy.html" class="btn btn-primary">Get Clutch</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> v13.1 · Windows 10 & 11 · now with Console mode</span>
+        <h1>Win the<br><span class="line2">clutch moments.</span></h1>
+        <p class="sub">Clutch tunes your controller the way pros tune a car — response curves, deadzones, gyro aim and one-tap game profiles. Dial it in once, feel it every match. Now on console too, over Remote Play.</p>
+        <div class="hero-cta">
+          <a href="buy.html" class="btn btn-primary btn-lg">Download free</a>
+          <a href="buy.html" class="btn btn-ghost btn-lg">See Pro — 14-day trial</a>
+        </div>
+        <div class="hero-note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#37e08b" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+          No account to start. Free forever tier. Your keys, your PCs.
+        </div>
+      </div>
+      <div class="mock reveal">
+        <div class="mock-bar">
+          <span class="tl"></span><span class="tl"></span><span class="tl r"></span>
+          <span class="mock-title">Clutch — Shooter profile</span>
+          <span class="mock-pro">PRO</span>
+        </div>
+        <div class="mock-body">
+          <div class="chips">
+            <span class="chip on">Shooter</span><span class="chip">Racing</span><span class="chip">Keyboard</span><span class="chip">Couch co-op</span>
+          </div>
+          <div class="slider-row"><div class="lab"><span class="k">Aim response curve</span><span class="v">Dynamic</span></div><div class="track"><div class="fill anim" style="width:62%"></div><div class="knob" style="left:62%"></div></div></div>
+          <div class="slider-row"><div class="lab"><span class="k">Stick deadzone</span><span class="v">4%</span></div><div class="track"><div class="fill" style="width:20%"></div><div class="knob" style="left:20%"></div></div></div>
+          <div class="slider-row"><div class="lab"><span class="k">Gyro sensitivity</span><span class="v">2.4×</span></div><div class="track"><div class="fill" style="width:48%"></div><div class="knob" style="left:48%"></div></div></div>
+          <div class="mock-foot"><span class="safe-pill"><span class="sw"></span> Online-safe: ON</span><span class="xhair" title="Crosshair overlay"></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="kicker">Everything in one panel</div>
+        <h2>Tuning that used to take a $100 box.</h2>
+        <p>Clutch lives on your PC — no extra hardware, no dongles. Map it, tune it, and jump into any game with a profile that already fits.</p>
+      </div>
+      <div class="features">
+        <div class="feat reveal">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6a4d" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="8" cy="12" r="1.6" fill="#ff6a4d"/><circle cx="16" cy="12" r="1.6" fill="#ff6a4d"/></svg></div>
+          <h3>One-tap game packs</h3>
+          <p>Starter packs for shooters, racing, keyboard-mapping and couch co-op. Pick one and you're tuned — no menu-diving.</p>
+        </div>
+        <div class="feat reveal">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6a4d" stroke-width="2"><path d="M3 17c4-10 14-10 18 0"/><circle cx="12" cy="12" r="1.8" fill="#ff6a4d"/></svg></div>
+          <h3>Precision aim <span class="pro-tag">PRO</span></h3>
+          <p>Custom response curves and per-game deadzones so your stick does exactly what your thumb means.</p>
+        </div>
+        <div class="feat reveal">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6a4d" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg></div>
+          <h3>Gyro aim <span class="pro-tag">PRO</span></h3>
+          <p>Motion-steer your aim like a mouse. Blend it with the stick for fine control that feels unfair — in a good way.</p>
+        </div>
+        <div class="feat reveal wide">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6a4d" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
+          <h3>Remap anything + macros <span class="pro-tag">PRO</span></h3>
+          <p>Reassign every button, stick and trigger, or chain multi-input combos and accessibility shortcuts to a single press. Save unlimited profiles and switch them on the fly.</p>
+        </div>
+        <div class="feat reveal safe-feat">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#37e08b" stroke-width="2"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <h3>Online-safe mode</h3>
+          <p>One toggle strips anything that could trip an anti-cheat, so you keep your tuning without risking your account.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="console" class="band">
+    <div class="wrap band-grid">
+      <div class="reveal">
+        <div class="kicker">New in 13.1</div>
+        <h2>Your mods, on your console.</h2>
+        <p>Run Clutch on your PC and stream your Xbox to it with Microsoft's own Xbox app. Your tuned controller rides that official connection to the console — so your curves, gyro, crosshair and macros all work while you play.</p>
+        <p>No adapters, no extra hardware, and nothing on the console is modified. Flip on <strong style="color:var(--safe)">Console mode</strong> and Clutch re-tunes the sticks for the small delay a stream adds, so aim stays predictable.</p>
+        <ul>
+          <li><span class="ck"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span> Works over official Xbox Remote Play</li>
+          <li><span class="ck"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span> Playing straight on console? The Settings Advisor hands you the exact in-game values to match your profile</li>
+          <li><span class="ck"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span> No controller authentication touched — the Xbox app does the talking</li>
+        </ul>
+      </div>
+      <div class="console-card reveal">
+        <ol class="console-steps">
+          <li><span class="n"></span><div><b>Turn on remote features</b><p>On your Xbox: Settings → Devices &amp; connections → Remote features.</p></div></li>
+          <li><span class="n"></span><div><b>Open the Xbox app on PC</b><p>Free from the Microsoft Store. Sign in and connect to your console.</p></div></li>
+          <li><span class="n"></span><div><b>Keep Clutch running</b><p>Its virtual controller is what streams to the console, so your profile rides along.</p></div></li>
+          <li><span class="n"></span><div><b>Flip Console mode on</b><p>Clutch tunes for the stream and you play — mods and all.</p></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="safe">
+    <div class="wrap band-grid">
+      <div class="reveal">
+        <div class="kicker">Play without the paranoia</div>
+        <h2>Built to keep your account.</h2>
+        <p>Clutch isn't a cheat and never pretends to be. It works with the input your games already allow — remapping, curves, deadzones and gyro — not against them.</p>
+        <p>Flip on <strong style="color:var(--safe)">Online-safe mode</strong> and Clutch automatically disables any feature a competitive anti-cheat might flag, leaving only the tuning that's fair game.</p>
+        <ul>
+          <li><span class="ck"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span> No memory injection, no game-file edits</li>
+          <li><span class="ck"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span> Standard controller input the OS already trusts</li>
+          <li><span class="ck"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span> Risky extras auto-off when you go online</li>
+        </ul>
+      </div>
+      <div class="console-card reveal" style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px;border-radius:12px;background:var(--surface-2);border:1px solid rgba(55,224,139,0.25)">
+          <div><div style="font-family:'Archivo';font-weight:700;font-size:16px;color:var(--safe)">Online-safe mode</div><div style="font-size:13px;color:var(--muted);margin-top:3px">Competitive-ready tuning only</div></div>
+          <span style="width:52px;height:30px;border-radius:16px;background:var(--safe-dim);position:relative;flex:none"><span style="content:'';position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;display:block"></span></span>
+        </div>
+        <div style="font-size:13px;color:var(--muted-dim);text-align:center">You decide the line. Clutch just makes it easy to stay on your side of it.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>Your controller can do more.</h2>
+        <p>Download the free tier and feel the difference in your first match.</p>
+        <div class="hero-cta">
+          <a href="buy.html" class="btn btn-primary btn-lg">Download Clutch free</a>
+          <a href="buy.html" class="btn btn-ghost btn-lg">Compare plans</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head center reveal">
+        <div class="kicker">Good to know</div>
+        <h2>Questions, answered.</h2>
+      </div>
+      <div class="faq reveal">
+        <details><summary>Will Clutch get me banned? <span class="pl">+</span></summary><div class="ans">Clutch uses standard controller input your system already trusts — no injection, no game-file edits. Turn on Online-safe mode and it disables anything a competitive anti-cheat might flag. Every game's rules are its own, so the final call on what you run online is yours.</div></details>
+        <details><summary>Does it really work on Xbox? <span class="pl">+</span></summary><div class="ans">Yes, over Remote Play. Clutch runs on your PC, the Xbox app streams your console to it, and your tuned controller rides that official connection to the console. Playing straight on the console instead? The Settings Advisor gives you the exact in-game values to match your profile.</div></details>
+        <details><summary>What do I need to run it? <span class="pl">+</span></summary><div class="ans">Windows 10 or 11 and just about any controller — Xbox, PlayStation, or a generic PC pad. It also runs on Windows handhelds. No extra hardware or adapters required.</div></details>
+        <details><summary>One-time or subscription? <span class="pl">+</span></summary><div class="ans">One-time. You buy the version you want and it's yours — no recurring charge. Pro includes a 14-day trial up front.</div></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a href="/" class="logo"><span class="mark"></span>Clutch</a>
+    <div class="by">Built by <a href="https://bookcliffweb.com" target="_blank" rel="noopener">Bookcliff Web</a></div>
+    <div class="meta">v13.1 · Windows 10/11 · © 2026</div>
+  </div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver((e)=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');obs.unobserve(x.target);}})},{threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

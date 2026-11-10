@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Clutch — pricing &amp; checkout</title>
+<meta name="description" content="Download Clutch free, or unlock Pro once — $19.99 (1 PC) or Family $34.99 (3 PCs). 14-day Pro trial included. Secure checkout.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0f13;--surface:#16181f;--surface-2:#1d202a;--surface-3:#242836;
+    --line:#2a2e3a;--line-soft:#21242e;--text:#f4f5f7;--muted:#99a0ae;--muted-dim:#6b7080;
+    --redline:#ff4b2b;--redline-soft:#ff6a4d;--safe:#37e08b;--safe-dim:#1f8f5a;--maxw:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Archivo',sans-serif;letter-spacing:-0.02em;line-height:1.05}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:50;background:rgba(14,15,19,0.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:11px;font-family:'Archivo';font-weight:900;font-size:20px;letter-spacing:-0.03em}
+  .logo .mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(145deg,var(--redline),#c7331d);position:relative;flex:none;box-shadow:0 0 18px rgba(255,75,43,0.45)}
+  .logo .mark::after{content:"";position:absolute;inset:7px 7px auto 7px;height:4px;border-radius:2px;background:#fff;opacity:.92}
+  .logo .mark::before{content:"";position:absolute;left:7px;right:7px;bottom:7px;height:4px;border-radius:2px;background:rgba(255,255,255,0.35)}
+  .nav a.back{color:var(--muted);font-size:14px;font-weight:500}
+  .nav a.back:hover{color:var(--text)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:15px;border-radius:11px;padding:13px 22px;cursor:pointer;border:1px solid transparent;transition:transform .12s,box-shadow .2s,background .2s;width:100%;font-family:inherit}
+  .btn-primary{background:var(--redline);color:#fff;box-shadow:0 6px 22px rgba(255,75,43,0.32)}
+  .btn-primary:hover{background:var(--redline-soft);transform:translateY(-1px)}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--muted);background:var(--surface-2)}
+  :focus-visible{outline:2px solid var(--safe);outline-offset:3px;border-radius:4px}
+  .head{text-align:center;padding:64px 0 10px}
+  .kicker{font-family:'Archivo';font-weight:700;font-size:14px;color:var(--redline);margin-bottom:14px}
+  .head h1{font-size:clamp(34px,5vw,52px);font-weight:900}
+  .head p{color:var(--muted);font-size:17px;margin:16px auto 0;max-width:520px}
+  .prices{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch;padding:40px 0 20px}
+  .price{background:var(--surface);border:1px solid var(--line-soft);border-radius:16px;padding:30px 26px;display:flex;flex-direction:column}
+  .price.pop{border-color:var(--redline);box-shadow:0 0 0 1px var(--redline),0 24px 60px -30px rgba(255,75,43,0.5);position:relative}
+  .price .pop-tag{position:absolute;top:-12px;left:26px;background:var(--redline);color:#fff;font-size:11.5px;font-weight:700;font-family:'Archivo';padding:4px 12px;border-radius:20px}
+  .price .pname{font-family:'Archivo';font-weight:700;font-size:17px;color:var(--muted);margin-bottom:14px}
+  .price .amt{font-family:'Archivo';font-weight:900;font-size:46px;letter-spacing:-0.03em}
+  .price .amt small{font-size:16px;font-weight:600;color:var(--muted);letter-spacing:0}
+  .price .per{font-size:13px;color:var(--muted-dim);margin-top:4px;margin-bottom:22px}
+  .price ul{list-style:none;display:grid;gap:11px;margin-bottom:26px;flex:1}
+  .price li{font-size:14px;color:var(--text);display:flex;gap:10px;align-items:flex-start}
+  .price li .ck{flex:none;margin-top:3px;color:var(--redline)}
+  .price li.off{color:var(--muted-dim)}
+  .price li.off .ck{color:var(--muted-dim)}
+  .trust{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:13.5px;padding:14px 0 40px}
+  .trust span{display:inline-flex;gap:8px;align-items:center}
+  .trust svg{color:var(--safe);flex:none}
+  .note{max-width:720px;margin:0 auto 70px;padding:16px 20px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--muted);font-size:13.5px;display:flex;gap:12px}
+  .note svg{flex:none;color:var(--muted-dim);margin-top:2px}
+  footer{border-top:1px solid var(--line-soft);padding:30px 0;background:var(--surface)}
+  .foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted-dim);font-size:13px}
+  .foot a{color:var(--muted);font-weight:600}
+  #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--surface-2);border:1px solid var(--line);color:var(--text);padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:100;max-width:90vw;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:820px){.prices{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo"><span class="mark"></span>Clutch</a>
+    <a href="/" class="back">← Back to home</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="head">
+      <div class="kicker">Simple, one-time pricing</div>
+      <h1>Buy it once. Tune forever.</h1>
+      <p>No subscriptions. Every Pro purchase includes a 14-day trial up front and a license key that's yours to keep.</p>
+    </div>
+
+    <div class="prices">
+      <div class="price">
+        <div class="pname">Free</div>
+        <div class="amt">$0</div>
+        <div class="per">Forever</div>
+        <ul>
+          <li><span class="ck">✓</span> Full button remapping</li>
+          <li><span class="ck">✓</span> 4 starter game packs</li>
+          <li><span class="ck">✓</span> Basic deadzone control</li>
+          <li><span class="ck">✓</span> Online-safe mode</li>
+          <li class="off"><span class="ck">—</span> Aim curves, gyro, crosshair</li>
+          <li class="off"><span class="ck">—</span> Macros &amp; unlimited profiles</li>
+        </ul>
+        <button class="btn btn-ghost" data-plan="free">Download free</button>
+      </div>
+
+      <div class="price pop">
+        <span class="pop-tag">Most popular</span>
+        <div class="pname">Pro</div>
+        <div class="amt">$19.99 <small>once</small></div>
+        <div class="per">1 PC · 14-day trial included</div>
+        <ul>
+          <li><span class="ck">✓</span> Everything in Free</li>
+          <li><span class="ck">✓</span> Precision aim curves</li>
+          <li><span class="ck">✓</span> Gyro aim &amp; crosshair overlay</li>
+          <li><span class="ck">✓</span> Macros + every game pack</li>
+          <li><span class="ck">✓</span> Console (Remote Play) mode</li>
+          <li><span class="ck">✓</span> Unlimited profiles</li>
+        </ul>
+        <button class="btn btn-primary" data-plan="pro">Get Pro — $19.99</button>
+      </div>
+
+      <div class="price">
+        <div class="pname">Family</div>
+        <div class="amt">$34.99 <small>once</small></div>
+        <div class="per">3 PCs · one key</div>
+        <ul>
+          <li><span class="ck">✓</span> Full Pro on 3 machines</li>
+          <li><span class="ck">✓</span> Best value per seat</li>
+          <li><span class="ck">✓</span> One activation to manage</li>
+          <li><span class="ck">✓</span> Great for siblings &amp; setups</li>
+        </ul>
+        <button class="btn btn-ghost" data-plan="family">Get Family — $34.99</button>
+      </div>
+    </div>
+
+    <div class="trust">
+      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg> Secure checkout via Lemon Squeezy</span>
+      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg> License key emailed instantly</span>
+      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12h18M3 6h18M3 18h18"/></svg> Pay once — no subscription</span>
+    </div>
+
+    <div class="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      <div>Payments are handled by <strong style="color:var(--text)">Lemon Squeezy</strong>, which processes your card and taxes and emails your license key — Clutch never sees your card details. Paste your key into Clutch under Settings → Clutch Pro to unlock, or start the 14-day trial with no key at all.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a href="/" class="logo"><span class="mark"></span>Clutch</a>
+    <div>Built by <a href="https://bookcliffweb.com" target="_blank" rel="noopener">Bookcliff Web</a> · v13.1 · © 2026</div>
+  </div>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Lemon Squeezy overlay checkout (loads only if you use LS). Harmless if unused. -->
+<script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
+<script>
+  /* ========================================================================
+     CONFIG — paste your real links here once the store is set up.
+     Free download: your GitHub release (already live).
+     Pro / Family: your Lemon Squeezy checkout URLs, e.g.
+       "https://clutch.lemonsqueezy.com/buy/XXXXXXXX-xxxx-xxxx"
+     Leave a checkout URL as "" and the button shows a friendly "coming soon".
+  ======================================================================== */
+  const LINKS = {
+    free: "https://github.com/cloudburstt1993-a11y/clutch/releases/latest",
+    pro: "",      // <-- paste Lemon Squeezy Pro checkout URL
+    family: "",   // <-- paste Lemon Squeezy Family checkout URL
+  };
+
+  const toastEl = document.getElementById("toast");
+  let toastT;
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add("show");
+    clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("show"), 3200);
+  }
+
+  document.querySelectorAll("[data-plan]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const plan = btn.dataset.plan;
+      const url = LINKS[plan];
+      if (!url){
+        toast("💳 Checkout opens as soon as the store is connected. Hang tight!");
+        return;
+      }
+      if (plan === "free"){
+        window.location.href = url;   // straight to the GitHub release
+        return;
+      }
+      // Pro / Family — use Lemon Squeezy overlay when available, else redirect.
+      const lsUrl = url + (url.includes("?") ? "&" : "?") + "embed=1";
+      if (window.LemonSqueezy && window.createLemonSqueezy){
+        window.location.href = lsUrl;  // lemon.js auto-upgrades ?embed=1 links to an overlay
+      } else {
+        window.location.href = url;
+      }
+    });
+  });
+</script>
+</body>
+</html>
