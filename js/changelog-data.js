@@ -19,6 +19,18 @@ window.CLUTCH_POSTS = [
 <p class="dim" style="font-size:.9rem">The download button on this site always points at the latest release. If you are on an older build, run the installer again over the top; your profiles and settings stay put.</p>`
   },
   {
+    id: 'clutch-131-console',
+    type: 'news',
+    title: 'Clutch 13.1 — your mods, on your console',
+    date: '2026-11',
+    author: 'Founder',
+    body: `
+<p>Clutch now reaches the console, no new hardware required, in two honest ways.</p>
+<p><strong>Console (Remote Play) mode.</strong> Run Clutch on your PC and stream your Xbox to it with Microsoft's own Xbox app. Your tuned controller rides that official connection to the console, so your curves, gyro, crosshair and macros all work while you play. Turn Console mode on and Clutch re-tunes the sticks for the small input delay a stream adds. Nothing on the console is modified — the Xbox app does the talking.</p>
+<p><strong>Console Settings Advisor.</strong> Playing straight on the console with a normal controller? Clutch can't reach in there, but the game's own settings can get you most of the way. The Advisor turns your profile into the exact deadzone, response-curve and sensitivity values to enter in the game's menu — pick your game and copy them across.</p>
+<p>See both on the <a href="console-kit#today">console page</a>. The plug-in Console Kit is still in the works; this is what ships today.</p>`
+  },
+  {
     id: 'hello-from-the-founder',
     type: 'news',
     title: 'Hello from the founder',
